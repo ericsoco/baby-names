@@ -23,7 +23,6 @@ let startTime;
 
 const init = () => {
 
-	console.log('loading data...');
 	startTime = performance.now();
 	
 	d3.csv('./data/all.csv', onDataLoaded);
@@ -35,10 +34,12 @@ const onDataLoaded = (error, data) => {
 
 	let loadTime = performance.now();
 	console.log(`data loaded in ${loadTime - startTime}ms.`);
-	console.log('processing data...');
 
 	// slice to 1930 for testing
-	data = data.slice(0, 100000);
+	// data = data.slice(0, 100000);
+
+	// filter down to only top names per year
+	data = data.filter(d => +d.rank <= 100);
 
 	let yearExtents = d3.extent(data, d => +d.year),
 		fractionExtents = [0, d3.max(data, d => +d.fraction)],
@@ -93,7 +94,7 @@ const initGraph = (domains, data) => {
 	// console.log(data);
 
 	const outerMargin = 20,
-		rowHeight = 16,
+		rowHeight = 12,
 		width = document.querySelector('body').innerWidth - 2 * outerMargin,
 		height = rowHeight * data.length,
 		margin = {
@@ -106,9 +107,6 @@ const initGraph = (domains, data) => {
 	let rScale = d3.scaleLinear()
 		.domain(domains.fraction)
 		.range([0, 2*rowHeight]);
-
-	console.log('building DOM...');
-	let startTime = performance.now();
 
 	let tableContainer = d3.select('#app').append('table'),
 		header = tableContainer.append('thead'),
@@ -126,32 +124,48 @@ const initGraph = (domains, data) => {
 	let rowsTime = performance.now();
 	console.log(`rows built in ${rowsTime - startTime}ms.`);
 
-	let cells = rowsEnter.selectAll('.punch')
-		.data(d => d.values);
 
-	let cellsEnter = cells.enter()
-		.append('td')
-		.classed('punch', true);
+	// wait to build and render cells until after rows have rendered
+	// wait two frames to ensure stack has cleared and DOM has updated+rendered.
+	let frameCount = 0,
+		cellsStartTime,
+		cellsTime;
 
-	cellsEnter.each(function (d, i) {
-		let size = Math.ceil(rScale(d.value.fraction));
-		if (size) {
-			d3.select(this)
-				.append('div')
-				.style('width', size + 'px')
-				.style('height', size + 'px');
-		}
-	});
-
-	let cellsTime = performance.now();
-	console.log(`cells built in ${cellsTime - rowsTime}ms.`);
-
-	let frameCount = 0;
 	let onRAF = () => {
-		if (frameCount++) {
+		frameCount++;
+
+		if (frameCount === 2) {
+
+			cellsStartTime = performance.now();
+
+			let cells = rowsEnter.selectAll('.punch')
+				.data(d => d.values);
+
+			let cellsEnter = cells.enter()
+				.append('td')
+				.classed('punch', true);
+
+			cellsEnter.each(function (d, i) {
+				let size = Math.ceil(rScale(d.value.fraction));
+				if (size) {
+					d3.select(this)
+						.append('div')
+						.style('width', size + 'px')
+						.style('height', size + 'px');
+				}
+			});
+
+			cellsTime = performance.now();
+			console.log(`cells built in ${cellsTime - cellsStartTime}ms.`);
+
+			window.requestAnimationFrame(onRAF);
+
+		} else if (frameCount === 3) {
+
 			let renderedTime = performance.now();
 			console.log(`rendered in ${renderedTime - cellsTime}ms.`);
 			console.log(`total time: ${renderedTime - startTime}ms.`);
+
 		} else {
 			window.requestAnimationFrame(onRAF);
 		}

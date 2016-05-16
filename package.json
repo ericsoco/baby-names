@@ -3,14 +3,15 @@
   "version": "0.0.1",
   "description": "USA baby names exploration",
   "scripts": {
-    "start": "npm run sass && npm run watch & npm run serve",
+    "start": "npm run clean && npm run sass && npm run watch & npm run serve",
     "watch": "npm run js:watch & npm run sass:watch & npm run static:watch",
     "sass": "node-sass --include-path scss scss/main.scss dist/main.css",
     "static": "cp -R static/ dist/",
     "js:watch": "watchify js/main.js -o dist/bundle.js -dv",
     "sass:watch": "node-sass -w --include-path scss scss/main.scss dist/main.css",
     "static:watch": "nodemon -w static -e html,json,csv,gif,jpg,png,svg -x \"npm run static\"",
-    "serve": "serve dist"
+    "serve": "serve dist",
+    "clean": "rm -rf dist"
   },
   "author": "ericsoco",
   "license": "ISC",
