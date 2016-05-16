@@ -1,5 +1,64 @@
-$background-color: #f9f9f9;
+$background-color: #ffffff;
+$background-color-female: #f2eee1;
+$background-color-male: #dae8e0;
+$text-color: #000000;
+$border-color: #a9a9a9;
+$row-height: 16px;
+
 body { 
 	margin: 0; 
 	background-color: $background-color;
+	box-sizing: border-box;
+
+	color: $text-color;
+	font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif; 
+	font-weight: 300;
+}
+
+table {
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+.row {
+	position: relative;
+	height: $row-height;
+	font-size: $row-height - 4;
+	line-height: 0;
+	white-space: nowrap;
+
+	&.f {
+		background-color: $background-color-female;
+	}
+	&.m {
+		background-color: $background-color-male;
+	}
+
+	th {
+		margin: 0;
+		padding: 0 $row-height / 2 0 0;
+		font-weight: normal;
+		text-align: right;
+	}
+}
+
+.punch {
+	display: inline-block;
+	width: $row-height;
+	height: $row-height;
+	padding: 0;
+
+	// line every decade
+	&:nth-child(10n+1) {
+		border-right: $border-color 1px solid;
+	}
+
+	> div {
+		border-radius: 50%;
+		background-color: $text-color;
+
+		// center punch in cell
+		transform: translate(-50%, -50%);
+		margin: $row-height/2 0 0 $row-height/2;
+	}
 }
