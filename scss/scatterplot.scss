@@ -1,17 +1,36 @@
+$background-color: #ffffff;
+$axis-color: #707070;
+$stroke-color-female: #f2ec1d;
+$stroke-color-male: #90f200;
+
 .scatterplot {
+
+	background-color: $background-color;
 
 	.axis path,
 	.axis line {
 		fill: none;
-		stroke: #000;
+		stroke: $axis-color;
 		stroke-width: 1px;
 		shape-rendering: crispEdges;
+	}
+
+	text {
+		fill: $axis-color;
 	}
 
 	circle {
 		fill: none;
 		stroke: #a9a9a9;
 		stroke-width: 1px;
+
+		&.f {
+			stroke: $stroke-color-female;
+		}
+
+		&.m {
+			stroke: $stroke-color-male;
+		}
 	}
 
 }
