@@ -86,22 +86,13 @@ const matrix = () => {
 
 		// console.log(data);
 
-		const outerMargin = 20,
-			rowHeight = 12,
-			width = document.querySelector('body').innerWidth - 2 * outerMargin,
-			height = rowHeight * data.length,
-			margin = {
-				top: 10,
-				right: 10,
-				bottom: 70,
-				left: 10
-			};
+		const rowHeight = 12;
 
 		let rScale = d3.scaleLinear()
 			.domain(domains.fraction)
 			.range([0, 2*rowHeight]);
 
-		let tableContainer = d3.select('#app').append('table'),
+		let tableContainer = d3.select('#app').append('table').classed('matrix', true),
 			header = tableContainer.append('thead'),
 			table = tableContainer.append('tbody');
 

@@ -1,0 +1,17 @@
+.scatterplot {
+
+	.axis path,
+	.axis line {
+		fill: none;
+		stroke: #000;
+		stroke-width: 1px;
+		shape-rendering: crispEdges;
+	}
+
+	circle {
+		fill: none;
+		stroke: #a9a9a9;
+		stroke-width: 1px;
+	}
+
+}
