@@ -119,16 +119,31 @@ const scatterplot = () => {
 			.text('First letter');
 		*/
 
-		let circles = graphContainer.selectAll('circle')
-			.data(data);
+		// wait to build and render circles until after axes have rendered.
+		// wait two frames to ensure stack has cleared and DOM has updated+rendered.
+		let frameCount = 0;
 
-		let circlesEnter = circles.enter()
-			.append('circle')
-			.attr('class', d => d.sex)
-			.attr('cx', d => xScale(+d.year))
-			.attr('cy', d => yScale(d.nameNumeric))
-			// .attr('cy', d => yScale(d.name[0].toUpperCase().charCodeAt() - 65))
-			.attr('r', d => rScale(+d.fraction));
+		let onRAF = () => {
+			frameCount++;
+
+			if (frameCount === 2) {
+
+				let circles = graphContainer.selectAll('circle')
+					.data(data);
+
+				let circlesEnter = circles.enter()
+					.append('circle')
+					.attr('class', d => d.sex)
+					.attr('cx', d => xScale(+d.year))
+					.attr('cy', d => yScale(d.nameNumeric))
+					// .attr('cy', d => yScale(d.name[0].toUpperCase().charCodeAt() - 65))
+					.attr('r', d => rScale(+d.fraction));
+
+			} else {
+				window.requestAnimationFrame(onRAF);
+			}
+		};
+		window.requestAnimationFrame(onRAF);
 
 	};
 
