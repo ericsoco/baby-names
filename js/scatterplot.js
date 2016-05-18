@@ -149,7 +149,7 @@ const scatterplot = () => {
 
 	const initInteraction = (xScale, yScale) => {
 
-		document.querySelector('#app').addEventListener('click', event => {
+		document.querySelector('#app').addEventListener('mousemove', event => {
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.name) {
 				highlightName(datum.name, xScale, yScale);
