@@ -164,7 +164,7 @@ const scatterplot = () => {
 			selectedCircles = circles.filter(d => d.name === name);
 		circles.classed('highlighted', d => d.name === name);
 
-		selectedCircles.raise();
+		// selectedCircles.raise();
 		
 		// draw label below circle at year with highest prevalence of selected name
 		let maxFraction = d3.max(selectedCircles.data(), d => d.fraction),

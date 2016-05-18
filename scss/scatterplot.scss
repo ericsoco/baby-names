@@ -31,6 +31,8 @@ $stroke-color-male-highlighted: #09bf00;
 
 		pointer-events: auto;
 
+		// transition: all 1s ease;
+
 		&.f {
 			stroke: $stroke-color-female;
 		}
