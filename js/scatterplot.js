@@ -4,23 +4,21 @@ import d3_format from 'd3-format';
 import d3_request from 'd3-request';
 import d3_scale from 'd3-scale';
 import d3_selection from 'd3-selection';
+import d3_transition from 'd3-transition';
 const d3 = {
 	...d3_array,
 	...d3_axis,
 	...d3_format,
 	...d3_request,
 	...d3_scale,
-	...d3_selection
+	...d3_selection,
+	...d3_transition
 };
 
 const scatterplot = () => {
 
-	let startTime;
-
 	const init = () => {
 
-		startTime = performance.now();
-		
 		d3.csv('./data/all.csv', onDataLoaded);
 
 	};
@@ -31,7 +29,7 @@ const scatterplot = () => {
 		// data = data.slice(0, 100000);
 
 		// filter down to only top names per year
-		data = data.filter(d => +d.rank <= 500);
+		data = data.filter(d => +d.rank <= 100);
 
 		// calculate float (0<>26) for each name for alpha sort
 		data.forEach(d => {
@@ -54,7 +52,7 @@ const scatterplot = () => {
 
 	const initGraph = (domains, data) => {
 
-		console.log(data);
+		// console.log(data);
 
 		const margin = {
 				top: 60,
@@ -128,7 +126,7 @@ const scatterplot = () => {
 
 			if (frameCount === 2) {
 
-				let circles = graphContainer.selectAll('circle')
+				let circles = graphContainer.append('g').selectAll('circle')
 					.data(data);
 
 				let circlesEnter = circles.enter()
@@ -139,6 +137,8 @@ const scatterplot = () => {
 					// .attr('cy', d => yScale(d.name[0].toUpperCase().charCodeAt() - 65))
 					.attr('r', d => rScale(+d.fraction));
 
+				initInteraction(xScale, yScale);
+
 			} else {
 				window.requestAnimationFrame(onRAF);
 			}
@@ -146,6 +146,76 @@ const scatterplot = () => {
 		window.requestAnimationFrame(onRAF);
 
 	};
+
+	const initInteraction = (xScale, yScale) => {
+
+		document.querySelector('#app').addEventListener('click', event => {
+			let datum = d3.select(event.target).datum();
+			if (datum && datum.name) {
+				highlightName(datum.name, xScale, yScale);
+			}
+		});
+
+	};
+
+	const highlightName = (name, xScale, yScale) => {
+
+		let circles = d3.selectAll('#app circle'),
+			selectedCircles = circles.filter(d => d.name === name);
+		circles.classed('highlighted', d => d.name === name);
+
+		selectedCircles.raise();
+		
+		// draw label below circle at year with highest prevalence of selected name
+		let maxFraction = d3.max(selectedCircles.data(), d => d.fraction),
+			centerCircle = selectedCircles.filter(d => d.fraction === maxFraction),
+			x = centerCircle.attr('cx'),
+			y = centerCircle.attr('cy'),
+			datum = centerCircle.datum();
+
+		// label
+		let graphContainer = d3.select('#app svg > g'),
+			label = graphContainer.selectAll('.selection-label')
+				.data([datum]);
+
+		let label1 = `${ datum.name }`,
+			label2 = `${ datum.year } — ${ (datum.fraction * 100).toFixed(2) }%`;
+
+		label/*.transition()*/
+			.attr('x', x)
+			.attr('y', +y + 32);
+
+		let labelEnter = label.enter().append('text')
+			.classed('selection-label', true)
+			.attr('x', x)
+			.attr('y', +y + 32)
+			.style('text-anchor', 'middle');
+		labelEnter.append('tspan');
+		labelEnter.append('tspan');
+
+		graphContainer.selectAll('.selection-label').selectAll('tspan')
+			.each(function (d, i) {
+				d3.select(this)
+					.style('text-anchor', 'middle')
+					.text(i ? label2 : label1)
+				/*.transition()*/
+					.attr('x', x)
+					.attr('dy', i ? '1em' : 0);
+			});
+
+		// vertical year marker
+		let line = graphContainer.selectAll('.selection-line')
+			.data([datum])
+
+		line.attr('transform', d => `translate(${ xScale(d.year) }, 0)`);
+
+		line.enter().append('line', ':first-child')
+			.classed('selection-line', true)
+			.attr('y1', d => yScale(0))
+			.attr('y2', d => yScale(26))
+			.attr('transform', d => `translate(${ xScale(d.year) }, 0)`);
+
+	}
 
 	return {
 		init

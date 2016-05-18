@@ -1,10 +1,14 @@
 $background-color: #ffffff;
 $axis-color: #707070;
-$stroke-color-female: #f2ec1d;
+$label-color: #707070;
+$stroke-color-female: #f2f035;
+$stroke-color-female-highlighted: #e0ca00;
 $stroke-color-male: #90f200;
+$stroke-color-male-highlighted: #09bf00;
 
 .scatterplot {
 
+	pointer-events: none;
 	background-color: $background-color;
 
 	.axis path,
@@ -15,14 +19,17 @@ $stroke-color-male: #90f200;
 		shape-rendering: crispEdges;
 	}
 
-	text {
+	.axis text {
 		fill: $axis-color;
 	}
 
 	circle {
-		fill: none;
+		fill: rgba(0,0,0,0);
 		stroke: #a9a9a9;
 		stroke-width: 1px;
+		z-index: 1;
+
+		pointer-events: auto;
 
 		&.f {
 			stroke: $stroke-color-female;
@@ -31,6 +38,33 @@ $stroke-color-male: #90f200;
 		&.m {
 			stroke: $stroke-color-male;
 		}
+
+		&.highlighted {
+			stroke-width: 3px;
+			z-index: 2;
+			&.f {
+				stroke: $stroke-color-female-highlighted;
+				fill: rgba($stroke-color-female-highlighted, 0.25);
+			}
+			&.m {
+				stroke: $stroke-color-male-highlighted;
+				fill: rgba($stroke-color-male-highlighted, 0.25);
+			}
+		}
+	}
+
+	.selection-label {
+		text {
+			fill: $label-color;
+		}
+		tspan:nth-child(2) {
+			font-size: smaller;
+		}
+	}
+
+	.selection-line {
+		stroke: $label-color;
+		stroke-opacity: 0.5;
 	}
 
 }

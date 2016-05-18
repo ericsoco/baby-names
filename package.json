@@ -2,6 +2,10 @@
   "name": "baby-names",
   "version": "0.0.1",
   "description": "USA baby names exploration",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericsoco/baby-names.git"
+  },
   "scripts": {
     "start": "npm run clean && npm run sass && npm run watch & npm run serve",
     "watch": "npm run js:watch & npm run sass:watch & npm run static:watch",
@@ -33,7 +37,8 @@
     "d3-format": "^0.5.1",
     "d3-request": "^0.4.6",
     "d3-scale": "^0.7.0",
-    "d3-selection": "^0.7.2"
+    "d3-selection": "^0.7.2",
+    "d3-transition": "^0.2.9"
   },
   "browserify": {
     "transform": [
