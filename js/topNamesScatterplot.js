@@ -216,6 +216,8 @@ const topNamesScatterplot = () => {
 			if (datum && datum.key) {
 				// console.log(datum);
 				highlightName(datum.key, xScale, yScale, rScale);
+			} else {
+				highlightName(null);
 			}
 
 		});
@@ -237,8 +239,17 @@ const topNamesScatterplot = () => {
 
 	const highlightName = (name, xScale, yScale, rScale) => {
 
-		let nameElement = d3.select('#app svg').selectAll('.name').filter(d => d.value.name === name),
-			nameDatum = nameElement.datum();
+		let names = d3.select('#app svg').selectAll('.name');
+
+		if (!name) {
+
+			names.classed('highlighted', false);
+			d3.selectAll('.timespan').remove();
+
+		} else {
+
+			let nameElement = names.filter(d => d.value.name === name),
+				nameDatum = nameElement.datum();
 
 			// TODO: use update pattern to remove all this stuff on
 			//		non-highlighted elements
@@ -277,6 +288,7 @@ const topNamesScatterplot = () => {
 				.attr('cy', d => yScale(nameDatum.value.medianRank))
 				.attr('r', d => rScale(d.values[0].fraction));
 
+		}
 
 
 	};
