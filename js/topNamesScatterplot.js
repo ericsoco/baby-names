@@ -30,6 +30,13 @@ const d3 = {
 
 const topNamesScatterplot = () => {
 
+	let margin,
+		width,
+		height,
+		xScale,
+		yScale,
+		rScale;
+
 	const init = () => {
 
 		d3.csv('./data/all.csv', onDataLoaded);
@@ -54,17 +61,11 @@ const topNamesScatterplot = () => {
 					firstYear: d3.min(values, d => +d.year),
 					lastYear: d3.max(values, d => +d.year),
 					maxYear: values.find(d => d.fraction === maxFraction).year,
+					maxFraction: maxFraction,
 					medianRank: d3.median(values, d => +d.rank),
 					occurrences: d3.nest()
 						.key(d => d.year)
 							.sortKeys(d3.ascending)
-						.rollup(valuesByYear => ({
-							name: values[0].name,
-							sex: values[0].sex,
-							year: +values[0].year,
-							fraction: +values[0].fraction,
-							rank: +values[0].rank
-						}))
 						.entries(values),
 					numTopOccurrences: values.reduce((total, d) => {
 						return total + (+d.rank < rankCutoff ? 1 : 0);
@@ -79,7 +80,7 @@ const topNamesScatterplot = () => {
 
 		let domains = {
 				year: d3.extent(data, d => +d.year),
-				// fraction: [0, d3.max(data, d => +d.fraction)],
+				fraction: [0, d3.max(data, d => +d.fraction)],
 				occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
 				rank: [0, d3.max(stats, d => d.value.medianRank)]
 			},
@@ -99,18 +100,19 @@ const topNamesScatterplot = () => {
 
 		console.log(data);
 
-		const margin = {
-				top: 20,
-				right: 20,
-				bottom: 60,
-				left: 60
-			},
-			width = window.innerWidth - margin.left - margin.right,
-			height = window.innerHeight - margin.top - margin.bottom;
+		margin = {
+			top: 20,
+			right: 20,
+			bottom: 60,
+			left: 60
+		};
+		width = window.innerWidth - margin.left - margin.right;
+		height = window.innerHeight - margin.top - margin.bottom;
 
 		// TODO: put these, along with fractionScale,
 		// into a place they can be accessed and updated from all local functions.
 		let xScale = d3.scaleLinear()
+			.clamp(true)
 			.domain(domains.year)
 			.range([0, width]);
 
@@ -120,7 +122,7 @@ const topNamesScatterplot = () => {
 
 		let rScale = d3.scalePow()
 			.exponent(0.5)
-			.domain(domains.occurrence)
+			.domain(domains.fraction)
 			.range([1, 20]);
 
 		let graphContainer = d3.select('#app').append('svg')
@@ -133,16 +135,27 @@ const topNamesScatterplot = () => {
 		let xAxis = d3.axisBottom()
 			.scale(xScale)
 			.tickFormat(d3.format('d'))
-		graphContainer.append('g')
+		let xAxisEl = graphContainer.append('g')
 			.classed('x axis', true)
 			.attr('transform', `translate(0,${ height + 20 })`)
 			.call(xAxis)
-		.append('text')
+		xAxisEl.append('text')
 			.classed('label', true)
 			.attr('x', width)
 			.attr('y', -10)
 			.style('text-anchor', 'end')
 			.text('Year');
+
+		let yearTick = xAxisEl.append('g')
+			.attr('class', 'year-tick');
+		yearTick.append('line')
+			.attr('x1', 0)
+			.attr('x2', 0)
+			.attr('y1', -10)
+			.attr('y2', 0);
+		yearTick.append('text')
+			.attr('x', 0)
+			.attr('y', -20);
 
 		let yAxis = d3.axisLeft()
 			.scale(yScale)
@@ -178,7 +191,7 @@ const topNamesScatterplot = () => {
 				namePlotsEnter.append('circle')
 					.attr('cx', d => xScale(d.value.maxYear))
 					.attr('cy', d => yScale(d.value.medianRank))
-					.attr('r', d => rScale(+d.value.occurrences.length));
+					.attr('r', d => rScale(d.value.maxFraction));
 
 				namePlotsEnter.append('text')
 					.attr('x', d => xScale(d.value.maxYear))
@@ -198,11 +211,26 @@ const topNamesScatterplot = () => {
 	const initInteraction = (xScale, yScale, rScale) => {
 
 		document.querySelector('#app').addEventListener('click', event => {
+
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
-				console.log(datum);
+				// console.log(datum);
 				highlightName(datum.key, xScale, yScale, rScale);
 			}
+
+		});
+
+		document.querySelector('#app').addEventListener('mousemove', event => {
+
+			let year = Math.round(xScale.invert(event.pageX - margin.left)),
+				yearTick = d3.select('.year-tick');
+			yearTick.select('line')
+				.attr('x1', xScale(year))
+				.attr('x2', xScale(year));
+			yearTick.select('text')
+				.attr('x', xScale(year))
+				.text(year);
+
 		});
 
 	};
@@ -240,23 +268,14 @@ const topNamesScatterplot = () => {
 				.attr('y2', d => yScale(d.value.medianRank) + 5);
 			*/
 
-			// TODO: move this to be with other scales
-			// and make accessible and updatable from here and elsewhere
-			let fractionScale = d3.scaleLinear()
-				.domain([0, 0.01])
-				.range([1, 20]);
-
 			let circles = timespan.selectAll('circle')
 				.data(nameDatum.value.occurrences)
 			.enter().append('circle')
-				// .each(d => { console.log(d); })
+				.each(d => { console.log(d); })
 				.attr('class', 'occurrence')
-				.attr('cx', d => {
-					console.log(d);
-					return xScale(d.key);
-				})
+				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', d => yScale(nameDatum.value.medianRank))
-				.attr('r', d => fractionScale(d.value.fraction));
+				.attr('r', d => rScale(d.values[0].fraction));
 
 
 
