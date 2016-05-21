@@ -1,0 +1,95 @@
+$background-color: #ffffff;
+$axis-color: #707070;
+$label-color: #707070;
+$stroke-color-female: #f2f035;
+$text-color-female: #e0ca00;
+$stroke-color-male: #90f200;
+$text-color-male: #09bf00;
+
+.top-names-scatterplot {
+
+	pointer-events: none;
+	background-color: $background-color;
+
+	.axis path,
+	.axis line {
+		fill: none;
+		stroke: $axis-color;
+		stroke-width: 1px;
+		shape-rendering: crispEdges;
+	}
+
+	.axis text {
+		fill: $axis-color;
+	}
+
+	.name {
+		z-index: 1;
+		&.highlighted {
+			z-index: 2;
+		}
+
+		&.f {
+			stroke: $stroke-color-female;
+			fill: $text-color-female;
+
+			&.highlighted {
+				circle {
+					fill: rgba($stroke-color-female, 0.25);
+				}
+			}
+		}
+
+		&.m {
+			stroke: $stroke-color-male;
+			fill: $text-color-male;
+
+			&.highlighted {
+				circle {
+					fill: rgba($stroke-color-male, 0.25);
+				}
+			}
+		}
+
+		line {
+			stroke-opacity: 1.0;
+		}
+
+		text {
+			stroke: none;
+			text-anchor: middle;
+			font-weight: normal;
+
+			pointer-events: auto;
+			cursor: pointer;
+            user-select: none;
+			&::selection {
+			    background: none;
+			}
+		}
+
+		circle {
+			fill: rgba(0,0,0,0);
+			stroke-width: 1px;
+
+			pointer-events: auto;
+			cursor: pointer;
+		}
+
+	}
+
+	.selection-label {
+		text {
+			fill: $label-color;
+		}
+		tspan:nth-child(2) {
+			font-size: smaller;
+		}
+	}
+
+	.selection-line {
+		stroke: $label-color;
+		stroke-opacity: 0.5;
+	}
+
+}
