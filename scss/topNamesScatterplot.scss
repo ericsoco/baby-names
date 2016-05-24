@@ -8,94 +8,125 @@ $text-color-male: #09bf00;
 
 .top-names-scatterplot {
 
-	pointer-events: none;
-	background-color: $background-color;
+	display: flex;
 
-	.axis path,
-	.axis line {
-		fill: none;
-		stroke: $axis-color;
-		stroke-width: 1px;
-		shape-rendering: crispEdges;
+	.sidebar {
+		flex: 0 0 15rem;
+
+		padding: 20px;
+		box-sizing: border-box;
+
+		background-color: #ccffcc;
 	}
 
-	.axis text {
-		fill: $axis-color;
-	}
+	.graph {
+		flex-grow: 1;
+		height: 100%;
 
-	.name {
-		z-index: 1;
-		&.highlighted {
-			z-index: 2;
+		background-color: $background-color;
+
+		svg {
+			pointer-events: none;
 		}
 
-		&.f {
-			stroke: $stroke-color-female;
-			fill: $text-color-female;
-
-			&.highlighted {
-				circle {
-					fill: rgba($stroke-color-female, 0.25);
-				}
-			}
-		}
-
-		&.m {
-			stroke: $stroke-color-male;
-			fill: $text-color-male;
-
-			&.highlighted {
-				circle {
-					fill: rgba($stroke-color-male, 0.25);
-				}
-			}
-		}
-
-		line {
-			stroke-opacity: 1.0;
-		}
-
-		text {
-			stroke: none;
-			text-anchor: middle;
-			font-weight: normal;
-
-			pointer-events: auto;
-			cursor: pointer;
-            user-select: none;
-			&::selection {
-			    background: none;
-			}
-		}
-
-		circle {
-			fill: rgba(0,0,0,0);
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: $axis-color;
 			stroke-width: 1px;
-
-			pointer-events: auto;
-			cursor: pointer;
+			shape-rendering: crispEdges;
 		}
 
-	}
-
-	.selection-label {
-		text {
-			fill: $label-color;
+		.axis text {
+			fill: $axis-color;
 		}
-		tspan:nth-child(2) {
-			font-size: smaller;
+
+		.name {
+			z-index: 1;
+			&.highlighted {
+				z-index: 2;
+
+				circle {
+					fill-opacity: 0.25;
+					stroke-opacity: 0.5;
+
+					&.top-rank {
+						stroke-width: 2px;
+						fill-opacity: 0.5;
+						stroke-opacity: 1.0;
+					}
+				}
+			}
+
+			&.f {
+				stroke: $stroke-color-female;
+				fill: $text-color-female;
+
+				&.highlighted {
+					circle {
+						fill: $stroke-color-female;
+					}
+				}
+			}
+
+			&.m {
+				stroke: $stroke-color-male;
+				fill: $text-color-male;
+
+				&.highlighted {
+					circle {
+						fill: $stroke-color-male;
+					}
+				}
+			}
+
+			line {
+				stroke-opacity: 1.0;
+			}
+
+			text {
+				stroke: none;
+				text-anchor: middle;
+				font-weight: normal;
+
+				pointer-events: auto;
+				cursor: pointer;
+	            user-select: none;
+				&::selection {
+				    background: none;
+				}
+			}
+
+			circle {
+				fill: #000000;
+				fill-opacity: 0.0;
+				stroke-width: 1px;
+
+				pointer-events: auto;
+				cursor: pointer;
+			}
+
 		}
-	}
 
-	.selection-line {
-		stroke: $label-color;
-		stroke-opacity: 0.5;
-	}
+		.selection-label {
+			text {
+				fill: $label-color;
+			}
+			tspan:nth-child(2) {
+				font-size: smaller;
+			}
+		}
 
-	.year-tick {
-		text {
-			font-size: 1.16em;
-			text-anchor: middle;
+		.selection-line {
+			stroke: $label-color;
+			stroke-opacity: 0.5;
+		}
+
+		.year-tick {
+			text {
+				font-size: 1.16em;
+				text-anchor: middle;
+			}
 		}
 	}
 

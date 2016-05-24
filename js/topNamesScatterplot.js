@@ -1,31 +1,43 @@
 /*
 TODO:
-add UI to slide down scale of popularity.
-this is basically filtering on topOccurrences;
-the more topOccurrences, the more popular.
+( ) add UI to slide down scale of popularity.
+	this is filtering on topOccurrencesMin;
+	the more topOccurrences, the more popular.
 
-the other possible variable to filter on is rankCutoff,
-but this probably best set to a constant value.
+	other possible filters:
+	( ) topOccurrencesSpread
+	( ) rankCutoff
+	shouldn't make all values filterable; keep it simple. max 2.
+	maybe make a slider for all three and then figure out which combo
+	gives most interesting results?
+
+	a simple d3-brush could allow adjusting topOccurences + spread.
+
+( ) refine radius scale (what's best metric here?)
+( ) add legend (color, radius)
+( ) refine design/colors
+( ) add header to matrix
+( ) post on transmote
 */
 
 
 import d3_array from 'd3-array';
 import d3_axis from 'd3-axis';
+import d3_brush from 'd3-brush';
 import d3_collection from 'd3-collection';
 import d3_format from 'd3-format';
 import d3_request from 'd3-request';
 import d3_scale from 'd3-scale';
 import d3_selection from 'd3-selection';
-// import d3_transition from 'd3-transition';
 const d3 = {
 	...d3_array,
 	...d3_axis,
+	...d3_brush,
 	...d3_collection,
 	...d3_format,
 	...d3_request,
 	...d3_scale,
-	...d3_selection,
-	// ...d3_transition
+	...d3_selection
 };
 
 const topNamesScatterplot = () => {
@@ -37,6 +49,10 @@ const topNamesScatterplot = () => {
 		yScale,
 		rScale;
 
+	let rankCutoff = 100,
+		topOccurrencesMin = 20,
+		topOccurrencesSpread = 10;
+	
 	const init = () => {
 
 		d3.csv('./data/all.csv', onDataLoaded);
@@ -46,9 +62,6 @@ const topNamesScatterplot = () => {
 
 	const onDataLoaded = (error, data) => {
 
-		const rankCutoff = 10,
-			minRequiredTopOccurrences = 1;
-		
 		let stats = d3.nest()
 			.key(d => d.name)
 				.sortKeys(d3.ascending)
@@ -75,8 +88,8 @@ const topNamesScatterplot = () => {
 			.entries(data);
 
 		// filter down to only the names that have appeared
-		// in the top { rankCutoff } at least { minRequiredTopOccurrences } times
-		stats = stats.filter(d => d.value.numTopOccurrences >= minRequiredTopOccurrences);
+		// in the top { rankCutoff } at least { topOccurrencesMin } times
+		stats = stats.filter(d => d.value.numTopOccurrences >= topOccurrencesMin && d.value.numTopOccurrences <= topOccurrencesMin + topOccurrencesSpread);
 
 		let domains = {
 				year: d3.extent(data, d => +d.year),
@@ -92,19 +105,28 @@ const topNamesScatterplot = () => {
 		});
 		domains.age = d3.extent(stats, d => d.value.age);
 
-		initGraph(domains, stats);
+		render(domains, stats);
 
 	};
 
-	const initGraph = (domains, data) => {
+	const render = (domains, data) => {
 
-		console.log(data);
+		d3.select('#app').classed('top-names-scatterplot', true);
 
-		margin = {
+		initSidebar(domains, data);
+		initGraph(domains, data);
+
+	}
+
+	const initSidebar = (domains, data) => {
+
+
+		/*
+		let sidebarMargin = {
 			top: 20,
 			right: 20,
-			bottom: 60,
-			left: 60
+			bottom: 20,
+			left: 20
 		};
 		width = window.innerWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
@@ -125,10 +147,51 @@ const topNamesScatterplot = () => {
 			.domain(domains.fraction)
 			.range([1, 20]);
 
-		let graphContainer = d3.select('#app').append('svg')
+		let graphContainer = d3.select('.top-names-scatterplot .sidebar').append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
 			.classed('top-names-scatterplot', true)
+		.append('g')
+			.attr('transform', `translate(${ margin.left },${ margin.top })`);
+
+		*/
+
+	};
+
+	const initGraph = (domains, data) => {
+
+		console.log(data);
+
+		let sidebar = d3.select('.top-names-scatterplot .sidebar');
+
+		margin = {
+			top: 20,
+			right: 40,
+			bottom: 60,
+			left: 60
+		};
+		width = window.innerWidth - sidebar.node().offsetWidth - margin.left - margin.right;
+		height = window.innerHeight - margin.top - margin.bottom;
+
+		// TODO: put these, along with fractionScale,
+		// into a place they can be accessed and updated from all local functions.
+		let xScale = d3.scaleLinear()
+			.clamp(true)
+			.domain(domains.year)
+			.range([0, width]);
+
+		let yScale = d3.scaleLinear()
+			.domain(domains.rank)
+			.range([0, height]);
+
+		let rScale = d3.scalePow()
+			.exponent(0.5)
+			.domain(domains.fraction)
+			.range([1, 20]);
+
+		let graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
+			.attr('width', width + margin.left + margin.right)
+			.attr('height', height + margin.top + margin.bottom)
 		.append('g')
 			.attr('transform', `translate(${ margin.left },${ margin.top })`);
 
@@ -210,7 +273,9 @@ const topNamesScatterplot = () => {
 
 	const initInteraction = (xScale, yScale, rScale) => {
 
-		document.querySelector('#app').addEventListener('click', event => {
+		let graphEl = document.querySelector('.top-names-scatterplot .graph');
+
+		graphEl.addEventListener('click', event => {
 
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
@@ -222,9 +287,9 @@ const topNamesScatterplot = () => {
 
 		});
 
-		document.querySelector('#app').addEventListener('mousemove', event => {
+		graphEl.addEventListener('mousemove', event => {
 
-			let year = Math.round(xScale.invert(event.pageX - margin.left)),
+			let year = Math.round(xScale.invert(event.pageX - graphEl.offsetLeft - margin.left)),
 				yearTick = d3.select('.year-tick');
 			yearTick.select('line')
 				.attr('x1', xScale(year))
@@ -239,7 +304,7 @@ const topNamesScatterplot = () => {
 
 	const highlightName = (name, xScale, yScale, rScale) => {
 
-		let names = d3.select('#app svg').selectAll('.name');
+		let names = d3.select('.top-names-scatterplot .graph svg').selectAll('.name');
 
 		if (!name) {
 
@@ -279,11 +344,13 @@ const topNamesScatterplot = () => {
 				.attr('y2', d => yScale(d.value.medianRank) + 5);
 			*/
 
+			// console.log("occurrences:", nameDatum.value.occurrences.length, "top occurrences:", nameDatum.value.numTopOccurrences);
 			let circles = timespan.selectAll('circle')
 				.data(nameDatum.value.occurrences)
 			.enter().append('circle')
-				.each(d => { console.log(d); })
+				// .each(d => { console.log(d); })
 				.attr('class', 'occurrence')
+				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', d => yScale(nameDatum.value.medianRank))
 				.attr('r', d => rScale(d.values[0].fraction));
