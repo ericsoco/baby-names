@@ -11,12 +11,55 @@ $text-color-male: #09bf00;
 	display: flex;
 
 	.sidebar {
+		display: flex;
+		flex-direction: column;
+
 		flex: 0 0 15rem;
 
 		padding: 20px;
 		box-sizing: border-box;
+	}
 
+	.copy {
+		width: 100%;
+		flex-grow: 1;
 		background-color: #ccffcc;
+	}
+
+	.slider {
+		width: 100%;
+		flex: 0 0 20rem;
+		background-color: #ffccff;
+		padding-left: 50%;
+		box-sizing: border-box;
+
+		svg {
+			transform: translateX(-50%);
+		}
+
+		.axis {
+			path {
+				display: none;
+			}
+			line {
+				fill: none;
+				stroke: $axis-color;
+				stroke-width: 1px;
+				shape-rendering: crispEdges;
+			}
+			text {
+				fill: $axis-color;
+			}
+		}
+
+		.extent {
+			stroke: $axis-color;
+			fill: rgba($background-color, 0.25);
+		}
+	}
+
+	.slider-background {
+		fill: rgba($axis-color, 0.5);
 	}
 
 	.graph {

@@ -15,6 +15,8 @@ TODO:
 
 ( ) refine radius scale (what's best metric here?)
 ( ) add legend (color, radius)
+	d3.legend?
+	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
 ( ) refine design/colors
 ( ) add header to matrix
 ( ) post on transmote
@@ -23,7 +25,8 @@ TODO:
 
 import d3_array from 'd3-array';
 import d3_axis from 'd3-axis';
-import d3_brush from 'd3-brush';
+// import d3_brush from 'd3-brush';		// not ported to v4 yet: https://github.com/d3/d3/issues/2461
+import d3All from 'd3'
 import d3_collection from 'd3-collection';
 import d3_format from 'd3-format';
 import d3_request from 'd3-request';
@@ -32,7 +35,8 @@ import d3_selection from 'd3-selection';
 const d3 = {
 	...d3_array,
 	...d3_axis,
-	...d3_brush,
+	// ...d3_brush,
+	brush: d3All.svg.brush,
 	...d3_collection,
 	...d3_format,
 	...d3_request,
@@ -50,7 +54,7 @@ const topNamesScatterplot = () => {
 		rScale;
 
 	let rankCutoff = 100,
-		topOccurrencesMin = 20,
+		topOccurrencesMin = 90,
 		topOccurrencesSpread = 10;
 	
 	const init = () => {
@@ -95,7 +99,8 @@ const topNamesScatterplot = () => {
 				year: d3.extent(data, d => +d.year),
 				fraction: [0, d3.max(data, d => +d.fraction)],
 				occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
-				rank: [0, d3.max(stats, d => d.value.medianRank)]
+				rank: [0, d3.max(stats, d => d.value.medianRank)],
+				topOccurrence: [0, 100]
 			},
 			numYears = domains.year[1] - domains.year[0] + 1;
 
@@ -120,41 +125,75 @@ const topNamesScatterplot = () => {
 
 	const initSidebar = (domains, data) => {
 
+		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
+			sidebarEl = sidebar.node(),
+			copy = sidebar.append('div').attr('class', 'copy'),
+			sliderContainer = sidebar.append('div').attr('class', 'slider');
 
-		/*
-		let sidebarMargin = {
-			top: 20,
-			right: 20,
-			bottom: 20,
-			left: 20
-		};
-		width = window.innerWidth - margin.left - margin.right;
-		height = window.innerHeight - margin.top - margin.bottom;
+		let sliderWidth = 40,
+			sliderMargin = {
+				top: 20,
+				right: 40,
+				bottom: 20,
+				left: 40
+			},
+			width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
+			height = sidebarEl.offsetHeight - copy.node().offsetHeight - sliderMargin.top - sliderMargin.bottom,
+			sliderSvg = sliderContainer.append('svg')
+				.attr('width', width + sliderMargin.left + sliderMargin.right)
+				.attr('height', height + sliderMargin.top + sliderMargin.bottom)
+			.append('g')
+				.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
 
-		// TODO: put these, along with fractionScale,
-		// into a place they can be accessed and updated from all local functions.
-		let xScale = d3.scaleLinear()
+		let sliderScale = d3.scaleLinear()
 			.clamp(true)
-			.domain(domains.year)
-			.range([0, width]);
-
-		let yScale = d3.scaleLinear()
-			.domain(domains.rank)
+			.domain(domains.topOccurrence)
 			.range([0, height]);
 
-		let rScale = d3.scalePow()
-			.exponent(0.5)
-			.domain(domains.fraction)
-			.range([1, 20]);
+		let sliderBackground = sliderSvg.append('rect')
+			.attr('class', 'slider-background')
+			.attr('width', sliderWidth)
+			.attr('height', height);
 
-		let graphContainer = d3.select('.top-names-scatterplot .sidebar').append('svg')
-			.attr('width', width + margin.left + margin.right)
-			.attr('height', height + margin.top + margin.bottom)
-			.classed('top-names-scatterplot', true)
-		.append('g')
-			.attr('transform', `translate(${ margin.left },${ margin.top })`);
+		let sliderAxis = d3.axisLeft()
+			.scale(sliderScale)
+			.tickFormat(d3.format('d'))
+		sliderSvg.append('g')
+			.classed('y axis', true)
+			.call(sliderAxis);
 
-		*/
+		let stepSize = 5;
+		let brushGenerator = d3.brush()
+			.y(sliderScale)
+			.extent([0, 10])
+			.on('brushend', (type, ex0, ex1) => {
+				if (!d3All.event.sourceEvent) { return; }
+
+				let currentExtent = brushGenerator.extent();
+				console.log(currentExtent);
+
+				/*
+				// snap brush extent
+				let currentExtent = brushGenerator.extent(),
+					targetExtent = currentExtent.map(v => Math.round(v / stepSize) * stepSize);
+
+				// if empty after rounding, use floor/ceil instead
+				if (targetExtent[0] >= targetExtent[1]) {
+					targetExtent[0] = Math.floor(currentExtent[0] / stepSize) * stepSize;
+					targetExtent[1] = Math.floor(currentExtent[1] / stepSize) * stepSize;
+				}
+
+				d3.select(this).transition()
+					.call(brushGenerator.extent(targetExtent))
+					.call(brushGenerator.event);
+				*/
+			});
+		
+		let brush = sliderSvg.append('g')
+			.call(brushGenerator)
+			.call(brushGenerator.event);
+		brush.selectAll('rect')
+			.attr('width', sliderWidth);
 
 	};
 
@@ -162,7 +201,7 @@ const topNamesScatterplot = () => {
 
 		console.log(data);
 
-		let sidebar = d3.select('.top-names-scatterplot .sidebar');
+		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node();
 
 		margin = {
 			top: 20,
@@ -170,7 +209,7 @@ const topNamesScatterplot = () => {
 			bottom: 60,
 			left: 60
 		};
-		width = window.innerWidth - sidebar.node().offsetWidth - margin.left - margin.right;
+		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
 
 		// TODO: put these, along with fractionScale,
