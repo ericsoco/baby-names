@@ -105,11 +105,11 @@ const topNamesScatterplot = () => {
 
 		domains = {
 			year: d3.extent(data, d => +d.year),
-			fraction: [0, d3.max(data, d => +d.fraction)],
+			fraction: [0, d3.max(data, d => +d.fraction)]
 			// occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
 			// rank: [0, d3.max(stats, d => d.value.medianRank)],
-			topOccurrence: [0, 100]
 		};
+		domains.topOccurrence = [1, domains.year[1] - domains.year[0]];
 
 		/*
 		// now that we have domains.year, calculate age of each name
@@ -177,7 +177,7 @@ const topNamesScatterplot = () => {
 		brush = d3.brush()
 			.y(sliderScale)
 			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread])
-			.on('brushend', (type, ex0, ex1) => {
+			.on('brushend', () => {
 
 				if (!d3All.event.sourceEvent) { return; }
 
@@ -318,6 +318,11 @@ const topNamesScatterplot = () => {
 		console.log(occurrenceExtent);
 		console.log(filteredNames.map(n => n.key));
 
+		const enterDuration = 300,
+			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?
+			exitDuration = 750,
+			exitEase = d3.easeQuad;
+
 		let namePlots = graphContainer.selectAll('.name')
 			.data(filteredNames, d => d.key);
 
@@ -327,21 +332,30 @@ const topNamesScatterplot = () => {
 
 		// enter
 		let namePlotsEnter = namePlots.enter().append('g')
-			.attr('class', d => 'name ' + d.value.sex);
+			.attr('class', d => 'name ' + d.value.sex)
+			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(0.01)rotate(0)`)
+			.attr('opacity', 0.0);
+		namePlotsEnter.transition()
+			.duration(enterDuration)
+			.ease(enterEase)
+			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(1.0)rotate(0)`)
+			.attr('opacity', 1.0);
 		namePlotsEnter.append('circle')
-			.attr('cx', d => xScale(d.value.maxYear))
-			.attr('cy', d => yScale(d.value.medianRank))
-		.transition()
-			.duration(500)
-			.ease(t => d3.easeBackOut(t, 3.0))	// custom overshoot isn't working...why?
+			.attr('cx', 0)
+			.attr('cy', 0)
 			.attr('r', d => rScale(d.value.maxFraction));
 		namePlotsEnter.append('text')
-			.attr('x', d => xScale(d.value.maxYear))
-			.attr('y', d => yScale(d.value.medianRank) + 5)
+			.attr('x', 0)
+			.attr('y', 5)
 			.text(d => d.value.name);
 
 		// exit
-		namePlots.exit().remove();
+		namePlots.exit().transition()
+			.duration(exitDuration)
+			.ease(exitEase)
+			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(0.01)rotate(0)`)
+			.attr('opacity', 0.0)
+			.remove();
 
 	};
 

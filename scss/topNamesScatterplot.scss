@@ -85,6 +85,7 @@ $text-color-male: #09bf00;
 		}
 
 		.name {
+			// transform-origin: 50% 50% 0;
 			z-index: 1;
 			&.highlighted {
 				z-index: 2;
