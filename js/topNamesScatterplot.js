@@ -28,20 +28,24 @@ import d3_axis from 'd3-axis';
 // import d3_brush from 'd3-brush';		// not ported to v4 yet: https://github.com/d3/d3/issues/2461
 import d3All from 'd3'
 import d3_collection from 'd3-collection';
+import d3_ease from 'd3-ease';
 import d3_format from 'd3-format';
 import d3_request from 'd3-request';
 import d3_scale from 'd3-scale';
 import d3_selection from 'd3-selection';
+import d3_transition from 'd3-transition';
 const d3 = {
 	...d3_array,
 	...d3_axis,
 	// ...d3_brush,
 	brush: d3All.svg.brush,
 	...d3_collection,
+	...d3_ease,
 	...d3_format,
 	...d3_request,
 	...d3_scale,
-	...d3_selection
+	...d3_selection,
+	...d3_transition
 };
 
 const topNamesScatterplot = () => {
@@ -49,13 +53,15 @@ const topNamesScatterplot = () => {
 	let margin,
 		width,
 		height,
+		graphContainer,
 		xScale,
 		yScale,
-		rScale;
+		rScale,
+		brush;
 
 	let rankCutoff = 100,
-		topOccurrencesMin = 90,
-		topOccurrencesSpread = 10;
+		domains,
+		stats;
 	
 	const init = () => {
 
@@ -66,7 +72,7 @@ const topNamesScatterplot = () => {
 
 	const onDataLoaded = (error, data) => {
 
-		let stats = d3.nest()
+		stats = d3.nest()
 			.key(d => d.name)
 				.sortKeys(d3.ascending)
 			.rollup(values => {
@@ -91,39 +97,42 @@ const topNamesScatterplot = () => {
 			})
 			.entries(data);
 
+		/*
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } at least { topOccurrencesMin } times
 		stats = stats.filter(d => d.value.numTopOccurrences >= topOccurrencesMin && d.value.numTopOccurrences <= topOccurrencesMin + topOccurrencesSpread);
+		*/
 
-		let domains = {
-				year: d3.extent(data, d => +d.year),
-				fraction: [0, d3.max(data, d => +d.fraction)],
-				occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
-				rank: [0, d3.max(stats, d => d.value.medianRank)],
-				topOccurrence: [0, 100]
-			},
-			numYears = domains.year[1] - domains.year[0] + 1;
+		domains = {
+			year: d3.extent(data, d => +d.year),
+			fraction: [0, d3.max(data, d => +d.fraction)],
+			// occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
+			// rank: [0, d3.max(stats, d => d.value.medianRank)],
+			topOccurrence: [0, 100]
+		};
 
+		/*
 		// now that we have domains.year, calculate age of each name
 		stats.forEach(d => {
 			d.value.age = domains.year[1] - d.value.firstYear
 		});
 		domains.age = d3.extent(stats, d => d.value.age);
+		*/
 
-		render(domains, stats);
+		render();
 
 	};
 
-	const render = (domains, data) => {
+	const render = () => {
 
 		d3.select('#app').classed('top-names-scatterplot', true);
 
-		initSidebar(domains, data);
-		initGraph(domains, data);
+		initSidebar();
+		initGraph();
 
 	}
 
-	const initSidebar = (domains, data) => {
+	const initSidebar = () => {
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
@@ -148,7 +157,7 @@ const topNamesScatterplot = () => {
 		let sliderScale = d3.scaleLinear()
 			.clamp(true)
 			.domain(domains.topOccurrence)
-			.range([0, height]);
+			.range([height, 0]);
 
 		let sliderBackground = sliderSvg.append('rect')
 			.attr('class', 'slider-background')
@@ -162,19 +171,21 @@ const topNamesScatterplot = () => {
 			.classed('y axis', true)
 			.call(sliderAxis);
 
-		let stepSize = 5;
-		let brushGenerator = d3.brush()
+		let topOccurrencesMin = 90,
+			topOccurrencesSpread = 10,
+			stepSize = 5;
+		brush = d3.brush()
 			.y(sliderScale)
-			.extent([0, 10])
+			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread])
 			.on('brushend', (type, ex0, ex1) => {
+
 				if (!d3All.event.sourceEvent) { return; }
 
-				let currentExtent = brushGenerator.extent();
-				console.log(currentExtent);
+				renderNames();
 
 				/*
 				// snap brush extent
-				let currentExtent = brushGenerator.extent(),
+				let currentExtent = brush.extent(),
 					targetExtent = currentExtent.map(v => Math.round(v / stepSize) * stepSize);
 
 				// if empty after rounding, use floor/ceil instead
@@ -184,22 +195,20 @@ const topNamesScatterplot = () => {
 				}
 
 				d3.select(this).transition()
-					.call(brushGenerator.extent(targetExtent))
-					.call(brushGenerator.event);
+					.call(brush.extent(targetExtent))
+					.call(brush.event);
 				*/
 			});
 		
-		let brush = sliderSvg.append('g')
-			.call(brushGenerator)
-			.call(brushGenerator.event);
-		brush.selectAll('rect')
+		sliderSvg.append('g')
+			.call(brush)
+			.call(brush.event)
+		.selectAll('rect')
 			.attr('width', sliderWidth);
 
 	};
 
-	const initGraph = (domains, data) => {
-
-		console.log(data);
+	const initGraph = () => {
 
 		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node();
 
@@ -212,23 +221,22 @@ const topNamesScatterplot = () => {
 		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
 
-		// TODO: put these, along with fractionScale,
-		// into a place they can be accessed and updated from all local functions.
-		let xScale = d3.scaleLinear()
+		xScale = d3.scaleLinear()
 			.clamp(true)
 			.domain(domains.year)
 			.range([0, width]);
 
-		let yScale = d3.scaleLinear()
-			.domain(domains.rank)
+		yScale = d3.scaleLinear()
+			// .domain(domains.rank)
+			.domain([0, 1000])
 			.range([0, height]);
 
-		let rScale = d3.scalePow()
+		rScale = d3.scalePow()
 			.exponent(0.5)
 			.domain(domains.fraction)
 			.range([1, 20]);
 
-		let graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
+		graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
 		.append('g')
@@ -284,23 +292,8 @@ const topNamesScatterplot = () => {
 
 			if (frameCount === 2) {
 
-				let namePlots = graphContainer.append('g').selectAll('.name')
-					.data(data);
-
-				let namePlotsEnter = namePlots.enter().append('g')
-					.attr('class', d => 'name ' + d.value.sex);
-
-				namePlotsEnter.append('circle')
-					.attr('cx', d => xScale(d.value.maxYear))
-					.attr('cy', d => yScale(d.value.medianRank))
-					.attr('r', d => rScale(d.value.maxFraction));
-
-				namePlotsEnter.append('text')
-					.attr('x', d => xScale(d.value.maxYear))
-					.attr('y', d => yScale(d.value.medianRank) + 5)
-					.text(d => d.value.name);
-					
-				initInteraction(xScale, yScale, rScale);
+				renderNames();
+				initGraphInteraction(xScale, yScale, rScale);
 
 			} else {
 				window.requestAnimationFrame(onRAF);
@@ -310,7 +303,49 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const initInteraction = (xScale, yScale, rScale) => {
+	const renderNames = () => {
+
+		highlightName(null);
+
+		// filter down to only the names that have appeared
+		// in the top { rankCutoff } a number of times specified by brush extent
+		let occurrenceExtent = brush.extent(),
+			filteredNames = stats.filter(d => 
+				d.value.numTopOccurrences >= occurrenceExtent[0] &&
+				d.value.numTopOccurrences <= occurrenceExtent[1]
+			);
+
+		console.log(occurrenceExtent);
+		console.log(filteredNames.map(n => n.key));
+
+		let namePlots = graphContainer.selectAll('.name')
+			.data(filteredNames, d => d.key);
+
+		// update
+		// namePlots.transition()
+		// 	.attr();
+
+		// enter
+		let namePlotsEnter = namePlots.enter().append('g')
+			.attr('class', d => 'name ' + d.value.sex);
+		namePlotsEnter.append('circle')
+			.attr('cx', d => xScale(d.value.maxYear))
+			.attr('cy', d => yScale(d.value.medianRank))
+		.transition()
+			.duration(500)
+			.ease(t => d3.easeBackOut(t, 3.0))	// custom overshoot isn't working...why?
+			.attr('r', d => rScale(d.value.maxFraction));
+		namePlotsEnter.append('text')
+			.attr('x', d => xScale(d.value.maxYear))
+			.attr('y', d => yScale(d.value.medianRank) + 5)
+			.text(d => d.value.name);
+
+		// exit
+		namePlots.exit().remove();
+
+	};
+
+	const initGraphInteraction = (xScale, yScale, rScale) => {
 
 		let graphEl = document.querySelector('.top-names-scatterplot .graph');
 
