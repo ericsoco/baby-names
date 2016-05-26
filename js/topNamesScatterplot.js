@@ -325,7 +325,7 @@ const topNamesScatterplot = () => {
 			exitDuration = 750,
 			exitEase = d3.easeQuad;
 
-		let namePlots = graphContainer.selectAll('.name')
+		let namePlots = graphContainer.selectAll('.name:not(.timespan)')
 			.data(filteredNames, d => d.key);
 
 		// update
@@ -394,12 +394,28 @@ const topNamesScatterplot = () => {
 
 	const highlightName = (name, xScale, yScale, rScale) => {
 
+		// TODO: DRY this out -- copied from renderNames()
+		const enterDuration = 300,
+			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?
+			exitDuration = 750,
+			exitEase = d3.easeQuad;
+
 		let names = graphContainer.selectAll('.name:not(.timespan)');
 
 		if (!name) {
 
 			names.classed('highlighted', false);
-			d3.selectAll('.timespan').remove();
+			d3.selectAll('.timespan circle').transition()
+				.duration(exitDuration)
+				.ease(exitEase)
+				.attr('r', 0.01);
+			d3.selectAll('.timespan line').transition()
+				.duration(exitDuration)
+				.ease(exitEase)
+				.attr('opacity', 0.0);
+			d3.selectAll('.timespan').transition()
+				.delay(exitDuration)
+				.remove();
 
 		} else {
 
@@ -415,6 +431,7 @@ const topNamesScatterplot = () => {
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 
 			timespan.append('line')
+				.attr('opacity', 1.0)
 				.attr('x1', xScale(nameDatum.value.firstYear))
 				.attr('y1', yScale(nameDatum.value.medianRank))
 				.attr('x2', xScale(nameDatum.value.lastYear))
@@ -434,15 +451,19 @@ const topNamesScatterplot = () => {
 				.attr('y2', d => yScale(d.value.medianRank) + 5);
 			*/
 
-			// console.log("occurrences:", nameDatum.value.occurrences.length, "top occurrences:", nameDatum.value.numTopOccurrences);
-			let circles = timespan.selectAll('circle')
+			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.values[0].fraction === nameDatum.value.maxFraction),
+				circles = timespan.selectAll('circle')
 				.data(nameDatum.value.occurrences)
 			.enter().append('circle')
-				// .each(d => { console.log(d); })
 				.attr('class', 'occurrence')
 				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', d => yScale(nameDatum.value.medianRank))
+				.attr('r', 0.01)
+			.transition()
+				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
+				.duration(enterDuration)
+				.ease(enterEase)
 				.attr('r', d => rScale(d.values[0].fraction));
 
 		}
