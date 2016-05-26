@@ -173,15 +173,6 @@ const topNamesScatterplot = () => {
 				.tickFormat(d3.format('d'))
 			);
 
-		/*
-		let sliderAxis = d3.axisLeft()
-			.scale(sliderScale)
-			.tickFormat(d3.format('d'))
-		sliderSvg.append('g')
-			.classed('y axis', true)
-			.call(sliderAxis);
-		*/
-
 		let topOccurrencesMin = 90,
 			topOccurrencesSpread = 10,
 			stepSize = 5;
@@ -227,7 +218,7 @@ const topNamesScatterplot = () => {
 			top: 20,
 			right: 40,
 			bottom: 60,
-			left: 60
+			left: 65
 		};
 		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
@@ -245,7 +236,7 @@ const topNamesScatterplot = () => {
 		rScale = d3.scalePow()
 			.exponent(0.5)
 			.domain(domains.fraction)
-			.range([1, 20]);
+			.range([5, 80]);
 
 		graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
 			.attr('width', width + margin.left + margin.right)
@@ -403,7 +394,7 @@ const topNamesScatterplot = () => {
 
 	const highlightName = (name, xScale, yScale, rScale) => {
 
-		let names = d3.select('.top-names-scatterplot .graph svg').selectAll('.name');
+		let names = graphContainer.selectAll('.name:not(.timespan)');
 
 		if (!name) {
 
@@ -412,7 +403,7 @@ const topNamesScatterplot = () => {
 
 		} else {
 
-			let nameElement = names.filter(d => d.value.name === name),
+			let nameElement = names.filter(d => d.key === name),
 				nameDatum = nameElement.datum();
 
 			// TODO: use update pattern to remove all this stuff on
@@ -420,14 +411,14 @@ const topNamesScatterplot = () => {
 			// TODO: transition by spreading out and pulling back in timespan lines/circles
 
 			nameElement.classed('highlighted', true);
-			let timespan = nameElement.append('g', ':first-child')
-				.attr('class', 'timespan');
+			let timespan = graphContainer.append('g', ':first-child')
+				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 
 			timespan.append('line')
-				.attr('x1', d => xScale(d.value.firstYear))
-				.attr('y1', d => yScale(d.value.medianRank))
-				.attr('x2', d => xScale(d.value.lastYear))
-				.attr('y2', d => yScale(d.value.medianRank));
+				.attr('x1', xScale(nameDatum.value.firstYear))
+				.attr('y1', yScale(nameDatum.value.medianRank))
+				.attr('x2', xScale(nameDatum.value.lastYear))
+				.attr('y2', yScale(nameDatum.value.medianRank));
 
 			/*
 			// end ticks

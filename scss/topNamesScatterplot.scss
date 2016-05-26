@@ -97,20 +97,18 @@ $text-color-male: #09bf00;
 		}
 
 		.name {
-			// transform-origin: 50% 50% 0;
 			z-index: 1;
 			&.highlighted {
 				z-index: 2;
+			}
 
-				circle {
-					fill-opacity: 0.25;
+			&.timespan circle {
+				fill-opacity: 0.0;
+				stroke-opacity: 0.25;
+
+				&.top-rank {
 					stroke-opacity: 0.5;
-
-					&.top-rank {
-						stroke-width: 2px;
-						fill-opacity: 0.5;
-						stroke-opacity: 1.0;
-					}
+					fill-opacity: 0.05;
 				}
 			}
 
@@ -118,10 +116,12 @@ $text-color-male: #09bf00;
 				stroke: $stroke-color-female;
 				fill: $text-color-female;
 
-				&.highlighted {
-					circle {
-						fill: $stroke-color-female;
-					}
+				&.highlighted circle {
+					stroke-width: 4px;
+				}
+				&.highlighted circle,
+				&.timespan circle {
+					fill: $stroke-color-female;
 				}
 			}
 
@@ -129,10 +129,12 @@ $text-color-male: #09bf00;
 				stroke: $stroke-color-male;
 				fill: $text-color-male;
 
-				&.highlighted {
-					circle {
-						fill: $stroke-color-male;
-					}
+				&.highlighted circle {
+					stroke-width: 4px;
+				}
+				&.highlighted circle,
+				&.timespan circle {
+					fill: $stroke-color-male;
 				}
 			}
 
@@ -154,14 +156,12 @@ $text-color-male: #09bf00;
 			}
 
 			circle {
-				fill: #000000;
-				fill-opacity: 0.0;
+				fill-opacity: 0.1;
 				stroke-width: 1px;
 
 				pointer-events: auto;
 				cursor: pointer;
 			}
-
 		}
 
 		.selection-label {
