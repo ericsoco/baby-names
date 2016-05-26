@@ -109,7 +109,7 @@ const topNamesScatterplot = () => {
 			// occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
 			// rank: [0, d3.max(stats, d => d.value.medianRank)],
 		};
-		domains.topOccurrence = [1, domains.year[1] - domains.year[0]];
+		domains.topOccurrence = [1, Math.floor((domains.year[1] - domains.year[0]) / 10) * 10];
 
 		/*
 		// now that we have domains.year, calculate age of each name
@@ -164,12 +164,23 @@ const topNamesScatterplot = () => {
 			.attr('width', sliderWidth)
 			.attr('height', height);
 
+		let sliderGrid = sliderSvg.append('g')
+			.attr('class', 'slider-background-grid')
+			.call(d3.axisLeft()
+				.scale(sliderScale)
+				.tickSize(-sliderWidth)
+				.tickValues([1, 20, 40, 60, 80, 100, 115, 130])
+				.tickFormat(d3.format('d'))
+			);
+
+		/*
 		let sliderAxis = d3.axisLeft()
 			.scale(sliderScale)
 			.tickFormat(d3.format('d'))
 		sliderSvg.append('g')
 			.classed('y axis', true)
 			.call(sliderAxis);
+		*/
 
 		let topOccurrencesMin = 90,
 			topOccurrencesSpread = 10,
@@ -315,8 +326,8 @@ const topNamesScatterplot = () => {
 				d.value.numTopOccurrences <= occurrenceExtent[1]
 			);
 
-		console.log(occurrenceExtent);
-		console.log(filteredNames.map(n => n.key));
+		// console.log(occurrenceExtent);
+		// console.log(filteredNames.map(n => n.key));
 
 		const enterDuration = 300,
 			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?

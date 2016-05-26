@@ -23,13 +23,11 @@ $text-color-male: #09bf00;
 	.copy {
 		width: 100%;
 		flex-grow: 1;
-		background-color: #ccffcc;
 	}
 
 	.slider {
 		width: 100%;
 		flex: 0 0 20rem;
-		background-color: #ffccff;
 		padding-left: 50%;
 		box-sizing: border-box;
 
@@ -54,12 +52,26 @@ $text-color-male: #09bf00;
 
 		.extent {
 			stroke: $axis-color;
-			fill: rgba($background-color, 0.25);
+			stroke-width: 1px;
+			fill: rgba($background-color, 0.5);
 		}
 	}
 
 	.slider-background {
-		fill: rgba($axis-color, 0.5);
+		fill: rgba($axis-color, 0.25);
+	}
+
+	.slider-background-grid {
+		text {
+			fill: $label-color;
+		}
+
+		line,
+		path {
+			fill: none;
+			stroke: $background-color;
+			shape-rendering: crispEdges;
+		}
 	}
 
 	.graph {
