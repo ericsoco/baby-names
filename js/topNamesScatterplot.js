@@ -59,7 +59,7 @@ const topNamesScatterplot = () => {
 		rScale,
 		brush;
 
-	let rankCutoff = 500,
+	let rankCutoff = 100,
 		domains,
 		stats;
 	
@@ -137,13 +137,51 @@ const topNamesScatterplot = () => {
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
 			copy = sidebar.append('div').attr('class', 'copy'),
+			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
 			sliderContainer = sidebar.append('div').attr('class', 'slider');
 
+
+		// 
+		// copy
+		// 
+		copy.text('Baby names!');
+
+
+		//
+		// sex toggles
+		//
+		toggleContainer.append('label')
+			.html('<input type="checkbox" class="m" data-sex="m" checked> Male');
+		toggleContainer.append('label')
+			.html('<input type="checkbox" class="f" data-sex="f" checked> Female');
+
+		toggleContainer.selectAll('input')
+			.on('change', function (event) {
+
+				// disable a checkbox if it's the only one checked
+				// (don't allow unchecking all boxes)
+				let checkedToggles = d3.selectAll('.top-names-scatterplot .toggles input:checked');
+				if (checkedToggles.size() === 1) {
+					// checkedToggles.classed('disabled', true);
+					checkedToggles.attr('disabled', true)
+				} else {
+					d3.selectAll('.top-names-scatterplot .toggles input')
+						.attr('disabled', null)
+						// .classed('disabled', false);
+				}
+
+				renderNames();
+			});
+
+
+		//
+		// popularity slider
+		//
 		let sliderWidth = 40,
 			sliderMargin = {
 				top: 20,
 				right: 40,
-				bottom: 20,
+				bottom: 60,
 				left: 40
 			},
 			width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
@@ -208,6 +246,10 @@ const topNamesScatterplot = () => {
 		.selectAll('rect')
 			.attr('width', sliderWidth);
 
+		sliderContainer.append('div')
+			.attr('class', 'label')
+			.text(`Number of occurrences in the annual top ${ rankCutoff } names`);
+
 	};
 
 	const initGraph = () => {
@@ -217,8 +259,8 @@ const topNamesScatterplot = () => {
 		margin = {
 			top: 20,
 			right: 40,
-			bottom: 60,
-			left: 65
+			bottom: 80,
+			left: 85
 		};
 		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
@@ -230,7 +272,7 @@ const topNamesScatterplot = () => {
 
 		yScale = d3.scaleLinear()
 			// .domain(domains.rank)
-			.domain([0, 1000])
+			.domain([0, 800])
 			.range([0, height]);
 
 		rScale = d3.scalePow()
@@ -249,7 +291,7 @@ const topNamesScatterplot = () => {
 			.tickFormat(d3.format('d'))
 		let xAxisEl = graphContainer.append('g')
 			.classed('x axis', true)
-			.attr('transform', `translate(0,${ height + 20 })`)
+			.attr('transform', `translate(0,${ height + 40 })`)
 			.call(xAxis)
 		xAxisEl.append('text')
 			.classed('label', true)
@@ -274,7 +316,7 @@ const topNamesScatterplot = () => {
 			.tickFormat(d3.format('d'))
 		graphContainer.append('g')
 			.classed('y axis', true)
-			.attr('transform', `translate(-20,0)`)
+			.attr('transform', `translate(-40,0)`)
 			.call(yAxis)
 		.append('text')
 			.classed('label', true)
@@ -316,9 +358,16 @@ const topNamesScatterplot = () => {
 				d.value.numTopOccurrences >= occurrenceExtent[0] &&
 				d.value.numTopOccurrences <= occurrenceExtent[1]
 			);
-
 		// console.log(occurrenceExtent);
 		// console.log(filteredNames.map(n => n.key));
+
+		// filter to only selected sexes
+		let sexToggles = d3.selectAll('.top-names-scatterplot .toggles input').nodes()
+			.reduce((acc, el) => {
+				acc[el.dataset.sex] = el.checked;
+				return acc;
+			}, {});
+		filteredNames = filteredNames.filter(d => sexToggles[d.value.sex]);
 
 		const enterDuration = 300,
 			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?
@@ -450,7 +499,7 @@ const topNamesScatterplot = () => {
 				.classed('highlighted', true)
 				.raise();
 
-			let timespan = graphContainer.append('g')//, ':first-child')
+			let timespan = graphContainer.append('g')
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 
 			timespan.append('line')
