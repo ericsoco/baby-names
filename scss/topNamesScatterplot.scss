@@ -1,10 +1,10 @@
 $background-color: #ffffff;
 $axis-color: #707070;
 $label-color: #707070;
-$stroke-color-female: #f2f035;
-$text-color-female: #e0ca00;
-$stroke-color-male: #90f200;
-$text-color-male: #09bf00;
+$stroke-color-female: #F2B5DA;
+$text-color-female: #E057C1;
+$stroke-color-male: #90F2DF;
+$text-color-male: #1AB3BF;
 
 .top-names-scatterplot {
 
@@ -97,9 +97,14 @@ $text-color-male: #09bf00;
 		}
 
 		.name {
-			z-index: 1;
-			&.highlighted {
-				z-index: 2;
+			&.hover {
+				circle {
+					stroke-width: 2px;
+					fill-opacity: 0.35;
+				}
+				text {
+					font-weight: bold;
+				}
 			}
 
 			&.timespan circle {
@@ -118,6 +123,7 @@ $text-color-male: #09bf00;
 
 				&.highlighted circle {
 					stroke-width: 4px;
+					fill-opacity: 0.25;
 				}
 				&.highlighted circle,
 				&.timespan circle {

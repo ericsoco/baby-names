@@ -59,7 +59,7 @@ const topNamesScatterplot = () => {
 		rScale,
 		brush;
 
-	let rankCutoff = 100,
+	let rankCutoff = 500,
 		domains,
 		stats;
 	
@@ -390,6 +390,30 @@ const topNamesScatterplot = () => {
 
 		});
 
+		graphEl.addEventListener('mouseover', event => {
+
+			let datum = d3.select(event.target).datum();
+			if (datum && datum.key) {
+				hoverName(datum.key);
+			} else {
+				hoverName(null);
+			}
+
+		});
+
+	};
+
+	const hoverName = name => {
+
+		let names = graphContainer.selectAll('.name:not(.timespan)')
+			.classed('hover', false);
+
+		if (name) {
+			names.filter(d => d.key === name)
+				.classed('hover', true)
+				.raise();
+		}
+
 	};
 
 	const highlightName = (name, xScale, yScale, rScale) => {
@@ -422,12 +446,11 @@ const topNamesScatterplot = () => {
 			let nameElement = names.filter(d => d.key === name),
 				nameDatum = nameElement.datum();
 
-			// TODO: use update pattern to remove all this stuff on
-			//		non-highlighted elements
-			// TODO: transition by spreading out and pulling back in timespan lines/circles
+			nameElement
+				.classed('highlighted', true)
+				.raise();
 
-			nameElement.classed('highlighted', true);
-			let timespan = graphContainer.append('g', ':first-child')
+			let timespan = graphContainer.append('g')//, ':first-child')
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 
 			timespan.append('line')
@@ -436,20 +459,6 @@ const topNamesScatterplot = () => {
 				.attr('y1', yScale(nameDatum.value.medianRank))
 				.attr('x2', xScale(nameDatum.value.lastYear))
 				.attr('y2', yScale(nameDatum.value.medianRank));
-
-			/*
-			// end ticks
-			timespan.append('line')
-				.attr('x1', d => xScale(d.value.firstYear))
-				.attr('y1', d => yScale(d.value.medianRank) - 5)
-				.attr('x2', d => xScale(d.value.firstYear))
-				.attr('y2', d => yScale(d.value.medianRank) + 5);
-			timespan.append('line')
-				.attr('x1', d => xScale(d.value.lastYear))
-				.attr('y1', d => yScale(d.value.medianRank) - 5)
-				.attr('x2', d => xScale(d.value.lastYear))
-				.attr('y2', d => yScale(d.value.medianRank) + 5);
-			*/
 
 			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.values[0].fraction === nameDatum.value.maxFraction),
 				circles = timespan.selectAll('circle')
