@@ -1,25 +1,34 @@
 /*
 TODO:
-( ) add UI to slide down scale of popularity.
-	this is filtering on topOccurrencesMin;
-	the more topOccurrences, the more popular.
-
-	other possible filters:
-	( ) topOccurrencesSpread
-	( ) rankCutoff
-	shouldn't make all values filterable; keep it simple. max 2.
-	maybe make a slider for all three and then figure out which combo
-	gives most interesting results?
-
-	a simple d3-brush could allow adjusting topOccurences + spread.
-
+( ) find name (typeahead?)
+( ) hover / tooltip on timespan circles
+( ) write copy
 ( ) refine radius scale (what's best metric here?)
 ( ) add legend (color, radius)
 	d3.legend?
 	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
 ( ) refine design/colors
-( ) add header to matrix
+
+( ) fix up other prototypes
+	( ) to work with new index.html
+	( ) apply styles via top-level class
+		in same way as .top-names-scatterplot
+	( ) add header to matrix
+
 ( ) post on transmote
+
+(X) add UI to slide down scale of popularity.
+	this is filtering on topOccurrencesMin;
+	the more topOccurrences, the more popular.
+
+	other possible filters:
+	(X) topOccurrencesSpread
+	(X) rankCutoff
+	shouldn't make all values filterable; keep it simple. max 2.
+	maybe make a slider for all three and then figure out which combo
+	gives most interesting results?
+
+	a simple d3-brush could allow adjusting topOccurences + spread.
 */
 
 
