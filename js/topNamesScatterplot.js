@@ -151,9 +151,11 @@ const topNamesScatterplot = () => {
 		// sex toggles
 		//
 		toggleContainer.append('label')
-			.html('<input type="checkbox" class="m" data-sex="m" checked> Male');
+			.attr('class', 'f')
+			.html('<input type="checkbox" data-sex="f" checked> Female');
 		toggleContainer.append('label')
-			.html('<input type="checkbox" class="f" data-sex="f" checked> Female');
+			.attr('class', 'm')
+			.html('<input type="checkbox" data-sex="m" checked> Male');
 
 		toggleContainer.selectAll('input')
 			.on('change', function (event) {
