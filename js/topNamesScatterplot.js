@@ -1,6 +1,9 @@
 /*
 TODO:
 ( ) find name (typeahead?)
+	(X) typeahead
+	(X) select name
+	( ) animate brush to new position
 ( ) hover / tooltip on timespan circles
 ( ) write copy
 ( ) refine radius scale (what's best metric here?)
@@ -190,12 +193,25 @@ const topNamesScatterplot = () => {
 		);
 
 		window.addEventListener('awesomplete-selectcomplete', event => {
+
 			let name = topNames.find(d => d.key === event.target.value),
 				brushExtent = [
 					Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
 					Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
 				];
-			console.log('TODO: set brush extent to:', brushExtent);
+
+			if (brush) {
+
+				brush.extent(brushExtent);
+				brush(sidebar.select('.brush').transition());
+				brush.event(sidebar.select('.brush').transition().delay(1000));
+
+				setTimeout(() => {
+					highlightName(name.key);
+				}, 500);
+
+			}
+
 		});
 
 
@@ -216,12 +232,10 @@ const topNamesScatterplot = () => {
 				// (don't allow unchecking all boxes)
 				let checkedToggles = d3.selectAll('.top-names-scatterplot .toggles input:checked');
 				if (checkedToggles.size() === 1) {
-					// checkedToggles.classed('disabled', true);
 					checkedToggles.attr('disabled', true)
 				} else {
 					d3.selectAll('.top-names-scatterplot .toggles input')
 						.attr('disabled', null)
-						// .classed('disabled', false);
 				}
 
 				renderNames();
@@ -265,34 +279,20 @@ const topNamesScatterplot = () => {
 				.tickFormat(d3.format('d'))
 			);
 
-		// let stepSize = 5;
 		brush = d3.brush()
 			.y(sliderScale)
-			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread])
-			.on('brushend', () => {
+			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
 
-				if (!d3All.event.sourceEvent) { return; }
-
+		// apply handler after delay to avoid
+		// responding to initial brush setup
+		setTimeout(() => {
+			brush.on('brushend', () => {
 				renderNames();
-
-				/*
-				// snap brush extent
-				let currentExtent = brush.extent(),
-					targetExtent = currentExtent.map(v => Math.round(v / stepSize) * stepSize);
-
-				// if empty after rounding, use floor/ceil instead
-				if (targetExtent[0] >= targetExtent[1]) {
-					targetExtent[0] = Math.floor(currentExtent[0] / stepSize) * stepSize;
-					targetExtent[1] = Math.floor(currentExtent[1] / stepSize) * stepSize;
-				}
-
-				d3.select(this).transition()
-					.call(brush.extent(targetExtent))
-					.call(brush.event);
-				*/
 			});
+		}, 1);
 		
 		sliderSvg.append('g')
+			.attr('class', 'brush')
 			.call(brush)
 			.call(brush.event)
 		.selectAll('rect')
@@ -471,7 +471,7 @@ const topNamesScatterplot = () => {
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
 				// console.log(datum);
-				highlightName(datum.key, xScale, yScale, rScale);
+				highlightName(datum.key);
 			} else {
 				highlightName(null);
 			}
@@ -517,7 +517,7 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const highlightName = (name, xScale, yScale, rScale) => {
+	const highlightName = (name) => {
 
 		// TODO: DRY this out -- copied from renderNames()
 		const enterDuration = 300,
