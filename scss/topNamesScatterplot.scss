@@ -1,5 +1,5 @@
 $background-color: #ffffff;
-$axis-color: #707070;
+$sidebar-background-color: #f9f9f9;
 $label-color: #707070;
 $stroke-color-female: #F2B5DA;
 $text-color-female: #E057C1;
@@ -16,11 +16,13 @@ $text-color-male: #189EB2;
 		display: flex;
 		flex-direction: column;
 
-		flex: 0 0 15rem;
+		flex: 0 1 15rem;
 		max-width: 15rem;
 
 		padding: 20px 20px 72px 20px;
 		box-sizing: border-box;
+
+		background-color: $sidebar-background-color;
 	}
 
 	.copy {
@@ -28,10 +30,72 @@ $text-color-male: #189EB2;
 		flex-grow: 1;
 	}
 
+	.name-lookup {
+		$input-padding: 1.5rem;
+
+		width: 100%;
+		flex: 0 0 4rem;
+
+		div.awesomplete {
+			position: relative;
+			width: calc(100% - 2*#{$input-padding});
+			left: $input-padding;
+		}
+
+		input.awesomplete {
+			width: 100%;
+			border: 1px solid rgba($label-color, 0.25);
+
+			font-size: 1.25rem;
+			color: $label-color;
+			text-transform: capitalize;
+
+			&:focus {
+				border: 2px solid rgba($label-color, 0.5);
+				outline: none;
+			}
+		}
+
+		ul {
+			border-radius: 0;
+		}
+		li {
+			color: $label-color;
+		}
+
+		mark {
+			.f & {
+				color: $text-color-female;
+				background-color: rgba($stroke-color-female, 0.2);
+			}
+			.m & {
+				color: $text-color-male;
+				background-color: rgba($stroke-color-male, 0.2);
+			}
+		}
+		li:hover,
+		li[aria-selected="true"] {
+			&.f {
+				color: $text-color-female;
+				background-color: rgba($text-color-female, 0.2);
+				mark {
+					background-color: rgba($stroke-color-female, 0.6);
+				}
+			}
+			&.m {
+				color: $text-color-male;
+				background-color: rgba($text-color-male, 0.2);
+				mark {
+					background-color: rgba($stroke-color-male, 0.6);
+				}
+			}
+		}
+	}
+
 	.toggles {
 		width: 100%;
-		flex: 0 0 3rem;
-		padding: 0 1.5rem;
+		flex: 0 0 4rem;
+		padding-left: 1.5rem;
 
 		label {
 			display: inline-block;
@@ -68,17 +132,17 @@ $text-color-male: #189EB2;
 			}
 			line {
 				fill: none;
-				stroke: $axis-color;
+				stroke: $label-color;
 				stroke-width: 1px;
 				shape-rendering: crispEdges;
 			}
 			text {
-				fill: $axis-color;
+				fill: $label-color;
 			}
 		}
 
 		.extent {
-			stroke: $axis-color;
+			stroke: $label-color;
 			stroke-width: 1px;
 			fill: rgba($background-color, 0.5);
 		}
@@ -89,11 +153,12 @@ $text-color-male: #189EB2;
 			width: 100%;
 			height: 3em;
 			margin-left: -50%;
+			text-align: center;
 		}
 	}
 
 	.slider-background {
-		fill: rgba($axis-color, 0.25);
+		fill: rgba($label-color, 0.25);
 	}
 
 	.slider-background-grid {
@@ -104,7 +169,7 @@ $text-color-male: #189EB2;
 		line,
 		path {
 			fill: none;
-			stroke: $background-color;
+			stroke: $sidebar-background-color;
 			shape-rendering: crispEdges;
 		}
 	}
@@ -122,13 +187,13 @@ $text-color-male: #189EB2;
 		.axis path,
 		.axis line {
 			fill: none;
-			stroke: $axis-color;
+			stroke: $label-color;
 			stroke-width: 1px;
 			shape-rendering: crispEdges;
 		}
 
 		.axis text {
-			fill: $axis-color;
+			fill: $label-color;
 		}
 
 		.name {

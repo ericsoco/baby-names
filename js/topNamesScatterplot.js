@@ -57,6 +57,8 @@ const d3 = {
 	...d3_transition
 };
 
+import awesomplete from 'awesomplete';
+
 const topNamesScatterplot = () => {
 
 	let margin,
@@ -70,7 +72,8 @@ const topNamesScatterplot = () => {
 
 	let rankCutoff = 100,
 		domains,
-		stats;
+		allNames,
+		topNames;
 	
 	const init = () => {
 
@@ -81,7 +84,7 @@ const topNamesScatterplot = () => {
 
 	const onDataLoaded = (error, data) => {
 
-		stats = d3.nest()
+		allNames = d3.nest()
 			.key(d => d.name)
 				.sortKeys(d3.ascending)
 			.rollup(values => {
@@ -106,26 +109,24 @@ const topNamesScatterplot = () => {
 			})
 			.entries(data);
 
-		/*
 		// filter down to only the names that have appeared
-		// in the top { rankCutoff } at least { topOccurrencesMin } times
-		stats = stats.filter(d => d.value.numTopOccurrences >= topOccurrencesMin && d.value.numTopOccurrences <= topOccurrencesMin + topOccurrencesSpread);
-		*/
+		// in the top { rankCutoff } at least once
+		topNames = allNames.filter(d => d.value.numTopOccurrences);
 
 		domains = {
 			year: d3.extent(data, d => +d.year),
 			fraction: [0, d3.max(data, d => +d.fraction)]
-			// occurrence: [0, d3.max(stats, d => d.value.occurrences.length)],
-			// rank: [0, d3.max(stats, d => d.value.medianRank)],
+			// occurrence: [0, d3.max(allNames, d => d.value.occurrences.length)],
+			// rank: [0, d3.max(allNames, d => d.value.medianRank)],
 		};
 		domains.topOccurrence = [1, Math.floor((domains.year[1] - domains.year[0]) / 10) * 10];
 
 		/*
 		// now that we have domains.year, calculate age of each name
-		stats.forEach(d => {
+		allNames.forEach(d => {
 			d.value.age = domains.year[1] - d.value.firstYear
 		});
-		domains.age = d3.extent(stats, d => d.value.age);
+		domains.age = d3.extent(allNames, d => d.value.age);
 		*/
 
 		render();
@@ -143,9 +144,13 @@ const topNamesScatterplot = () => {
 
 	const initSidebar = () => {
 
+		const topOccurrencesMin = 90,
+			topOccurrencesSpread = 10;
+
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
 			copy = sidebar.append('div').attr('class', 'copy'),
+			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
 			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
 			sliderContainer = sidebar.append('div').attr('class', 'slider');
 
@@ -154,6 +159,44 @@ const topNamesScatterplot = () => {
 		// copy
 		// 
 		copy.text('Baby names!');
+
+
+		//
+		// name lookup
+		//
+		let nameLookupInput = nameLookupContainer.append('input')
+			.attr('class', 'awesomplete')
+			.node();
+		
+		let names = topNames.map(name => name.key),
+			valuesByName = topNames.reduce((acc, name) => {
+				acc[name.key] = {
+					numTopOccurrences: name.value.numTopOccurrences,
+					sex: name.value.sex,
+				};
+				return acc;
+			}, {}),
+			nameLookup = new Awesomplete(nameLookupInput,
+			{
+				list: names,
+				autoFirst: true,
+				sort: (a, b) => valuesByName[b.value].numTopOccurrences - valuesByName[a.value].numTopOccurrences,
+				item: (itemText, inputText) => {
+					let li = Awesomplete.ITEM(itemText, inputText);
+					li.classList.add(valuesByName[itemText].sex);
+					return li;
+				}
+			}
+		);
+
+		window.addEventListener('awesomplete-selectcomplete', event => {
+			let name = topNames.find(d => d.key === event.target.value),
+				brushExtent = [
+					Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
+					Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
+				];
+			console.log('TODO: set brush extent to:', brushExtent);
+		});
 
 
 		//
@@ -222,9 +265,7 @@ const topNamesScatterplot = () => {
 				.tickFormat(d3.format('d'))
 			);
 
-		let topOccurrencesMin = 90,
-			topOccurrencesSpread = 10,
-			stepSize = 5;
+		// let stepSize = 5;
 		brush = d3.brush()
 			.y(sliderScale)
 			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread])
@@ -259,7 +300,7 @@ const topNamesScatterplot = () => {
 
 		sliderContainer.append('div')
 			.attr('class', 'label')
-			.text(`Number of occurrences in the annual top ${ rankCutoff } names`);
+			.text(`Occurrences in the top ${ rankCutoff } names of each year`);
 
 	};
 
@@ -271,7 +312,7 @@ const topNamesScatterplot = () => {
 			top: 20,
 			right: 40,
 			bottom: 80,
-			left: 85
+			left: 95
 		};
 		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
@@ -365,7 +406,7 @@ const topNamesScatterplot = () => {
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
 		let occurrenceExtent = brush.extent(),
-			filteredNames = stats.filter(d => 
+			filteredNames = topNames.filter(d => 
 				d.value.numTopOccurrences >= occurrenceExtent[0] &&
 				d.value.numTopOccurrences <= occurrenceExtent[1]
 			);
