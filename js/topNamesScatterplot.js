@@ -182,7 +182,7 @@ const topNamesScatterplot = () => {
 			nameLookup = new Awesomplete(nameLookupInput,
 			{
 				list: names,
-				autoFirst: true,
+				// autoFirst: true,
 				sort: (a, b) => valuesByName[b.value].numTopOccurrences - valuesByName[a.value].numTopOccurrences,
 				item: (itemText, inputText) => {
 					let li = Awesomplete.ITEM(itemText, inputText);
@@ -202,10 +202,18 @@ const topNamesScatterplot = () => {
 
 			if (brush) {
 
+				// ensure sex toggle is on for selected name
+				let sexToggle = toggleContainer.select(`.${name.value.sex} input`).node();
+				sexToggle.checked = true;
+				sexToggle.dispatchEvent(new Event('change'));
+				
+				// move brush to area where name exists
+				// TODO: how to animate brush movement?
 				brush.extent(brushExtent);
 				brush(sidebar.select('.brush').transition());
 				brush.event(sidebar.select('.brush').transition().delay(1000));
 
+				// highlight name after a delay
 				setTimeout(() => {
 					highlightName(name.key);
 				}, 500);
