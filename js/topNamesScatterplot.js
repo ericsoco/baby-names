@@ -3,6 +3,7 @@ TODO:
 ( ) find name (typeahead?)
 	(X) typeahead
 	(X) select name
+	(X) hit enter to enter typed-in selection
 	( ) animate brush to new position
 ( ) hover / tooltip on timespan circles
 ( ) write copy
@@ -192,13 +193,21 @@ const topNamesScatterplot = () => {
 			}
 		);
 
-		window.addEventListener('awesomplete-selectcomplete', event => {
+		const onNameLookupSelected = event => {
 
-			let name = topNames.find(d => d.key === event.target.value),
-				brushExtent = [
-					Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
-					Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
-				];
+			let name = topNames.find(d => d.key.toLowerCase() === event.target.value.toLowerCase());
+			if (!name) {
+				nameLookupInput.classList.add('not-found');
+				setTimeout(() => {
+					nameLookupInput.classList.remove('not-found');
+				}, 1);
+				return;
+			}
+
+			let brushExtent = [
+				Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
+				Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
+			];
 
 			if (brush) {
 
@@ -208,10 +217,12 @@ const topNamesScatterplot = () => {
 				sexToggle.dispatchEvent(new Event('change'));
 				
 				// move brush to area where name exists
-				// TODO: how to animate brush movement?
-				brush.extent(brushExtent);
-				brush(sidebar.select('.brush').transition());
-				brush.event(sidebar.select('.brush').transition().delay(1000));
+				// TODO: why are brush transitions not working?
+				sidebar.select('.brush').transition()
+					.duration(1000)
+					.call(brush.extent(brushExtent))
+					.call(brush)
+					.call(brush.event);
 
 				// highlight name after a delay
 				setTimeout(() => {
@@ -220,6 +231,19 @@ const topNamesScatterplot = () => {
 
 			}
 
+		};
+
+		window.addEventListener('awesomplete-selectcomplete', onNameLookupSelected);
+
+		// handle enter keypress
+		nameLookupInput.addEventListener('keypress', event => {
+			if (event.keyCode === 13) {
+				onNameLookupSelected({
+					target: {
+						value: nameLookupInput.value
+					}
+				});
+			}
 		});
 
 
