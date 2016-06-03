@@ -54,6 +54,20 @@ $text-color-male: #189EB2;
 				border: 2px solid rgba($label-color, 0.5);
 				outline: none;
 			}
+
+			$placeholder-font-size: 1.0rem;
+			&::-webkit-input-placeholder {
+				font-size: $placeholder-font-size;
+			}
+			&::-moz-placeholder {
+				font-size: $placeholder-font-size;
+			}
+			&:-ms-input-placeholder {
+				font-size: $placeholder-font-size;
+			}
+			&::placeholder {
+				font-size: $placeholder-font-size;
+			}
 		}
 
 		ul {

@@ -19,6 +19,10 @@ TODO:
 		in same way as .top-names-scatterplot
 	( ) add header to matrix
 
+( ) link to GH repo
+( ) link to scraper
+( ) shrink down bundle.js (2.3MB!!)
+
 ( ) post on transmote
 
 (X) add UI to slide down scale of popularity.
@@ -162,7 +166,9 @@ const topNamesScatterplot = () => {
 		// 
 		// copy
 		// 
-		copy.text('Baby names!');
+		let desc = document.querySelector('#app-description');
+		copy.html(desc.innerHTML);
+		document.querySelector('body').removeChild(desc);
 
 
 		//
@@ -170,6 +176,7 @@ const topNamesScatterplot = () => {
 		//
 		let nameLookupInput = nameLookupContainer.append('input')
 			.attr('class', 'awesomplete')
+			.attr('placeholder', 'Enter a name')
 			.node();
 		
 		let names = topNames.map(name => name.key),

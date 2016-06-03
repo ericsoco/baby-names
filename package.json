@@ -42,6 +42,7 @@
     "d3-request": "^0.4.6",
     "d3-scale": "^0.7.0",
     "d3-selection": "^0.7.2",
+    "d3-svg-legend": "^1.10.0",
     "d3-transition": "^0.2.10"
   },
   "browserify": {
