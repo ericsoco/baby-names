@@ -46,6 +46,7 @@ import d3_axis from 'd3-axis';
 import d3All from 'd3'
 import d3_collection from 'd3-collection';
 import d3_ease from 'd3-ease';
+import d3_force from 'd3-force';
 import d3_format from 'd3-format';
 import d3_request from 'd3-request';
 import d3_scale from 'd3-scale';
@@ -58,6 +59,7 @@ const d3 = {
 	brush: d3All.svg.brush,
 	...d3_collection,
 	...d3_ease,
+	...d3_force,
 	...d3_format,
 	...d3_request,
 	...d3_scale,
@@ -465,6 +467,13 @@ const topNamesScatterplot = () => {
 			exitDuration = 750,
 			exitEase = d3.easeQuad;
 
+		let simulation = d3.forceSimulation(filteredNames)
+			.force('x', d3.forceX(d => xScale(d.value.maxYear)).strength(1))
+			.force('y', d3.forceY(d => yScale(d.value.medianRank)).strength(1))
+			.force('collide', d3.forceCollide(d => rScale(d.value.maxFraction) * 0.75))
+			.stop();
+		for (let i = 0; i < 120; ++i) simulation.tick();
+
 		let namePlots = graphContainer.selectAll('.name:not(.timespan)')
 			.data(filteredNames, d => d.key);
 
@@ -475,12 +484,12 @@ const topNamesScatterplot = () => {
 		// enter
 		let namePlotsEnter = namePlots.enter().append('g')
 			.attr('class', d => 'name ' + d.value.sex)
-			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(0.01)rotate(0)`)
+			.attr('transform', d => `translate(${ d.x },${ d.y })scale(0.01)rotate(0)`)
 			.attr('opacity', 0.0);
 		namePlotsEnter.transition()
 			.duration(enterDuration)
 			.ease(enterEase)
-			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(1.0)rotate(0)`)
+			.attr('transform', d => `translate(${ d.x },${ d.y })scale(1.0)rotate(0)`)
 			.attr('opacity', 1.0);
 		namePlotsEnter.append('circle')
 			.attr('cx', 0)
@@ -495,7 +504,7 @@ const topNamesScatterplot = () => {
 		namePlots.exit().transition()
 			.duration(exitDuration)
 			.ease(exitEase)
-			.attr('transform', d => `translate(${ xScale(d.value.maxYear) },${ yScale(d.value.medianRank) })scale(0.01)rotate(0)`)
+			.attr('transform', d => `translate(${ d.x },${ d.y })scale(0.01)rotate(0)`)
 			.attr('opacity', 0.0)
 			.remove();
 
