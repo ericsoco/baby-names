@@ -222,24 +222,25 @@ $text-color-male: #189EB2;
 			}
 
 			&.timespan circle {
-				fill-opacity: 0.0;
-				stroke-opacity: 0.25;
+				fill-opacity: 0.2;
+				stroke-opacity: 0.0;
 
 				&.top-rank {
-					stroke-opacity: 0.5;
-					fill-opacity: 0.05;
+					stroke-opacity: 0.0;
+					fill-opacity: 0.5;
 				}
+			}
+			
+			&.highlighted circle {
+				stroke-width: 3px;
+				fill: $background-color;
+				fill-opacity: 0.75;
 			}
 
 			&.f {
 				stroke: $stroke-color-female;
 				fill: $text-color-female;
 
-				&.highlighted circle {
-					stroke-width: 4px;
-					fill-opacity: 0.25;
-				}
-				&.highlighted circle,
 				&.timespan circle {
 					fill: $stroke-color-female;
 				}
@@ -249,10 +250,6 @@ $text-color-male: #189EB2;
 				stroke: $stroke-color-male;
 				fill: $text-color-male;
 
-				&.highlighted circle {
-					stroke-width: 4px;
-				}
-				&.highlighted circle,
 				&.timespan circle {
 					fill: $stroke-color-male;
 				}

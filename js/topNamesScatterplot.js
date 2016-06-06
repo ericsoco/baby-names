@@ -7,11 +7,17 @@ TODO:
 	( ) animate brush to new position
 ( ) hover / tooltip on timespan circles
 ( ) write copy
-( ) refine radius scale (what's best metric here?)
+( ) change radius to represent total number of births
+	(need total number of babies per year)
 ( ) add legend (color, radius)
 	d3.legend?
 	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
 ( ) refine design/colors
+( ) be sure sidebar is responsive enough
+( ) refine styles
+	( ) gooey-ify spread names?
+		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
+	( ) blend modes?
 
 ( ) fix up other prototypes
 	( ) to work with new index.html
@@ -154,7 +160,7 @@ const topNamesScatterplot = () => {
 
 	const initSidebar = () => {
 
-		const topOccurrencesMin = 90,
+		const topOccurrencesMin = 55,
 			topOccurrencesSpread = 10;
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
@@ -418,7 +424,7 @@ const topNamesScatterplot = () => {
 			.attr('y', 6)
 			.attr('dy', '.71em')
 			.style('text-anchor', 'end')
-			.text('Average rank');
+			.text('Median rank');
 
 		// wait to build and render circles until after axes have rendered.
 		// wait two frames to ensure stack has cleared and DOM has updated+rendered.
@@ -599,7 +605,8 @@ const topNamesScatterplot = () => {
 				.classed('highlighted', true)
 				.raise();
 
-			let timespan = graphContainer.append('g')
+			// insert after any existing timespans, but before all other circles
+			let timespan = graphContainer.append('g', '.name:not(.timespan)')
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 
 			timespan.append('line')
@@ -617,6 +624,7 @@ const topNamesScatterplot = () => {
 				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', d => yScale(nameDatum.value.medianRank))
+				// .attr('cy', d => yScale(d.values[0].rank))
 				.attr('r', 0.01)
 			.transition()
 				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
