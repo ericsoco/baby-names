@@ -5,6 +5,9 @@ TODO:
 	(X) select name
 	(X) hit enter to enter typed-in selection
 	( ) animate brush to new position
+( ) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
+(X) BUG: vertical offset problem on .timespan -- not always correctly aligned with highlighted name
+	(due to force layout probably!)
 ( ) hover / tooltip on timespan circles
 ( ) write copy
 ( ) change radius to represent total number of births
@@ -15,7 +18,7 @@ TODO:
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) refine styles
-	( ) gooey-ify spread names?
+	(-) gooey-ify spread names?
 		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
 	( ) blend modes?
 
@@ -385,6 +388,23 @@ const topNamesScatterplot = () => {
 		.append('g')
 			.attr('transform', `translate(${ margin.left },${ margin.top })`);
 
+		// 'gooey' filter from http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
+		var defs = d3.select('.top-names-scatterplot .graph svg').append('defs');
+		var filter = defs.append('filter').attr('id','gooey');
+		filter.append('feGaussianBlur')
+			.attr('in','SourceGraphic')
+			.attr('stdDeviation','3')
+			.attr('result','blur');
+		filter.append('feColorMatrix')
+			.attr('in','blur')
+			.attr('mode','matrix')
+			.attr('values','1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7')
+			.attr('result','gooey');
+		filter.append('feComposite')
+			.attr('in','SourceGraphic')
+			.attr('in2','gooey')
+			.attr('operator','atop');
+
 		let xAxis = d3.axisBottom()
 			.scale(xScale)
 			.tickFormat(d3.format('d'))
@@ -599,7 +619,10 @@ const topNamesScatterplot = () => {
 		} else {
 
 			let nameElement = names.filter(d => d.key === name),
-				nameDatum = nameElement.datum();
+				nameDatum = nameElement.datum(),
+
+				// modified earlier by force layout, so use this value rather than deriving from data
+				nameElementY = parseFloat(nameElement.attr('transform').split(',')[1].split(')')[0]);
 
 			nameElement
 				.classed('highlighted', true)
@@ -608,13 +631,14 @@ const topNamesScatterplot = () => {
 			// insert after any existing timespans, but before all other circles
 			let timespan = graphContainer.append('g', '.name:not(.timespan)')
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
+				// .style('filter', 'url(#gooey)');
 
 			timespan.append('line')
 				.attr('opacity', 1.0)
 				.attr('x1', xScale(nameDatum.value.firstYear))
-				.attr('y1', yScale(nameDatum.value.medianRank))
+				.attr('y1', nameElementY)
 				.attr('x2', xScale(nameDatum.value.lastYear))
-				.attr('y2', yScale(nameDatum.value.medianRank));
+				.attr('y2', nameElementY);
 
 			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.values[0].fraction === nameDatum.value.maxFraction),
 				circles = timespan.selectAll('circle')
@@ -623,7 +647,8 @@ const topNamesScatterplot = () => {
 				.attr('class', 'occurrence')
 				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
-				.attr('cy', d => yScale(nameDatum.value.medianRank))
+				.attr('cy', nameElementY)
+				// .attr('cy', d => yScale(nameDatum.value.medianRank))
 				// .attr('cy', d => yScale(d.values[0].rank))
 				.attr('r', 0.01)
 			.transition()
