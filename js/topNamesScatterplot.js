@@ -5,7 +5,7 @@ TODO:
 	(X) select name
 	(X) hit enter to enter typed-in selection
 	( ) animate brush to new position
-( ) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
+(X) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
 (X) BUG: vertical offset problem on .timespan -- not always correctly aligned with highlighted name
 	(due to force layout probably!)
 ( ) hover / tooltip on timespan circles
@@ -624,7 +624,11 @@ const topNamesScatterplot = () => {
 
 			let nameElement = names.filter(d => d.key === name);
 
+			// couldn't find it, fail gracefully
 			if (nameElement.empty()) return null;
+
+			// already highlighted! nothing to see here, please disperse.
+			if (nameElement.classed('highlighted')) return null;
 
 			let nameDatum = nameElement.datum(),
 
