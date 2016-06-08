@@ -128,10 +128,6 @@ const topNamesScatterplot = () => {
 			})
 			.entries(data);
 
-		// filter down to only the names that have appeared
-		// in the top { rankCutoff } at least once
-		topNames = allNames.filter(d => d.value.numTopOccurrences);
-
 		domains = {
 			year: d3.extent(data, d => +d.year),
 			fraction: [0, d3.max(data, d => +d.fraction)]
@@ -139,6 +135,14 @@ const topNamesScatterplot = () => {
 			// rank: [0, d3.max(allNames, d => d.value.medianRank)],
 		};
 		domains.topOccurrence = [1, Math.floor((domains.year[1] - domains.year[0]) / 10) * 10];
+
+		// some names have more numTopOccurrences than there are years in the data,
+		// due to data errors. clamp them to avoid problems.
+		allNames.forEach(name => name.value.numTopOccurrences = Math.min(domains.topOccurrence[1], name.value.numTopOccurrences));
+
+		// filter down to only the names that have appeared
+		// in the top { rankCutoff } at least once
+		topNames = allNames.filter(d => d.value.numTopOccurrences);
 
 		/*
 		// now that we have domains.year, calculate age of each name
@@ -496,7 +500,7 @@ const topNamesScatterplot = () => {
 		let simulation = d3.forceSimulation(filteredNames)
 			.force('x', d3.forceX(d => xScale(d.value.maxYear)).strength(1))
 			.force('y', d3.forceY(d => yScale(d.value.medianRank)).strength(1))
-			.force('collide', d3.forceCollide(d => rScale(d.value.maxFraction) * 0.75))
+			.force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.maxFraction), 0.9)))
 			.stop();
 		for (let i = 0; i < 120; ++i) simulation.tick();
 
@@ -510,12 +514,12 @@ const topNamesScatterplot = () => {
 		// enter
 		let namePlotsEnter = namePlots.enter().append('g')
 			.attr('class', d => 'name ' + d.value.sex)
-			.attr('transform', d => `translate(${ d.x },${ d.y })scale(0.01)rotate(0)`)
+			.attr('transform', d => `translate(${ Math.max(0, Math.min(width, d.x)) },${ Math.max(0, Math.min(height, d.y)) })scale(0.01)rotate(0)`)
 			.attr('opacity', 0.0);
 		namePlotsEnter.transition()
 			.duration(enterDuration)
 			.ease(enterEase)
-			.attr('transform', d => `translate(${ d.x },${ d.y })scale(1.0)rotate(0)`)
+			.attr('transform', d => `translate(${ Math.max(0, Math.min(width, d.x)) },${ Math.max(0, Math.min(height, d.y)) })scale(1.0)rotate(0)`)
 			.attr('opacity', 1.0);
 		namePlotsEnter.append('circle')
 			.attr('cx', 0)
@@ -618,8 +622,11 @@ const topNamesScatterplot = () => {
 
 		} else {
 
-			let nameElement = names.filter(d => d.key === name),
-				nameDatum = nameElement.datum(),
+			let nameElement = names.filter(d => d.key === name);
+
+			if (nameElement.empty()) return null;
+
+			let nameDatum = nameElement.datum(),
 
 				// modified earlier by force layout, so use this value rather than deriving from data
 				nameElementY = parseFloat(nameElement.attr('transform').split(',')[1].split(')')[0]);
