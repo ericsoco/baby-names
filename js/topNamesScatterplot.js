@@ -96,13 +96,47 @@ const topNamesScatterplot = () => {
 	
 	const init = () => {
 
-		d3.csv('./data/all.csv', onDataLoaded);
+		let loaded = {
+			names: null,
+			counts: null
+		};
 
+		const fileLoaded = (error, data, key) => {
+
+			if (error) throw error;
+
+			loaded[key] = data;
+			if (loaded.names && loaded.counts) {
+				onDataLoaded(loaded.names, loaded.counts)
+			}
+
+		};
+
+		// from: https://www.ssa.gov/cgi-bin/popularnames.cgi,
+		// via https://github.com/ericsoco/baby-name-scraper
+		d3.csv('./data/all.csv', (error, data) => fileLoaded(error, data, 'names'));
+
+		// from: https://www.ssa.gov/oact/babynames/numberUSbirths.html
+		d3.tsv('./data/birthCounts.tsv', (error, data) => fileLoaded(error, data, 'counts'));
 
 	};
 
-	const onDataLoaded = (error, data) => {
+	const onDataLoaded = (names, counts) => {
 
+		domains = {
+			year: d3.extent(names, d => +d.year),
+			fraction: [0, d3.max(names, d => +d.fraction)],
+			count: d3.extent(names, d => d.count)
+			// occurrence: [0, d3.max(allNames, d => d.value.occurrences.length)],
+			// rank: [0, d3.max(allNames, d => d.value.medianRank)],
+		};
+		domains.topOccurrence = [1, Math.floor((domains.year[1] - domains.year[0]) / 10) * 10];
+
+		// calculate amount of each name per year,
+		// based on name-year fraction and total count per year
+		names.forEach(n => n.count = Math.round(+n.fraction * parseFloat(counts[+n.year - domains.year[0]].total)));
+
+		// restructure name data into a more useful format
 		allNames = d3.nest()
 			.key(d => d.name)
 				.sortKeys(d3.ascending)
@@ -126,15 +160,7 @@ const topNamesScatterplot = () => {
 					}, 0)
 				};
 			})
-			.entries(data);
-
-		domains = {
-			year: d3.extent(data, d => +d.year),
-			fraction: [0, d3.max(data, d => +d.fraction)]
-			// occurrence: [0, d3.max(allNames, d => d.value.occurrences.length)],
-			// rank: [0, d3.max(allNames, d => d.value.medianRank)],
-		};
-		domains.topOccurrence = [1, Math.floor((domains.year[1] - domains.year[0]) / 10) * 10];
+			.entries(names);
 
 		// some names have more numTopOccurrences than there are years in the data,
 		// due to data errors. clamp them to avoid problems.
