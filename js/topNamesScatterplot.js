@@ -599,7 +599,11 @@ const topNamesScatterplot = () => {
 
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
-				hoverName(datum.key);
+				if (event.target.classList.contains('occurrence')) {
+					hoverOccurrence(event.target, datum);
+				} else {
+					hoverName(datum.key);
+				}
 			} else {
 				hoverName(null);
 			}
@@ -618,6 +622,18 @@ const topNamesScatterplot = () => {
 				.classed('hover', true)
 				.raise();
 		}
+
+	};
+
+	const hoverOccurrence = (target, datum) => {
+
+		let name = datum.values[0].name,
+			year = datum.values[0].year,
+			count = datum.values[0].count,
+			rank = datum.values[0].rank,
+			sex = datum.values[0].sex;
+
+		console.log(`${ name }(${ sex[0] }): ${ year }\n${ count } (#${ rank })`);
 
 	};
 
