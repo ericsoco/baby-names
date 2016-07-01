@@ -695,10 +695,15 @@ const topNamesScatterplot = () => {
 			tooltip.append('h5');
 		}
 
+		let circleY = +circleSel.attr('cy'),
+			tooltipTop = circleY > 0.5 * graphContainer.node().offsetHeight ?
+				circleY - 80 :
+				circleY + 50;
+
 		tooltip.classed(sex, true)
 			.classed(sex === 'm' ? 'f' : 'm', false)
 			.style('left', `${ +circleSel.attr('cx') + margin.left - 0.5*tooltipWidth - 10 }px`)
-			.style('top', `${ +circleSel.attr('cy') + 50 }px`)
+			.style('top', `${ tooltipTop }px`)
 			.style('opacity', null);
 		tooltip.select('h4').text(`${ name }, ${ year }`);
 		tooltip.select('h5').text(`${ count } (#${ rank })`);
