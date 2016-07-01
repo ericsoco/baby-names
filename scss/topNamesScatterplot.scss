@@ -229,6 +229,13 @@ $text-color-male: #189EB2;
 					stroke-opacity: 0.0;
 					fill-opacity: 0.5;
 				}
+
+				&.occurrence.highlighted-occurrence {
+					stroke-opacity: 1.0;
+					stroke-width: 2px;
+					fill: $background-color;
+					fill-opacity: 0.85;
+				}
 			}
 			
 			&.highlighted circle {

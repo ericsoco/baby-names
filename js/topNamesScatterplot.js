@@ -486,7 +486,7 @@ const topNamesScatterplot = () => {
 			if (frameCount === 2) {
 
 				renderNames();
-				initGraphInteraction(xScale, yScale, rScale);
+				initGraphInteraction(xScale, yScale, rScale, margin);
 
 			} else {
 				window.requestAnimationFrame(onRAF);
@@ -566,9 +566,10 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const initGraphInteraction = (xScale, yScale, rScale) => {
+	const initGraphInteraction = (xScale, yScale, rScale, margin) => {
 
-		let graphEl = document.querySelector('.top-names-scatterplot .graph');
+		let graphEl = document.querySelector('.top-names-scatterplot .graph'),
+			highlightedTimespanCircle = null;
 
 		graphEl.addEventListener('click', event => {
 
@@ -599,13 +600,40 @@ const topNamesScatterplot = () => {
 
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
-				if (event.target.classList.contains('occurrence')) {
-					hoverOccurrence(event.target, datum);
-				} else {
+				if (!event.target.classList.contains('occurrence')) {
 					hoverName(datum.key);
 				}
 			} else {
 				hoverName(null);
+			}
+
+		});
+		
+		graphEl.addEventListener('mousemove', event => {
+
+			let x = event.pageX - graphEl.offsetLeft - margin.left,
+				y = event.pageY - graphEl.offsetTop - margin.top;
+
+			const maxDist = 60;
+			let shortestDist = Number.MAX_VALUE,
+				closestCircle = null,
+				dx, dy, dist,
+				allCircles = d3.selectAll('.timespan circle');
+			
+			allCircles.each(function (d) {
+				dx = this.getAttribute('cx') - x;
+				dy = this.getAttribute('cy') - y;
+				dist = Math.sqrt(dx * dx + dy * dy);
+				if (dist < maxDist && dist < shortestDist) {
+					shortestDist = dist;
+					closestCircle = this;
+				}
+			});
+
+			if (closestCircle) {
+				closestCircle = d3.select(closestCircle);
+				hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
+				highlightedTimespanCircle = closestCircle;
 			}
 
 		});
@@ -625,19 +653,28 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const hoverOccurrence = (target, datum) => {
+	const hoverTimespanCircle = (circleSel, lastCircleSel) => {
 
-		let name = datum.values[0].name,
+		let datum = circleSel.datum(),
+			name = datum.values[0].name,
 			year = datum.values[0].year,
 			count = datum.values[0].count,
 			rank = datum.values[0].rank,
 			sex = datum.values[0].sex;
 
+		// TODO: tooltip with something similar to this:
 		console.log(`${ name }(${ sex[0] }): ${ year }\n${ count } (#${ rank })`);
+
+		circleSel.classed('highlighted-occurrence', true);
+		circleSel.raise();
+		
+		if (lastCircleSel && lastCircleSel.node() !== circleSel.node()) {
+			lastCircleSel.classed('highlighted-occurrence', false);
+		}
 
 	};
 
-	const highlightName = (name) => {
+	const highlightName = name => {
 
 		// TODO: DRY this out -- copied from renderNames()
 		const enterDuration = 300,
