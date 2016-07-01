@@ -630,11 +630,9 @@ const topNamesScatterplot = () => {
 				}
 			});
 
-			if (closestCircle) {
-				closestCircle = d3.select(closestCircle);
-				hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
-				highlightedTimespanCircle = closestCircle;
-			}
+			closestCircle = d3.select(closestCircle);
+			hoverTimespanCircle(closestCircle, highlightedTimespanCircle, margin);
+			highlightedTimespanCircle = closestCircle;
 
 		});
 
@@ -653,7 +651,24 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const hoverTimespanCircle = (circleSel, lastCircleSel) => {
+	const hoverTimespanCircle = (circleSel, lastCircleSel, margin) => {
+
+		let tooltip = d3.select('.timespan-tooltip');
+		if (!circleSel || !circleSel.size()) {
+			if (tooltip.size()) {
+				tooltip.transition()
+					.delay(500)
+					.duration(500)
+					.style('opacity', 0.0)
+					.remove();
+			}
+
+			if (lastCircleSel && lastCircleSel.node() !== circleSel.node()) {
+				lastCircleSel.classed('highlighted-occurrence', false);
+			}
+
+			return;
+		}
 
 		let datum = circleSel.datum(),
 			name = datum.values[0].name,
@@ -662,15 +677,31 @@ const topNamesScatterplot = () => {
 			rank = datum.values[0].rank,
 			sex = datum.values[0].sex;
 
-		// TODO: tooltip with something similar to this:
-		console.log(`${ name }(${ sex[0] }): ${ year }\n${ count } (#${ rank })`);
-
 		circleSel.classed('highlighted-occurrence', true);
 		circleSel.raise();
-		
+
 		if (lastCircleSel && lastCircleSel.node() !== circleSel.node()) {
 			lastCircleSel.classed('highlighted-occurrence', false);
 		}
+
+		let graphContainer = d3.select('.top-names-scatterplot .graph'),
+			tooltipWidth = 96;	// topNamesScatterplot.scss#.timespan-tooltip.min-width;
+		tooltip = graphContainer.select('.timespan-tooltip');
+
+		if (!tooltip.size()) {
+			tooltip = graphContainer.append('div')
+				.classed('timespan-tooltip', true)
+			tooltip.append('h4');
+			tooltip.append('h5');
+		}
+
+		tooltip.classed(sex, true)
+			.classed(sex === 'm' ? 'f' : 'm', false)
+			.style('left', `${ +circleSel.attr('cx') + margin.left - 0.5*tooltipWidth - 10 }px`)
+			.style('top', `${ +circleSel.attr('cy') + 50 }px`)
+			.style('opacity', null);
+		tooltip.select('h4').text(`${ name }, ${ year }`);
+		tooltip.select('h5').text(`${ count } (#${ rank })`);
 
 	};
 
@@ -698,6 +729,8 @@ const topNamesScatterplot = () => {
 			d3.selectAll('.timespan').transition()
 				.delay(exitDuration)
 				.remove();
+
+			hoverTimespanCircle(null);
 
 		} else {
 
