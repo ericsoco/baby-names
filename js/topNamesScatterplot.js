@@ -8,7 +8,8 @@ TODO:
 (X) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
 (X) BUG: vertical offset problem on .timespan -- not always correctly aligned with highlighted name
 	(due to force layout probably!)
-( ) hover / tooltip on timespan circles
+(X) hover / tooltip on timespan circles
+( ) color circle by sex per year, not sex per name (Lindsay)
 ( ) write copy
 ( ) change radius to represent total number of births
 	(need total number of babies per year)
@@ -125,8 +126,7 @@ const topNamesScatterplot = () => {
 
 		domains = {
 			year: d3.extent(names, d => +d.year),
-			fraction: [0, d3.max(names, d => +d.fraction)],
-			count: d3.extent(names, d => d.count)
+			fraction: [0, d3.max(names, d => +d.fraction)]
 			// occurrence: [0, d3.max(allNames, d => d.value.occurrences.length)],
 			// rank: [0, d3.max(allNames, d => d.value.medianRank)],
 		};
@@ -136,12 +136,15 @@ const topNamesScatterplot = () => {
 		// based on name-year fraction and total count per year
 		names.forEach(n => n.count = Math.round(+n.fraction * parseFloat(counts[+n.year - domains.year[0]].total)));
 
+		domains.count = d3.extent(names, d => d.count);
+
 		// restructure name data into a more useful format
 		allNames = d3.nest()
 			.key(d => d.name)
 				.sortKeys(d3.ascending)
 			.rollup(values => {
-				let maxFraction = d3.max(values, d => d.fraction);
+				let maxFraction = d3.max(values, d => d.fraction),
+					countAtMaxFraction = values[d3.scan(values, (a, b) => b.fraction - a.fraction)].count;
 
 				return {
 					name: values[0].name,
@@ -149,7 +152,8 @@ const topNamesScatterplot = () => {
 					firstYear: d3.min(values, d => +d.year),
 					lastYear: d3.max(values, d => +d.year),
 					maxYear: values.find(d => d.fraction === maxFraction).year,
-					maxFraction: maxFraction,
+					maxFraction,
+					countAtMaxFraction,
 					medianRank: d3.median(values, d => +d.rank),
 					occurrences: d3.nest()
 						.key(d => d.year)
@@ -409,7 +413,8 @@ const topNamesScatterplot = () => {
 
 		rScale = d3.scalePow()
 			.exponent(0.5)
-			.domain(domains.fraction)
+			// .domain(domains.fraction)
+			.domain(domains.count)
 			.range([5, 80]);
 
 		graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
@@ -526,7 +531,8 @@ const topNamesScatterplot = () => {
 		let simulation = d3.forceSimulation(filteredNames)
 			.force('x', d3.forceX(d => xScale(d.value.maxYear)).strength(1))
 			.force('y', d3.forceY(d => yScale(d.value.medianRank)).strength(1))
-			.force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.maxFraction), 0.9)))
+			// .force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.maxFraction), 0.9)))
+			.force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.countAtMaxFraction), 0.9)))
 			.stop();
 		for (let i = 0; i < 120; ++i) simulation.tick();
 
@@ -550,7 +556,8 @@ const topNamesScatterplot = () => {
 		namePlotsEnter.append('circle')
 			.attr('cx', 0)
 			.attr('cy', 0)
-			.attr('r', d => rScale(d.value.maxFraction));
+			// .attr('r', d => rScale(d.value.maxFraction));
+			.attr('r', d => rScale(d.value.countAtMaxFraction));
 		namePlotsEnter.append('text')
 			.attr('x', 0)
 			.attr('y', 5)
@@ -783,7 +790,8 @@ const topNamesScatterplot = () => {
 				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
 				.duration(enterDuration)
 				.ease(enterEase)
-				.attr('r', d => rScale(d.values[0].fraction));
+				// .attr('r', d => rScale(d.values[0].fraction));
+				.attr('r', d => rScale(d.values[0].count));
 
 		}
 
