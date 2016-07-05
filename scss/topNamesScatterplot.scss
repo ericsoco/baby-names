@@ -237,6 +237,15 @@ $text-color-male: #189EB2;
 					fill: $background-color;
 					fill-opacity: 0.85;
 				}
+
+				&.f {
+					stroke: $stroke-color-female;
+					fill: $stroke-color-female;
+				}
+				&.m {
+					stroke: $stroke-color-male;
+					fill: $stroke-color-male;
+				}
 			}
 			
 			&.highlighted circle {
@@ -249,18 +258,22 @@ $text-color-male: #189EB2;
 				stroke: $stroke-color-female;
 				fill: $text-color-female;
 
+				/*
 				&.timespan circle {
 					fill: $stroke-color-female;
 				}
+				*/
 			}
 
 			&.m {
 				stroke: $stroke-color-male;
 				fill: $text-color-male;
 
+				/*
 				&.timespan circle {
 					fill: $stroke-color-male;
 				}
+				*/
 			}
 
 			line {

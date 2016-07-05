@@ -1,27 +1,27 @@
 /*
 TODO:
-( ) find name (typeahead?)
-	(X) typeahead
-	(X) select name
-	(X) hit enter to enter typed-in selection
-	( ) animate brush to new position
-(X) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
-(X) BUG: vertical offset problem on .timespan -- not always correctly aligned with highlighted name
-	(due to force layout probably!)
-(X) hover / tooltip on timespan circles
 ( ) color circle by sex per year, not sex per name (Lindsay)
+( ) display tooltip immediately on name click
+	tried to do this in highlightName, but commented out cuz it's buggy
 ( ) write copy
-( ) change radius to represent total number of births
-	(need total number of babies per year)
+		circles appear at year in which name was at its most popular
+		circle size represents total number of babies with that name in that year
 ( ) add legend (color, radius)
 	d3.legend?
 	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
+( ) change popularity slider to allow display of all names:
+	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
+	algo is something like: add up total (inverse: #1 is worth most) rank in all years
+	two pluses:
+		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
+		2, can show all 7000+ names
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) refine styles
 	(-) gooey-ify spread names?
 		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
 	( ) blend modes?
+( ) animate brush to new position
 
 ( ) fix up other prototypes
 	( ) to work with new index.html
@@ -35,6 +35,16 @@ TODO:
 
 ( ) post on transmote
 
+(X) change radius to represent total number of births
+	(need total number of babies per year)
+(X) find name (typeahead?)
+	(X) typeahead
+	(X) select name
+	(X) hit enter to enter typed-in selection
+(X) BUG: subsequent clicks on highlighted name draw again, instead of being ignored or bringing to front
+(X) BUG: vertical offset problem on .timespan -- not always correctly aligned with highlighted name
+	(due to force layout probably!)
+(X) hover / tooltip on timespan circles
 (X) add UI to slide down scale of popularity.
 	this is filtering on topOccurrencesMin;
 	the more topOccurrences, the more popular.
@@ -144,11 +154,12 @@ const topNamesScatterplot = () => {
 				.sortKeys(d3.ascending)
 			.rollup(values => {
 				let maxFraction = d3.max(values, d => d.fraction),
-					countAtMaxFraction = values[d3.scan(values, (a, b) => b.fraction - a.fraction)].count;
+					maxFractionIndex = d3.scan(values, (a, b) => b.fraction - a.fraction),
+					countAtMaxFraction = values[maxFractionIndex].count;
 
 				return {
-					name: values[0].name,
-					sex: values[0].sex,
+					name: values[maxFractionIndex].name,
+					sex: values[maxFractionIndex].sex,
 					firstYear: d3.min(values, d => +d.year),
 					lastYear: d3.max(values, d => +d.year),
 					maxYear: values.find(d => d.fraction === maxFraction).year,
@@ -638,7 +649,7 @@ const topNamesScatterplot = () => {
 			});
 
 			closestCircle = d3.select(closestCircle);
-			hoverTimespanCircle(closestCircle, highlightedTimespanCircle, margin);
+			hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
 			highlightedTimespanCircle = closestCircle;
 
 		});
@@ -658,7 +669,7 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const hoverTimespanCircle = (circleSel, lastCircleSel, margin) => {
+	const hoverTimespanCircle = (circleSel, lastCircleSel) => {
 
 		let tooltip = d3.select('.timespan-tooltip');
 		if (!circleSel || !circleSel.size()) {
@@ -779,7 +790,8 @@ const topNamesScatterplot = () => {
 				circles = timespan.selectAll('circle')
 				.data(nameDatum.value.occurrences)
 			.enter().append('circle')
-				.attr('class', 'occurrence')
+				.attr('class', d => d.values[0].sex)
+				.classed('occurrence', true)
 				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', nameElementY)
@@ -792,6 +804,13 @@ const topNamesScatterplot = () => {
 				.ease(enterEase)
 				// .attr('r', d => rScale(d.values[0].fraction));
 				.attr('r', d => rScale(d.values[0].count));
+
+			/*
+			// immediately open tooltip on clicked circle
+			// (close it first if it's already open)
+			hoverTimespanCircle(null);
+			hoverTimespanCircle(timespan.selectAll('circle').filter((d, i) => i === topOccurrenceIndex));
+			*/
 
 		}
 
