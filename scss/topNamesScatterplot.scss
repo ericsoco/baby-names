@@ -5,6 +5,7 @@ $stroke-color-female: #F2B5DA;
 $text-color-female: #E057C1;
 $stroke-color-male: #90F2DF;
 $text-color-male: #189EB2;
+$sidebar-width: 16rem;
 
 .top-names-scatterplot {
 
@@ -16,8 +17,8 @@ $text-color-male: #189EB2;
 		display: flex;
 		flex-direction: column;
 
-		flex: 0 1 15rem;
-		max-width: 15rem;
+		flex: 0 1 $sidebar-width;
+		max-width: $sidebar-width;
 
 		padding: 20px 20px 72px 20px;
 		box-sizing: border-box;
@@ -38,8 +39,8 @@ $text-color-male: #189EB2;
 
 		div.awesomplete {
 			position: relative;
-			width: calc(100% - 2*#{$input-padding});
-			left: $input-padding;
+			width: 100%;//calc(100% - 2*#{$input-padding});
+			left: 0;//$input-padding;
 		}
 
 		input.awesomplete {
@@ -48,7 +49,7 @@ $text-color-male: #189EB2;
 
 			font-size: 1.25rem;
 			color: $label-color;
-			text-transform: capitalize;
+			// text-transform: capitalize;
 
 			&:focus {
 				border: 2px solid rgba($label-color, 0.5);
@@ -132,7 +133,7 @@ $text-color-male: #189EB2;
 	.slider {
 		position: relative;
 		width: 100%;
-		flex: 0 0 15rem;
+		flex: 0 0 $sidebar-width;
 		padding-left: 50%;
 		box-sizing: border-box;
 
@@ -163,11 +164,11 @@ $text-color-male: #189EB2;
 
 		.label {
 			position: absolute;
-			bottom: -0.6rem;
+			bottom: 1.5rem;
 			width: 100%;
-			height: 3em;
 			margin-left: -50%;
 			text-align: center;
+			font-size: 1.25rem;
 		}
 	}
 
@@ -189,19 +190,27 @@ $text-color-male: #189EB2;
 	}
 
 	.legend {
-
-		.legend-item {
-
-		}
+		position: relative;
+		width: 100%;
+		box-sizing: border-box;
 
 		circle {
-			fill: none;
-			stroke: $label-color;
-			stroke-width: 2px;
+			fill: rgba($label-color, 0.1);
+			stroke: rgba($label-color, 0.5);
+			stroke-width: 1px;
 		}
 
 		text {
-			text-anchor: middle;
+			fill: $label-color;
+			text-anchor: left;
+		}
+
+		.label {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			text-align: center;
+			font-size: 1.25rem;
 		}
 	}
 

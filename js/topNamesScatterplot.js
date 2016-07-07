@@ -19,6 +19,7 @@ TODO:
 ( ) write copy
 		circles appear at year in which name was at its most popular
 		circle size represents total number of babies with that name in that year
+		copy has to move above/below the fold, not enough room in sidebar.
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) refine styles
@@ -92,9 +93,6 @@ const d3 = {
 	...d3_selection,
 	...d3_transition
 };
-
-// needed by d3_legend
-window.d3 = d3All;
 
 import awesomplete from 'awesomplete';
 
@@ -242,7 +240,7 @@ const topNamesScatterplot = () => {
 		//
 		let nameLookupInput = nameLookupContainer.append('input')
 			.attr('class', 'awesomplete')
-			.attr('placeholder', 'Enter a name')
+			.attr('placeholder', 'Find a name')
 			.node();
 		
 		let names = topNames.map(name => name.key),
@@ -405,39 +403,46 @@ const topNamesScatterplot = () => {
 
 		sliderContainer.append('div')
 			.attr('class', 'label')
-			.text(`Occurrences in the top ${ rankCutoff } names of each year`);
+			// .text(`Occurrences in the top ${ rankCutoff } names of each year`);
+			.text('Popularity');
 
 
 		// 
 		// legend
 		// 
-		let legendSvg = legendContainer.append('svg')
-			.attr('width', sidebarEl.offsetWidth)
-			.attr('height', 300)
-		.append('g')
-			.attr('transform', 'translate(0,0)');
+		let legendSizes = [2000, 20000, 75000, 200000].reverse(),
+			biggestSize = rScale(legendSizes[0]),
+			labelHeight = 25;
 
-		/*
-		let sizeDomain = rScale.domain(),
-			sizeDomainDelta = sizeDomain[1] - sizeDomain[0],
-			legendSizes = [sizeDomain[0] + sizeDomainDelta * 0.01, sizeDomain[0] + sizeDomainDelta * 0.1, sizeDomain[0] + sizeDomainDelta * 0.333, sizeDomain[0] + sizeDomainDelta];
-		*/
-		let legendSizes = [2000, 20000, 75000, 200000];
+		let legendMargin = {
+				left: 20
+			},
+			legendStrokeWidth = 2,
+			legendSvg = legendContainer.append('svg')
+				.attr('width', sidebarEl.offsetWidth - legendMargin.left)
+				.attr('height', 2*biggestSize + 2 * legendStrokeWidth + labelHeight)
+			.append('g')
+				.attr('transform', `translate(${ -0.5*legendMargin.left },0)`);
 
 		let legendSel = legendSvg.selectAll('g.legend-item')
 			.data(legendSizes);
 		let legendEnter = legendSel.enter()
 			.append('g')
 				.classed('legend-item', true)
-				.attr('transform', `translate(${ sidebarEl.offsetWidth * 0.5 }, 50)`)
+				.attr('transform', `translate(${ biggestSize + 0.5*legendMargin.left + legendStrokeWidth },${ legendStrokeWidth })`)
 		legendEnter.append('circle')
 			.attr('cx', 0)
-			.attr('cy', 0)
+			.attr('cy', d => rScale(d))
 			.attr('r', d => rScale(d));
 		legendEnter.append('text')
-			.attr('x', 0)
+			.attr('x', biggestSize + 10)
 			.attr('y', d => rScale(d) + 12)
 			.text(d => d);
+
+		legendContainer.append('div')
+			.attr('class', 'label')
+			.text('# of babies per year');
+
 	};
 
 	const initGraph = () => {
