@@ -188,6 +188,23 @@ $text-color-male: #189EB2;
 		}
 	}
 
+	.legend {
+
+		.legend-item {
+
+		}
+
+		circle {
+			fill: none;
+			stroke: $label-color;
+			stroke-width: 2px;
+		}
+
+		text {
+			text-anchor: middle;
+		}
+	}
+
 	.graph {
 		position: relative;
 		flex-grow: 1;
@@ -257,27 +274,16 @@ $text-color-male: #189EB2;
 			&.f {
 				stroke: $stroke-color-female;
 				fill: $text-color-female;
-
-				/*
-				&.timespan circle {
-					fill: $stroke-color-female;
-				}
-				*/
 			}
 
 			&.m {
 				stroke: $stroke-color-male;
 				fill: $text-color-male;
-
-				/*
-				&.timespan circle {
-					fill: $stroke-color-male;
-				}
-				*/
 			}
 
 			line {
 				stroke-opacity: 1.0;
+				stroke: #d9d9d9;
 			}
 
 			text {

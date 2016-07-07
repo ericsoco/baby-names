@@ -1,11 +1,11 @@
 /*
 TODO:
-( ) color circle by sex per year, not sex per name (Lindsay)
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
-( ) write copy
-		circles appear at year in which name was at its most popular
-		circle size represents total number of babies with that name in that year
+( ) display name and overall (all-time) rank somewhere.
+	in tooltip?
+	this is most interesting along with displaying all names
+	somewhere larger / more graphic might be nice
 ( ) add legend (color, radius)
 	d3.legend?
 	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
@@ -15,6 +15,10 @@ TODO:
 	two pluses:
 		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
 		2, can show all 7000+ names
+
+( ) write copy
+		circles appear at year in which name was at its most popular
+		circle size represents total number of babies with that name in that year
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) refine styles
@@ -34,7 +38,9 @@ TODO:
 ( ) shrink down bundle.js (2.3MB!!)
 
 ( ) post on transmote
+( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) color circle by sex per year, not sex per name (Lindsay)
 (X) change radius to represent total number of births
 	(need total number of babies per year)
 (X) find name (typeahead?)
@@ -86,6 +92,9 @@ const d3 = {
 	...d3_selection,
 	...d3_transition
 };
+
+// needed by d3_legend
+window.d3 = d3All;
 
 import awesomplete from 'awesomplete';
 
@@ -201,8 +210,8 @@ const topNamesScatterplot = () => {
 
 		d3.select('#app').classed('top-names-scatterplot', true);
 
-		initSidebar();
 		initGraph();
+		initSidebar();
 
 	}
 
@@ -216,7 +225,8 @@ const topNamesScatterplot = () => {
 			copy = sidebar.append('div').attr('class', 'copy'),
 			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
 			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
-			sliderContainer = sidebar.append('div').attr('class', 'slider');
+			sliderContainer = sidebar.append('div').attr('class', 'slider'),
+			legendContainer = sidebar.append('div').attr('class', 'legend');
 
 
 		// 
@@ -397,6 +407,37 @@ const topNamesScatterplot = () => {
 			.attr('class', 'label')
 			.text(`Occurrences in the top ${ rankCutoff } names of each year`);
 
+
+		// 
+		// legend
+		// 
+		let legendSvg = legendContainer.append('svg')
+			.attr('width', sidebarEl.offsetWidth)
+			.attr('height', 300)
+		.append('g')
+			.attr('transform', 'translate(0,0)');
+
+		/*
+		let sizeDomain = rScale.domain(),
+			sizeDomainDelta = sizeDomain[1] - sizeDomain[0],
+			legendSizes = [sizeDomain[0] + sizeDomainDelta * 0.01, sizeDomain[0] + sizeDomainDelta * 0.1, sizeDomain[0] + sizeDomainDelta * 0.333, sizeDomain[0] + sizeDomainDelta];
+		*/
+		let legendSizes = [2000, 20000, 75000, 200000];
+
+		let legendSel = legendSvg.selectAll('g.legend-item')
+			.data(legendSizes);
+		let legendEnter = legendSel.enter()
+			.append('g')
+				.classed('legend-item', true)
+				.attr('transform', `translate(${ sidebarEl.offsetWidth * 0.5 }, 50)`)
+		legendEnter.append('circle')
+			.attr('cx', 0)
+			.attr('cy', 0)
+			.attr('r', d => rScale(d));
+		legendEnter.append('text')
+			.attr('x', 0)
+			.attr('y', d => rScale(d) + 12)
+			.text(d => d);
 	};
 
 	const initGraph = () => {
