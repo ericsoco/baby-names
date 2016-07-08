@@ -6,9 +6,6 @@ TODO:
 	in tooltip?
 	this is most interesting along with displaying all names
 	somewhere larger / more graphic might be nice
-( ) add legend (color, radius)
-	d3.legend?
-	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
 ( ) change popularity slider to allow display of all names:
 	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
 	algo is something like: add up total (inverse: #1 is worth most) rank in all years
@@ -41,6 +38,9 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) add legend (color, radius)
+	d3.legend?
+	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
 (X) color circle by sex per year, not sex per name (Lindsay)
 (X) change radius to represent total number of births
 	(need total number of babies per year)
@@ -283,9 +283,14 @@ const topNamesScatterplot = () => {
 			if (brush) {
 
 				// ensure sex toggle is on for selected name
+				let sexToggle = toggleContainer.select(`.${name.value.sex}.sex-toggle`).node();
+				// sexToggle.classList.toggle('on', true);
+				sexToggle.click();
+				/*
 				let sexToggle = toggleContainer.select(`.${name.value.sex} input`).node();
 				sexToggle.checked = true;
 				sexToggle.dispatchEvent(new Event('change'));
+				*/
 				
 				// move brush to area where name exists
 				// TODO: why are brush transitions not working?
@@ -321,6 +326,36 @@ const topNamesScatterplot = () => {
 		//
 		// sex toggles
 		//
+		toggleContainer.append('div')
+			.attr('class', 'f sex-toggle on')
+			.attr('data-sex', 'f')
+			.html('<span>female</span>');
+		toggleContainer.append('div')
+			.attr('class', 'm sex-toggle on')
+			.attr('data-sex', 'm')
+			.html('<span>male</span>');
+		toggleContainer.selectAll('div')
+			.on('click', function (event) {
+				// disable a checkbox if it's the only one checked
+				// (don't allow unchecking all boxes)
+				if (!this.classList.contains('disabled')) {
+					this.classList.toggle('on');
+				}
+				
+				let selectedToggles = d3.selectAll('.top-names-scatterplot .sex-toggle.on');
+				if (selectedToggles.size() === 1) {
+					selectedToggles.classed('disabled', true)
+				} else {
+					d3.selectAll('.top-names-scatterplot .sex-toggle')
+						.classed('disabled', false)
+				}
+
+				renderNames();
+			});
+
+		// TODO: also refactor 'sex toggle' above (line 285)
+
+		/*
 		toggleContainer.append('label')
 			.attr('class', 'f')
 			.html('<input type="checkbox" data-sex="f" checked> Female');
@@ -343,7 +378,7 @@ const topNamesScatterplot = () => {
 
 				renderNames();
 			});
-
+		*/
 
 		//
 		// popularity slider
@@ -579,12 +614,20 @@ const topNamesScatterplot = () => {
 		// console.log(filteredNames.map(n => n.key));
 
 		// filter to only selected sexes
+		let sexToggles = d3.selectAll('.top-names-scatterplot .sex-toggle').nodes()
+			.reduce((acc, el) => {
+				acc[el.dataset.sex] = el.classList.contains('on');
+				return acc;
+			}, {});
+		filteredNames = filteredNames.filter(d => sexToggles[d.value.sex]);
+		/*
 		let sexToggles = d3.selectAll('.top-names-scatterplot .toggles input').nodes()
 			.reduce((acc, el) => {
 				acc[el.dataset.sex] = el.checked;
 				return acc;
 			}, {});
 		filteredNames = filteredNames.filter(d => sexToggles[d.value.sex]);
+		*/
 
 		const enterDuration = 300,
 			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?

@@ -108,10 +108,64 @@ $sidebar-width: 16rem;
 	}
 
 	.toggles {
+		display: flex;
+		justify-content: space-around;
 		width: 100%;
 		flex: 0 0 2.5rem;
-		padding-left: 1.5rem;
 
+		$toggle-size: 4rem;
+		.sex-toggle {
+			display: inline-block;
+			width: $toggle-size;
+			height: $toggle-size;
+			flex: 0 0 $toggle-size;
+			box-sizing: border-box;
+
+			text-align: center;
+			user-select: none;
+			border-radius: 50%;
+			border-style: solid;
+			border-width: 1px;
+			cursor: pointer;
+
+			&.f {
+				font-weight: normal;
+				color: $text-color-female;
+				border-color: $stroke-color-female;
+				background-color: rgba($text-color-female, 0.1);
+			}
+			&.m {
+				font-weight: normal;
+				color: $text-color-male;
+				border-color: $stroke-color-male;
+				background-color: rgba($text-color-male, 0.1);
+			}
+			&.on {
+				border-width: 3px;
+				&.f {
+					font-weight: bold;
+					border-color: $stroke-color-female;
+					background-color: rgba($text-color-female, 0.35);
+				}
+				&.m {
+					font-weight: bold;
+					border-color: $stroke-color-male;
+					background-color: rgba($text-color-male, 0.35);
+				}
+			}
+
+			&.disabled {
+				cursor: not-allowed;
+			}
+
+			span {
+				display: block;
+				position: relative;
+				top: $toggle-size / 2 - 0.8rem;
+			}
+		}
+
+		/*
 		label {
 			display: inline-block;
 			width: 50%;
@@ -128,6 +182,7 @@ $sidebar-width: 16rem;
 		input:disabled {
 			cursor: not-allowed;
 		}
+		*/
 	}
 
 	.slider {
