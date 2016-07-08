@@ -415,33 +415,39 @@ const topNamesScatterplot = () => {
 			labelHeight = 25;
 
 		let legendMargin = {
-				left: 20
+				left: 20,
+				right: 20
 			},
+			legendWidth = sidebarEl.offsetWidth - legendMargin.left - legendMargin.right,
 			legendStrokeWidth = 2,
 			legendSvg = legendContainer.append('svg')
-				.attr('width', sidebarEl.offsetWidth - legendMargin.left)
+				.attr('width', legendWidth)
 				.attr('height', 2*biggestSize + 2 * legendStrokeWidth + labelHeight)
 			.append('g')
-				.attr('transform', `translate(${ -0.5*legendMargin.left },0)`);
+				// .attr('transform', `translate(${ -0.5*legendMargin.left },0)`);
+				.attr('transform', `translate(${ 0.5 * legendWidth },0)`);
 
 		let legendSel = legendSvg.selectAll('g.legend-item')
 			.data(legendSizes);
 		let legendEnter = legendSel.enter()
 			.append('g')
 				.classed('legend-item', true)
-				.attr('transform', `translate(${ biggestSize + 0.5*legendMargin.left + legendStrokeWidth },${ legendStrokeWidth })`)
+				// .attr('transform', `translate(${ biggestSize + 0.5*legendMargin.left + legendStrokeWidth },${ legendStrokeWidth })`)
+				.attr('transform', `translate(0,${ legendStrokeWidth })`)
 		legendEnter.append('circle')
 			.attr('cx', 0)
 			.attr('cy', d => rScale(d))
 			.attr('r', d => rScale(d));
 		legendEnter.append('text')
-			.attr('x', biggestSize + 10)
-			.attr('y', d => rScale(d) + 12)
-			.text(d => d);
+			// .attr('x', biggestSize + 10)
+			// .attr('y', d => rScale(d) + 12)
+			.attr('x', 0)
+			.attr('y', d => 2 * rScale(d) + 12)
+			.text(d => (d / 1000) + 'k');
 
 		legendContainer.append('div')
 			.attr('class', 'label')
-			.text('# of babies per year');
+			.text('Babies per year');
 
 	};
 
