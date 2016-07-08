@@ -44,7 +44,8 @@ $sidebar-width: 16rem;
 		}
 
 		input.awesomplete {
-			width: 100%;
+			width: 90%;
+			padding: 5%;
 			border: 1px solid rgba($label-color, 0.25);
 
 			font-size: 1.25rem;
@@ -128,6 +129,13 @@ $sidebar-width: 16rem;
 			border-width: 1px;
 			cursor: pointer;
 
+			&:first-of-type {
+				margin-left: 1rem;
+			}
+			&:last-of-type {
+				margin-right: 1rem;
+			}
+
 			&.f {
 				font-weight: normal;
 				color: $text-color-female;
@@ -142,6 +150,9 @@ $sidebar-width: 16rem;
 			}
 			&.on {
 				border-width: 3px;
+				span {
+					top: $toggle-size / 2 - 0.9rem;
+				}
 				&.f {
 					font-weight: bold;
 					border-color: $stroke-color-female;
@@ -161,7 +172,7 @@ $sidebar-width: 16rem;
 			span {
 				display: block;
 				position: relative;
-				top: $toggle-size / 2 - 0.8rem;
+				top: $toggle-size / 2 - 0.7rem;
 			}
 		}
 

@@ -1,5 +1,6 @@
 /*
 TODO:
+( ) refine toggle styling, remove commented-out cruft
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
 ( ) display name and overall (all-time) rank somewhere.
@@ -222,8 +223,8 @@ const topNamesScatterplot = () => {
 			sidebarEl = sidebar.node(),
 			copy = sidebar.append('div').attr('class', 'copy'),
 			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
-			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
 			sliderContainer = sidebar.append('div').attr('class', 'slider'),
+			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
 			legendContainer = sidebar.append('div').attr('class', 'legend');
 
 
@@ -284,13 +285,9 @@ const topNamesScatterplot = () => {
 
 				// ensure sex toggle is on for selected name
 				let sexToggle = toggleContainer.select(`.${name.value.sex}.sex-toggle`).node();
-				// sexToggle.classList.toggle('on', true);
-				sexToggle.click();
-				/*
-				let sexToggle = toggleContainer.select(`.${name.value.sex} input`).node();
-				sexToggle.checked = true;
-				sexToggle.dispatchEvent(new Event('change'));
-				*/
+				if (!sexToggle.classList.contains('on')) {
+					sexToggle.click();
+				}
 				
 				// move brush to area where name exists
 				// TODO: why are brush transitions not working?
@@ -322,63 +319,6 @@ const topNamesScatterplot = () => {
 			}
 		});
 
-
-		//
-		// sex toggles
-		//
-		toggleContainer.append('div')
-			.attr('class', 'f sex-toggle on')
-			.attr('data-sex', 'f')
-			.html('<span>female</span>');
-		toggleContainer.append('div')
-			.attr('class', 'm sex-toggle on')
-			.attr('data-sex', 'm')
-			.html('<span>male</span>');
-		toggleContainer.selectAll('div')
-			.on('click', function (event) {
-				// disable a checkbox if it's the only one checked
-				// (don't allow unchecking all boxes)
-				if (!this.classList.contains('disabled')) {
-					this.classList.toggle('on');
-				}
-				
-				let selectedToggles = d3.selectAll('.top-names-scatterplot .sex-toggle.on');
-				if (selectedToggles.size() === 1) {
-					selectedToggles.classed('disabled', true)
-				} else {
-					d3.selectAll('.top-names-scatterplot .sex-toggle')
-						.classed('disabled', false)
-				}
-
-				renderNames();
-			});
-
-		// TODO: also refactor 'sex toggle' above (line 285)
-
-		/*
-		toggleContainer.append('label')
-			.attr('class', 'f')
-			.html('<input type="checkbox" data-sex="f" checked> Female');
-		toggleContainer.append('label')
-			.attr('class', 'm')
-			.html('<input type="checkbox" data-sex="m" checked> Male');
-
-		toggleContainer.selectAll('input')
-			.on('change', function (event) {
-
-				// disable a checkbox if it's the only one checked
-				// (don't allow unchecking all boxes)
-				let checkedToggles = d3.selectAll('.top-names-scatterplot .toggles input:checked');
-				if (checkedToggles.size() === 1) {
-					checkedToggles.attr('disabled', true)
-				} else {
-					d3.selectAll('.top-names-scatterplot .toggles input')
-						.attr('disabled', null)
-				}
-
-				renderNames();
-			});
-		*/
 
 		//
 		// popularity slider
@@ -442,6 +382,37 @@ const topNamesScatterplot = () => {
 			.text('Popularity');
 
 
+		//
+		// sex toggles
+		//
+		toggleContainer.append('div')
+			.attr('class', 'f sex-toggle on')
+			.attr('data-sex', 'f')
+			.html('<span>female</span>');
+		toggleContainer.append('div')
+			.attr('class', 'm sex-toggle on')
+			.attr('data-sex', 'm')
+			.html('<span>male</span>');
+		toggleContainer.selectAll('div')
+			.on('click', function (event) {
+				// disable a checkbox if it's the only one checked
+				// (don't allow unchecking all boxes)
+				if (!this.classList.contains('disabled')) {
+					this.classList.toggle('on');
+				}
+
+				let selectedToggles = d3.selectAll('.top-names-scatterplot .sex-toggle.on');
+				if (selectedToggles.size() === 1) {
+					selectedToggles.classed('disabled', true)
+				} else {
+					d3.selectAll('.top-names-scatterplot .sex-toggle')
+						.classed('disabled', false)
+				}
+
+				renderNames();
+			});
+
+
 		// 
 		// legend
 		// 
@@ -459,7 +430,6 @@ const topNamesScatterplot = () => {
 				.attr('width', legendWidth)
 				.attr('height', 2*biggestSize + 2 * legendStrokeWidth + labelHeight)
 			.append('g')
-				// .attr('transform', `translate(${ -0.5*legendMargin.left },0)`);
 				.attr('transform', `translate(${ 0.5 * legendWidth },0)`);
 
 		let legendSel = legendSvg.selectAll('g.legend-item')
@@ -467,15 +437,12 @@ const topNamesScatterplot = () => {
 		let legendEnter = legendSel.enter()
 			.append('g')
 				.classed('legend-item', true)
-				// .attr('transform', `translate(${ biggestSize + 0.5*legendMargin.left + legendStrokeWidth },${ legendStrokeWidth })`)
 				.attr('transform', `translate(0,${ legendStrokeWidth })`)
 		legendEnter.append('circle')
 			.attr('cx', 0)
 			.attr('cy', d => rScale(d))
 			.attr('r', d => rScale(d));
 		legendEnter.append('text')
-			// .attr('x', biggestSize + 10)
-			// .attr('y', d => rScale(d) + 12)
 			.attr('x', 0)
 			.attr('y', d => 2 * rScale(d) + 12)
 			.text(d => (d / 1000) + 'k');
@@ -620,14 +587,6 @@ const topNamesScatterplot = () => {
 				return acc;
 			}, {});
 		filteredNames = filteredNames.filter(d => sexToggles[d.value.sex]);
-		/*
-		let sexToggles = d3.selectAll('.top-names-scatterplot .toggles input').nodes()
-			.reduce((acc, el) => {
-				acc[el.dataset.sex] = el.checked;
-				return acc;
-			}, {});
-		filteredNames = filteredNames.filter(d => sexToggles[d.value.sex]);
-		*/
 
 		const enterDuration = 300,
 			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?
