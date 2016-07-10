@@ -1,17 +1,19 @@
 /*
 TODO:
-( ) display tooltip immediately on name click
-	tried to do this in highlightName, but commented out cuz it's buggy
-( ) display name and overall (all-time) rank somewhere.
-	in tooltip?
-	this is most interesting along with displaying all names
-	somewhere larger / more graphic might be nice
 ( ) change popularity slider to allow display of all names:
 	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
 	algo is something like: add up total (inverse: #1 is worth most) rank in all years
 	two pluses:
 		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
 		2, can show all 7000+ names
+( ) keep circle hover style (bold font) while timespan is open
+( ) increase top margin enough to let bubbles at top of graph show in their entirety
+( ) display name and overall (all-time) rank somewhere.
+	in tooltip?
+	this is most interesting along with displaying all names
+	somewhere larger / more graphic might be nice
+( ) display tooltip immediately on name click
+	tried to do this in highlightName, but commented out cuz it's buggy
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -19,15 +21,14 @@ TODO:
 		copy has to move above/below the fold, not enough room in sidebar.
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
-( ) refine styles
-	(-) gooey-ify spread names?
-		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
-	( ) blend modes?
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
 ( ) animate brush to new position
-( ) social media icons, transmote icon at lower-left
-( ) "you might also like" links at lower left, in dropup?
+( ) icons at lower-left:
+	( ) twitter
+	( ) transmote
+	( ) github (link to source)
+	( ) "you might also like" links at lower left, in dropup?
 
 ( ) fix up other prototypes
 	( ) to work with new index.html
@@ -42,6 +43,10 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) refine styles
+	(-) gooey-ify spread names?
+		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
+	(-) blend modes?
 (X) refine toggle styling, remove commented-out cruft
 (X) add legend (color, radius)
 	d3.legend?
