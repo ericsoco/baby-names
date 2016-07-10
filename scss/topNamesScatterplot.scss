@@ -37,7 +37,7 @@ $sidebar-width: 16rem;
 	.copy {
 		width: 100%;
 		flex: 0 1 auto;
-		margin-bottom: 1rem;
+		margin-bottom: 1.5rem;
 	}
 
 	//
@@ -50,27 +50,36 @@ $sidebar-width: 16rem;
 		flex: 0 0 3.5rem;
 
 		div.awesomplete {
-			position: relative;
-			width: 100%;//calc(100% - 2*#{$input-padding});
-			left: 0;//$input-padding;
+			position: absolute;
+			width: calc(100% - #{2 * $sidebar-padding});
+			left: $sidebar-padding;
+			margin-bottom: 1rem;
 		}
 
 		input.awesomplete {
-			width: 90%;
+			position: relative;
+			width: 100%;
 			padding: 5%;
+			box-sizing: border-box;
 			border: 1px solid rgba($label-color, 0.25);
+
+			border-left: none;
+			border-right: none;
 
 			font-size: 1.25rem;
 			font-family: "Aller", "Georgia", sans-serif;
 			color: $label-color;
-			// text-transform: capitalize;
+			text-transform: capitalize;
 
 			&:focus {
+				top: -1px;
 				border: 2px solid rgba($label-color, 0.5);
+				border-left: none;
+				border-right: none;
 				outline: none;
 			}
 
-			$placeholder-font-size: 1.0rem;
+			$placeholder-font-size: 1.25rem;
 			&::-webkit-input-placeholder {
 				font-size: $placeholder-font-size;
 			}
@@ -187,7 +196,7 @@ $sidebar-width: 16rem;
 	// sex toggles
 	//
 	.toggles {
-		flex: 0 0 auto;//5rem;
+		flex: 0 0 auto;
 		position: relative;
 		width: 100%;
 
@@ -299,7 +308,7 @@ $sidebar-width: 16rem;
 
 	.bottom-spacer {
 		width: 100%;
-		flex: 0 0 7rem;
+		flex: 0 0 7.5rem;
 	}
 
 	.graph {

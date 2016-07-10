@@ -324,6 +324,13 @@ const topNamesScatterplot = () => {
 			}
 		});
 
+		// Select all on focus
+		nameLookupInput.addEventListener('focus', function (event) {
+			this.select();
+		});
+		nameLookupInput.addEventListener('mouseup', function (event) {
+			return false;
+		});
 
 		//
 		// popularity slider
@@ -440,7 +447,7 @@ const topNamesScatterplot = () => {
 		// 
 		let legendSizes = [2000, 20000, 75000, 200000].reverse(),
 			biggestSize = rScale(legendSizes[0]),
-			labelHeight = 25;
+			labelHeight = 32;
 
 		let legendMargin = {
 				left: 20,
