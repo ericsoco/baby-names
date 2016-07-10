@@ -23,7 +23,11 @@ TODO:
 	(-) gooey-ify spread names?
 		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
 	( ) blend modes?
+( ) fonts race condition:
+	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
 ( ) animate brush to new position
+( ) social media icons, transmote icon at lower-left
+( ) "you might also like" links at lower left, in dropup?
 
 ( ) fix up other prototypes
 	( ) to work with new index.html
@@ -225,7 +229,8 @@ const topNamesScatterplot = () => {
 			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
 			sliderContainer = sidebar.append('div').attr('class', 'slider'),
 			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
-			legendContainer = sidebar.append('div').attr('class', 'legend');
+			legendContainer = sidebar.append('div').attr('class', 'legend'),
+			bottomSpacer = sidebar.append('div').attr('class', 'bottom-spacer');
 
 
 		// 
@@ -322,81 +327,94 @@ const topNamesScatterplot = () => {
 
 		//
 		// popularity slider
+		// wait one cycle to measure the rest of the elements and fill remaining space
 		//
-		let sliderWidth = 40,
-			sliderMargin = {
-				top: 20,
-				right: 40,
-				bottom: 60,
-				left: 40
-			},
-			width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
-			height = sidebarEl.offsetHeight - copy.node().offsetHeight - sliderMargin.top - sliderMargin.bottom,
-			sliderSvg = sliderContainer.append('svg')
-				.attr('width', width + sliderMargin.left + sliderMargin.right)
-				.attr('height', height + sliderMargin.top + sliderMargin.bottom)
-			.append('g')
-				.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
-
-		let sliderScale = d3.scaleLinear()
-			.clamp(true)
-			.domain(domains.topOccurrence)
-			.range([height, 0]);
-
-		let sliderBackground = sliderSvg.append('rect')
-			.attr('class', 'slider-background')
-			.attr('width', sliderWidth)
-			.attr('height', height);
-
-		let sliderGrid = sliderSvg.append('g')
-			.attr('class', 'slider-background-grid')
-			.call(d3.axisLeft()
-				.scale(sliderScale)
-				.tickSize(-sliderWidth)
-				.tickValues([1, 20, 40, 60, 80, 100, 115, 130])
-				.tickFormat(d3.format('d'))
-			);
-
-		brush = d3.brush()
-			.y(sliderScale)
-			.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
-
-		// apply handler after delay to avoid
-		// responding to initial brush setup
 		setTimeout(() => {
-			brush.on('brushend', () => {
-				renderNames();
-			});
-		}, 1);
-		
-		sliderSvg.append('g')
-			.attr('class', 'brush')
-			.call(brush)
-			.call(brush.event)
-		.selectAll('rect')
-			.attr('width', sliderWidth);
+			let sliderWidth = 40,
+				sliderMargin = {
+					top: 20,
+					right: 40,
+					bottom: 60,
+					left: 40
+				},
+				width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
+				height = sidebarEl.offsetHeight -
+							copy.node().offsetHeight -
+							nameLookupContainer.node().offsetHeight -
+							toggleContainer.node().offsetHeight -
+							legendContainer.node().offsetHeight -
+							bottomSpacer.node().offsetHeight -
+							sliderMargin.top - sliderMargin.bottom,
+				// height = sliderContainer.node().offsetHeight - sliderMargin.top - sliderMargin.bottom,
+				sliderSvg = sliderContainer.append('svg')
+					.attr('width', width + sliderMargin.left + sliderMargin.right)
+					.attr('height', height + sliderMargin.top + sliderMargin.bottom)
+				.append('g')
+					.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
 
-		sliderContainer.append('div')
-			.attr('class', 'label')
-			// .text(`Occurrences in the top ${ rankCutoff } names of each year`);
-			.text('Popularity');
+			let sliderScale = d3.scaleLinear()
+				.clamp(true)
+				.domain(domains.topOccurrence)
+				.range([height, 0]);
+
+			let sliderBackground = sliderSvg.append('rect')
+				.attr('class', 'slider-background')
+				.attr('width', sliderWidth)
+				.attr('height', height);
+
+			let sliderGrid = sliderSvg.append('g')
+				.attr('class', 'slider-background-grid')
+				.call(d3.axisLeft()
+					.scale(sliderScale)
+					.tickSize(-sliderWidth)
+					.tickValues([1, 20, 40, 60, 80, 100, 115, 130])
+					.tickFormat(d3.format('d'))
+				);
+
+			brush = d3.brush()
+				.y(sliderScale)
+				.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
+
+			// apply handler after delay to avoid
+			// responding to initial brush setup
+			setTimeout(() => {
+				brush.on('brushend', () => {
+					renderNames();
+				});
+			}, 1);
+			
+			sliderSvg.append('g')
+				.attr('class', 'brush')
+				.call(brush)
+				.call(brush.event)
+			.selectAll('rect')
+				.attr('width', sliderWidth);
+
+			sliderContainer.append('div')
+				.attr('class', 'label')
+				// .text(`Occurrences in the top ${ rankCutoff } names of each year`);
+				.text('Popularity');
+		}, 1);
 
 
 		//
 		// sex toggles
 		//
-		toggleContainer.append('div')
+		let togglesContainer = toggleContainer.append('div')
+			.classed('toggles-container', true);
+
+		togglesContainer.append('div')
 			.attr('class', 'f sex-toggle on')
 			.attr('data-sex', 'f')
 			.html('<span>female</span>');
-		toggleContainer.append('div')
+		togglesContainer.append('div')
 			.attr('class', 'm sex-toggle on')
 			.attr('data-sex', 'm')
 			.html('<span>male</span>');
-		toggleContainer.selectAll('div')
+		togglesContainer.selectAll('div')
 			.on('click', function (event) {
-				// disable a checkbox if it's the only one checked
-				// (don't allow unchecking all boxes)
+				// disable a button if it's the only one selected
+				// (don't allow unselecting all buttons)
 				if (!this.classList.contains('disabled')) {
 					this.classList.toggle('on');
 				}
@@ -411,6 +429,10 @@ const topNamesScatterplot = () => {
 
 				renderNames();
 			});
+
+		toggleContainer.append('div')
+			.attr('class', 'label')
+			.text('Sex');
 
 
 		// 

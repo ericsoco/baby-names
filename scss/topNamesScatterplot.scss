@@ -5,11 +5,13 @@ $stroke-color-female: #F2B5DA;
 $text-color-female: #E057C1;
 $stroke-color-male: #90F2DF;
 $text-color-male: #189EB2;
+$sidebar-padding: 1.25rem;
 $sidebar-width: 16rem;
 
 .top-names-scatterplot {
-
 	display: flex;
+	position: relative;
+	height: 100%;
 
 	color: $label-color;
 	font-family: "AllerLight", "Georgia", sans-serif;
@@ -17,21 +19,30 @@ $sidebar-width: 16rem;
 	.sidebar {
 		display: flex;
 		flex-direction: column;
+		position: relative;
+		height: 100vh;
 
-		flex: 0 1 $sidebar-width;
+		flex: 1 0 $sidebar-width;
 		max-width: $sidebar-width;
 
-		padding: 20px 20px 72px 20px;
+		padding: $sidebar-padding;
 		box-sizing: border-box;
 
 		background-color: $sidebar-background-color;
 	}
 
+	//
+	// copy
+	//
 	.copy {
 		width: 100%;
-		flex-grow: 1;
+		flex: 0 1 auto;
+		margin-bottom: 1rem;
 	}
 
+	//
+	// name lookup
+	//
 	.name-lookup {
 		$input-padding: 1.5rem;
 
@@ -110,11 +121,80 @@ $sidebar-width: 16rem;
 		}
 	}
 
-	.toggles {
-		display: flex;
-		justify-content: space-around;
+	//
+	// popularity slider
+	//
+	.slider {
+		position: relative;
 		width: 100%;
-		flex: 0 0 2.5rem;
+		flex: 1 0.25;
+		padding-left: 50%;
+		box-sizing: border-box;
+
+		svg {
+			transform: translateX(-50%);
+		}
+
+		.axis {
+			path {
+				display: none;
+			}
+			line {
+				fill: none;
+				stroke: $label-color;
+				stroke-width: 1px;
+				shape-rendering: crispEdges;
+			}
+			text {
+				fill: $label-color;
+			}
+		}
+
+		.extent {
+			stroke: $label-color;
+			stroke-width: 1px;
+			fill: rgba($background-color, 0.5);
+		}
+
+		.label {
+			position: absolute;
+			bottom: 1.5rem;
+			width: 100%;
+			margin-left: -50%;
+			text-align: center;
+			font-size: 1.25rem;
+		}
+	}
+
+	.slider-background {
+		fill: rgba($label-color, 0.25);
+	}
+
+	.slider-background-grid {
+		text {
+			fill: $label-color;
+		}
+
+		line,
+		path {
+			fill: none;
+			stroke: $sidebar-background-color;
+			shape-rendering: crispEdges;
+		}
+	}
+
+	//
+	// sex toggles
+	//
+	.toggles {
+		flex: 0 0 auto;//5rem;
+		position: relative;
+		width: 100%;
+
+		.toggles-container {
+			display: flex;
+			justify-content: space-around;
+		}
 
 		$toggle-size: 4rem;
 		.sex-toggle {
@@ -178,89 +258,22 @@ $sidebar-width: 16rem;
 			}
 		}
 
-		/*
-		label {
-			display: inline-block;
-			width: 50%;
-
-			&.f {
-				color: $text-color-female;
-			}
-
-			&.m {
-				color: $text-color-male;
-			}
-		}
-
-		input:disabled {
-			cursor: not-allowed;
-		}
-		*/
-	}
-
-	.slider {
-		position: relative;
-		width: 100%;
-		flex: 0 0 $sidebar-width;
-		padding-left: 50%;
-		box-sizing: border-box;
-
-		svg {
-			transform: translateX(-50%);
-		}
-
-		.axis {
-			path {
-				display: none;
-			}
-			line {
-				fill: none;
-				stroke: $label-color;
-				stroke-width: 1px;
-				shape-rendering: crispEdges;
-			}
-			text {
-				fill: $label-color;
-			}
-		}
-
-		.extent {
-			stroke: $label-color;
-			stroke-width: 1px;
-			fill: rgba($background-color, 0.5);
-		}
-
 		.label {
-			position: absolute;
-			bottom: 1.5rem;
 			width: 100%;
-			margin-left: -50%;
 			text-align: center;
 			font-size: 1.25rem;
+			margin-bottom: 1.25rem;
 		}
 	}
 
-	.slider-background {
-		fill: rgba($label-color, 0.25);
-	}
-
-	.slider-background-grid {
-		text {
-			fill: $label-color;
-		}
-
-		line,
-		path {
-			fill: none;
-			stroke: $sidebar-background-color;
-			shape-rendering: crispEdges;
-		}
-	}
-
+	//
+	// legend
+	//
 	.legend {
 		position: relative;
 		width: 100%;
 		box-sizing: border-box;
+		flex: 0 0 auto;//12rem;
 
 		circle {
 			fill: rgba($label-color, 0.1);
@@ -282,6 +295,11 @@ $sidebar-width: 16rem;
 			text-align: center;
 			font-size: 1.25rem;
 		}
+	}
+
+	.bottom-spacer {
+		width: 100%;
+		flex: 0 0 7rem;
 	}
 
 	.graph {
