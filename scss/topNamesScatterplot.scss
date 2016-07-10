@@ -12,6 +12,7 @@ $sidebar-width: 16rem;
 	display: flex;
 
 	color: $label-color;
+	font-family: "AllerLight", "Georgia", sans-serif;
 
 	.sidebar {
 		display: flex;
@@ -49,6 +50,7 @@ $sidebar-width: 16rem;
 			border: 1px solid rgba($label-color, 0.25);
 
 			font-size: 1.25rem;
+			font-family: "Aller", "Georgia", sans-serif;
 			color: $label-color;
 			// text-transform: capitalize;
 
@@ -154,12 +156,12 @@ $sidebar-width: 16rem;
 					top: $toggle-size / 2 - 0.9rem;
 				}
 				&.f {
-					font-weight: bold;
+					font-family: "AllerBold", "Georgia", sans-serif;
 					border-color: $stroke-color-female;
 					background-color: rgba($text-color-female, 0.35);
 				}
 				&.m {
-					font-weight: bold;
+					font-family: "AllerBold", "Georgia", sans-serif;
 					border-color: $stroke-color-male;
 					background-color: rgba($text-color-male, 0.35);
 				}
@@ -312,7 +314,7 @@ $sidebar-width: 16rem;
 					fill-opacity: 0.35;
 				}
 				text {
-					font-weight: bold;
+					font-family: "AllerBold", "Georgia", sans-serif;
 				}
 			}
 
@@ -440,4 +442,27 @@ $sidebar-width: 16rem;
 		}
 	}
 
+}
+
+
+@font-face {
+	font-family: 'AllerLight';
+	src: url('./font/aller_lt-webfont.eot');
+	src: url('./font/aller_lt-webfont.eot?#iefix') format('embedded-opentype'),
+		 url('./font/aller_lt-webfont.woff') format('application/x-font-woff'),
+		 url('./font/aller_lt-webfont.ttf') format('truetype'),
+		 url('./font/aller_lt-webfont.svg#aller_lightregular') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'AllerBold';
+	src: url('./font/aller_bd-webfont.eot');
+	src: url('./font/aller_bd-webfont.eot?#iefix') format('embedded-opentype'),
+		 url('./font/aller_bd-webfont.woff') format('application/x-font-woff'),
+		 url('./font/aller_bd-webfont.ttf') format('truetype'),
+		 url('./font/aller_bd-webfont.svg#allerbold') format('svg');
+	font-weight: normal;
+	font-style: normal;
 }

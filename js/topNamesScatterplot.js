@@ -1,6 +1,5 @@
 /*
 TODO:
-( ) refine toggle styling, remove commented-out cruft
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
 ( ) display name and overall (all-time) rank somewhere.
@@ -39,6 +38,7 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) refine toggle styling, remove commented-out cruft
 (X) add legend (color, radius)
 	d3.legend?
 	http://bl.ocks.org/zanarmstrong/0b6276e033142ce95f7f374e20f1c1a7
