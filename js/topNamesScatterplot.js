@@ -207,7 +207,8 @@ const topNamesScatterplot = () => {
 			.rollup(names => names.map(d => ({
 				name: d.name,
 				sex: d.sex,
-				popularity: 1 - d.rank / (names.length / 2)	// each year has a list of equal length for fe/male
+				// popularity: 1 - d.rank / (names.length / 2)	// each year has a list of equal length for fe/male
+				popularity: d.fraction 							// oops. just use fraction. can probbaly eliminate this rollup altogether.
 			})))
 			.entries(names);
 		/*
@@ -249,9 +250,9 @@ const topNamesScatterplot = () => {
 
 		// final popularity is the sum of the name's popularity across all years the name exists in the data.
 		// therefore, names that appear more often have higher popularity, and rank per year also factors in.
-		allNames.forEach(d => d.value.popularity = namePopularity[d.value.name][d.value.sex].reduce((total, pop) => total + pop));
+		allNames.forEach(d => d.value.popularity = namePopularity[d.value.name][d.value.sex].reduce((total, pop) => total += +pop, 0));
 
-		console.log(allNames.sort((a, b) => a.value.popularity - b.value.popularity).map(d => `${ d.value.name }: ${ d.value.popularity }`));
+		console.log(allNames.sort((a, b) => b.value.popularity - a.value.popularity).map(d => `${ d.value.name }: ${ d.value.popularity }`));
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } at least once
