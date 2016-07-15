@@ -6,6 +6,10 @@ TODO:
 	two pluses:
 		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
 		2, can show all 7000+ names
+( ) refactor out unused calculations to improve startup time
+	( ) no longer need topNames
+	( ) no longer need most num/topOccurrences code
+( ) name in hash when searched for / clicked
 ( ) keep circle hover style (bold font) while timespan is open
 ( ) increase top margin enough to let bubbles at top of graph show in their entirety
 ( ) display name and overall (all-time) rank somewhere.
@@ -14,6 +18,7 @@ TODO:
 	somewhere larger / more graphic might be nice
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
+( ) do a little stress testing...
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -252,11 +257,18 @@ const topNamesScatterplot = () => {
 		// therefore, names that appear more often have higher popularity, and rank per year also factors in.
 		allNames.forEach(d => d.value.popularity = namePopularity[d.value.name][d.value.sex].reduce((total, pop) => total += +pop, 0));
 
-		console.log(allNames.sort((a, b) => b.value.popularity - a.value.popularity).map(d => `${ d.value.name }: ${ d.value.popularity }`));
+		// console.log(allNames.sort((a, b) => b.value.popularity - a.value.popularity).map(d => `${ d.value.name }: ${ d.value.popularity }`));
+		// domains.popularity = d3.extent(allNames, d => d.value.popularity);
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } at least once
-		topNames = allNames.filter(d => d.value.numTopOccurrences);
+		// topNames = allNames.filter(d => d.value.numTopOccurrences);
+
+		// filter down to the most 1000 popular names,
+		// because there is too little variation in popularity below that
+		// to create a legible visualization in this form
+		topNames = allNames.sort((a, b) => b.value.popularity - a.value.popularity).slice(0, 1000);
+		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
 
 		/*
 		// now that we have domains.year, calculate age of each name
@@ -283,6 +295,8 @@ const topNamesScatterplot = () => {
 
 		const topOccurrencesMin = 55,
 			topOccurrencesSpread = 10;
+		const popularityMin = 1,
+			popularitySpread = 0.1;
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
@@ -314,6 +328,7 @@ const topNamesScatterplot = () => {
 			valuesByName = topNames.reduce((acc, name) => {
 				acc[name.key] = {
 					numTopOccurrences: name.value.numTopOccurrences,
+					popularity: name.value.popularity,
 					sex: name.value.sex,
 				};
 				return acc;
@@ -322,7 +337,8 @@ const topNamesScatterplot = () => {
 			{
 				list: names,
 				// autoFirst: true,
-				sort: (a, b) => valuesByName[b.value].numTopOccurrences - valuesByName[a.value].numTopOccurrences,
+				// sort: (a, b) => valuesByName[b.value].numTopOccurrences - valuesByName[a.value].numTopOccurrences,
+				sort: (a, b) => valuesByName[b.value].popularity - valuesByName[a.value].popularity,
 				item: (itemText, inputText) => {
 					let li = Awesomplete.ITEM(itemText, inputText);
 					li.classList.add(valuesByName[itemText].sex);
@@ -343,8 +359,10 @@ const topNamesScatterplot = () => {
 			}
 
 			let brushExtent = [
-				Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
-				Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
+				// Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
+				// Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
+				Math.max(domains.topPopularity[0], +name.value.popularity - popularitySpread/2),
+				Math.min(domains.topPopularity[1], +name.value.popularity + popularitySpread/2)
 			];
 
 			if (brush) {
@@ -420,9 +438,14 @@ const topNamesScatterplot = () => {
 				.append('g')
 					.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
 
-			let sliderScale = d3.scaleLinear()
+			// let sliderScale = d3.scaleLinear()
+			// let sliderScale = d3.scaleLog()
+			// 	.base(10000)
+			let sliderScale = d3.scalePow()
+				.exponent(-0.3)
 				.clamp(true)
-				.domain(domains.topOccurrence)
+				.domain(domains.topPopularity)
+				// .domain(domains.topOccurrence)
 				.range([height, 0]);
 
 			let sliderBackground = sliderSvg.append('rect')
@@ -430,18 +453,21 @@ const topNamesScatterplot = () => {
 				.attr('width', sliderWidth)
 				.attr('height', height);
 
+
 			let sliderGrid = sliderSvg.append('g')
 				.attr('class', 'slider-background-grid')
 				.call(d3.axisLeft()
 					.scale(sliderScale)
 					.tickSize(-sliderWidth)
-					.tickValues([1, 20, 40, 60, 80, 100, 115, 130])
-					.tickFormat(d3.format('d'))
+					.tickValues([0.01, 0.1, 1, 10])
+					// .tickValues([1, 20, 40, 60, 80, 100, 115, 130])
+					// .tickFormat(d3.format('d'))
 				);
 
 			brush = d3.brush()
 				.y(sliderScale)
-				.extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
+				// .extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
+				.extent([popularityMin, popularityMin + popularitySpread]);
 
 			// apply handler after delay to avoid
 			// responding to initial brush setup
@@ -662,12 +688,14 @@ const topNamesScatterplot = () => {
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
-		let occurrenceExtent = brush.extent(),
+		let nameSliderExtent = brush.extent(),
 			filteredNames = topNames.filter(d => 
-				d.value.numTopOccurrences >= occurrenceExtent[0] &&
-				d.value.numTopOccurrences <= occurrenceExtent[1]
+				// d.value.numTopOccurrences >= nameSliderExtent[0] &&
+				// d.value.numTopOccurrences <= nameSliderExtent[1]
+				d.value.popularity >= nameSliderExtent[0] &&
+				d.value.popularity <= nameSliderExtent[1]
 			);
-		// console.log(occurrenceExtent);
+		// console.log(nameSliderExtent);
 		// console.log(filteredNames.map(n => n.key));
 
 		// filter to only selected sexes
