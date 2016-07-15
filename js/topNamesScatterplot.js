@@ -6,6 +6,8 @@ TODO:
 	two pluses:
 		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
 		2, can show all 7000+ names
+( ) when any name is selected + expanded, all other names fade out
+	so that expanded timespan is more legible
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -18,6 +20,10 @@ TODO:
 	somewhere larger / more graphic might be nice
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
+( ) bug: when clicking to deselect timespan, tooltip fades out
+	but is still present and interferes with interaction.
+	( ) set to display: none when it's done fading out
+	( ) set pointer-events: none on the tooltip
 ( ) do a little stress testing...
 
 ( ) write copy
@@ -264,10 +270,10 @@ const topNamesScatterplot = () => {
 		// in the top { rankCutoff } at least once
 		// topNames = allNames.filter(d => d.value.numTopOccurrences);
 
-		// filter down to the most 1000 popular names,
+		// filter down to the most N popular names,
 		// because there is too little variation in popularity below that
 		// to create a legible visualization in this form
-		topNames = allNames.sort((a, b) => b.value.popularity - a.value.popularity).slice(0, 1000);
+		topNames = allNames.sort((a, b) => b.value.popularity - a.value.popularity).slice(0, 2000);
 		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
 
 		/*
@@ -442,7 +448,7 @@ const topNamesScatterplot = () => {
 			// let sliderScale = d3.scaleLog()
 			// 	.base(10000)
 			let sliderScale = d3.scalePow()
-				.exponent(-0.3)
+				.exponent(-0.1)
 				.clamp(true)
 				.domain(domains.topPopularity)
 				// .domain(domains.topOccurrence)
@@ -459,7 +465,7 @@ const topNamesScatterplot = () => {
 				.call(d3.axisLeft()
 					.scale(sliderScale)
 					.tickSize(-sliderWidth)
-					.tickValues([0.01, 0.1, 1, 10])
+					.tickValues([0.001, 0.01, 0.1, 1, 10])
 					// .tickValues([1, 20, 40, 60, 80, 100, 115, 130])
 					// .tickFormat(d3.format('d'))
 				);
@@ -715,7 +721,7 @@ const topNamesScatterplot = () => {
 			.force('x', d3.forceX(d => xScale(d.value.maxYear)).strength(1))
 			.force('y', d3.forceY(d => yScale(d.value.medianRank)).strength(1))
 			// .force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.maxFraction), 0.9)))
-			.force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.countAtMaxFraction), 0.9)))
+			.force('collide', d3.forceCollide(d => Math.pow(Math.max(20, rScale(d.value.countAtMaxFraction)), 0.9)))
 			.stop();
 		for (let i = 0; i < 120; ++i) simulation.tick();
 
