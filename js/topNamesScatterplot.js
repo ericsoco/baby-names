@@ -462,15 +462,17 @@ const topNamesScatterplot = () => {
 				.attr('height', height);
 
 
-			let sliderGrid = sliderSvg.append('g')
-				.attr('class', 'slider-background-grid')
-				.call(d3.axisLeft()
-					.scale(sliderScale)
-					.tickSize(-sliderWidth)
-					.tickValues([0.001, 0.01, 0.1, 1, 10])
-					// .tickValues([1, 20, 40, 60, 80, 100, 115, 130])
-					// .tickFormat(d3.format('d'))
-				);
+			let precision = d3.precisionFixed(0.001),
+				sliderGrid = sliderSvg.append('g')
+					.attr('class', 'slider-background-grid')
+					.call(d3.axisLeft()
+						.scale(sliderScale)
+						.tickSize(-sliderWidth)
+						.tickValues([0.001, 0.01, 0.1, 1, 10])
+						.tickFormat(d => d3.format(`.${ d3.precisionFixed(d) }f`)(d))
+						// .tickValues([1, 20, 40, 60, 80, 100, 115, 130])
+						// .tickFormat(d3.format('d'))
+					);
 
 			brush = d3.brush()
 				.y(sliderScale)

@@ -184,6 +184,10 @@ $sidebar-width: 16rem;
 			fill: $label-color;
 		}
 
+		> g:nth-of-type(2) text {
+			transform: translateY(-0.5rem);
+		}
+
 		line,
 		path {
 			fill: none;
