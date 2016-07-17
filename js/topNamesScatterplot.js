@@ -6,6 +6,8 @@ TODO:
 	two pluses:
 		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
 		2, can show all 7000+ names
+	(X) size slider thumb on name lookup based on pow scale
+	( ) change slider ticks to something useful
 ( ) when any name is selected + expanded, all other names fade out
 	so that expanded timespan is more legible
 ( ) refactor out unused calculations to improve startup time
@@ -301,10 +303,11 @@ const topNamesScatterplot = () => {
 
 		const topOccurrencesMin = 55,
 			topOccurrencesSpread = 10;
-		const popularityMin = 1,
-			popularitySpread = 0.1;
+		const popularityInitVal = 1,
+			popularitySpread = 0.03;
 
-		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
+		let sliderScale,
+			sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
 			copy = sidebar.append('div').attr('class', 'copy'),
 			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
@@ -364,11 +367,12 @@ const topNamesScatterplot = () => {
 				return;
 			}
 
+			let halfBrushHeight = (sliderScale.range()[0] - sliderScale.range()[1]) * popularitySpread;
 			let brushExtent = [
 				// Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
 				// Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
-				Math.max(domains.topPopularity[0], +name.value.popularity - popularitySpread/2),
-				Math.min(domains.topPopularity[1], +name.value.popularity + popularitySpread/2)
+				sliderScale.invert(sliderScale(name.value.popularity) + halfBrushHeight),
+				sliderScale.invert(sliderScale(name.value.popularity) - halfBrushHeight)
 			];
 
 			if (brush) {
@@ -445,9 +449,7 @@ const topNamesScatterplot = () => {
 					.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
 
 			// let sliderScale = d3.scaleLinear()
-			// let sliderScale = d3.scaleLog()
-			// 	.base(10000)
-			let sliderScale = d3.scalePow()
+			sliderScale = d3.scalePow()
 				.exponent(-0.1)
 				.clamp(true)
 				.domain(domains.topPopularity)
@@ -473,7 +475,10 @@ const topNamesScatterplot = () => {
 			brush = d3.brush()
 				.y(sliderScale)
 				// .extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
-				.extent([popularityMin, popularityMin + popularitySpread]);
+				.extent([
+					sliderScale.invert(sliderScale(popularityInitVal) + height * popularitySpread),
+					sliderScale.invert(sliderScale(popularityInitVal) - height * popularitySpread)
+				]);
 
 			// apply handler after delay to avoid
 			// responding to initial brush setup
