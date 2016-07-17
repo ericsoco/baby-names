@@ -1,13 +1,5 @@
 /*
 TODO:
-( ) change popularity slider to allow display of all names:
-	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
-	algo is something like: add up total (inverse: #1 is worth most) rank in all years
-	two pluses:
-		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
-		2, can show all 7000+ names
-	(X) size slider thumb on name lookup based on pow scale
-	( ) change slider ticks to something useful
 ( ) when any name is selected + expanded, all other names fade out
 	so that expanded timespan is more legible
 ( ) refactor out unused calculations to improve startup time
@@ -56,6 +48,16 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) change popularity slider to allow display of all names:
+	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
+	algo is something like: add up total (inverse: #1 is worth most) rank in all years
+	two pluses:
+		1, don't have to explain slider as "occurrences in the top 100 names of each year", it's just popularity (can break it down in text elsewhere)
+		2, can show all 7000+ names
+	(X) compare with master and make sure this is actually better,
+		then merge it!
+	(X) size slider thumb on name lookup based on pow scale
+	(X) change slider ticks to something useful
 (X) refine styles
 	(-) gooey-ify spread names?
 		http://bl.ocks.org/nbremer/69808ec7ec07542ed7df
