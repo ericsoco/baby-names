@@ -1,13 +1,13 @@
 /*
 TODO:
-( ) when any name is selected + expanded, all other names fade out
-	so that expanded timespan is more legible
-( ) refactor out unused calculations to improve startup time
-	( ) no longer need topNames
-	( ) no longer need most num/topOccurrences code
 ( ) name in hash when searched for / clicked
+	(X) write to hash
+	( ) read hash on load
+		this is in progress; see parseHashSelection()
 ( ) keep circle hover style (bold font) while timespan is open
 ( ) increase top margin enough to let bubbles at top of graph show in their entirety
+( ) loader screen;
+	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	this is most interesting along with displaying all names
@@ -19,8 +19,10 @@ TODO:
 	( ) set to display: none when it's done fading out
 	( ) set pointer-events: none on the tooltip
 ( ) do a little stress testing...
-( ) loader screen;
-	also, format raw html text in sidebar 
+( ) refactor out unused calculations to improve startup time
+	( ) no longer need topNames
+	( ) no longer need most num/topOccurrences code
+( ) clicking the brush track should not select nothing, it's confusing.
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -50,6 +52,8 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) when any name is selected + expanded, all other names fade out
+	so that expanded timespan is more legible
 (X) change popularity slider to allow display of all names:
 	instead of number of occurrences, choose a popularity metric/algorithm, and make slider just a popularity slider.
 	algo is something like: add up total (inverse: #1 is worth most) rank in all years
@@ -129,6 +133,7 @@ const topNamesScatterplot = () => {
 		width,
 		height,
 		graphContainer,
+		sliderScale,
 		xScale,
 		yScale,
 		rScale,
@@ -139,7 +144,14 @@ const topNamesScatterplot = () => {
 		allNames,
 		topNames;
 	
+	const topOccurrencesMin = 55,
+		topOccurrencesSpread = 10;
+	const popularityInitVal = 1,
+		popularitySpread = 0.03;
+
 	const init = () => {
+
+		window.addEventListener('hashchange', onHashChange);
 
 		let loaded = {
 			names: null,
@@ -279,11 +291,9 @@ const topNamesScatterplot = () => {
 		// filter down to the most N popular names of each sex,
 		// because there is too little variation in popularity below that
 		// to create a legible visualization in this form
-		topNames = allNames.sort((a, b) => b.value.popularity - a.value.popularity).slice(0, 2000);
-		/*
 		let numNamesPerSex = 1000,
-			sexCounters = { m: 0, f: 0 },
-			topNames = [];
+			sexCounters = { m: 0, f: 0 };
+		topNames = [];
 		allNames.sort((a, b) => b.value.popularity - a.value.popularity)
 			.some(name => {
 				if (sexCounters[name.value.sex] < numNamesPerSex) {
@@ -295,8 +305,6 @@ const topNamesScatterplot = () => {
 					return true;
 				}
 			});
-		console.log(">>>>> total top:", topNames.length, "m:", topNames.filter(n => n.value.sex) === 'm', "f:", topNames.filter(n => n.value.sex) === 'f'));
-		*/
 		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
 
 		/*
@@ -322,13 +330,7 @@ const topNamesScatterplot = () => {
 
 	const initSidebar = () => {
 
-		const topOccurrencesMin = 55,
-			topOccurrencesSpread = 10;
-		const popularityInitVal = 1,
-			popularitySpread = 0.03;
-
-		let sliderScale,
-			sidebar = d3.select('.top-names-scatterplot .sidebar'),
+		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
 			copy = sidebar.append('div').attr('class', 'copy'),
 			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
@@ -390,8 +392,6 @@ const topNamesScatterplot = () => {
 
 			let halfBrushHeight = (sliderScale.range()[0] - sliderScale.range()[1]) * popularitySpread;
 			let brushExtent = [
-				// Math.max(domains.topOccurrence[0], +name.value.numTopOccurrences - topOccurrencesSpread/2),
-				// Math.min(domains.topOccurrence[1], +name.value.numTopOccurrences + topOccurrencesSpread/2)
 				sliderScale.invert(sliderScale(name.value.popularity) + halfBrushHeight),
 				sliderScale.invert(sliderScale(name.value.popularity) - halfBrushHeight)
 			];
@@ -414,7 +414,7 @@ const topNamesScatterplot = () => {
 
 				// highlight name after a delay
 				setTimeout(() => {
-					highlightName(name.key);
+					addNameToSelection(name.key);
 				}, 500);
 
 			}
@@ -705,7 +705,13 @@ const topNamesScatterplot = () => {
 
 			if (frameCount === 2) {
 
-				renderNames();
+				let names = window.location.hash.slice(1) && window.location.hash.slice(1).split(',');
+				if (names && names.length) {
+					parseHashSelection(names);
+				} else {
+					renderNames();
+				}
+				
 				initGraphInteraction(xScale, yScale, rScale, margin);
 
 			} else {
@@ -718,7 +724,7 @@ const topNamesScatterplot = () => {
 
 	const renderNames = () => {
 
-		highlightName(null);
+		window.location.hash = '';
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
@@ -800,9 +806,9 @@ const topNamesScatterplot = () => {
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
 				// console.log(datum);
-				highlightName(datum.key);
+				addNameToSelection(datum.key);
 			} else {
-				highlightName(null);
+				window.location.hash = '';
 			}
 
 		});
@@ -934,6 +940,72 @@ const topNamesScatterplot = () => {
 
 	};
 
+	const parseHashSelection = (names) => {
+
+		if (!names || !names.length) return;
+
+		let nameObjs = names
+			.map(n => topNames.find(d => d.key.toLowerCase() === n.toLowerCase()))
+			.filter(n => !!n);
+
+		if (!nameObjs || !nameObjs.length) return;
+
+		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
+			toggleContainer = sidebar.select('.toggles');
+
+		let halfBrushHeight = (sliderScale.range()[0] - sliderScale.range()[1]) * popularitySpread,
+			namePositionExtent = d3.extent(nameObjs, d => sliderScale(d.value.popularity)),
+			midPos = namePositionExtent[0] + 0.5 * (namePositionExtent[1] - namePositionExtent[0]);
+
+		console.log(">>>>> namePositionExtent:", namePositionExtent);
+		
+		// set the brush extent to the greater of the distance
+		// encompassing all names, or the default brush size
+		let brushExtent = [
+			sliderScale.invert(Math.max(midPos + halfBrushHeight, namePositionExtent[1])),
+			sliderScale.invert(Math.min(midPos - halfBrushHeight, namePositionExtent[0]))
+		];
+
+		if (brush) {
+
+			// ensure sex toggle is on for selected names
+			nameObjs.forEach(name => {
+				let sexToggle = toggleContainer.select(`.${name.value.sex}.sex-toggle`).node();
+				if (!sexToggle.classList.contains('on')) {
+					sexToggle.click();
+				}
+			});
+			
+			// move brush to area where names exist
+			// TODO: why are brush transitions not working?
+			sidebar.select('.brush').transition()
+				.duration(1000)
+				.call(brush.extent(brushExtent))
+				.call(brush)
+				.call(brush.event);
+
+			// highlight name after a delay
+			setTimeout(() => {
+				highlightName(names);
+			}, 500);
+
+		}
+
+	}
+
+	const addNameToSelection = name => {
+		let hash = window.location.hash.slice(1);
+		if (hash) hash += ',';
+		window.location.hash = hash + name;
+	}
+
+	const onHashChange = event => {
+
+		let name = window.location.hash.slice(1);
+		highlightName(name.split(','));
+
+	};
+
 	const highlightName = name => {
 
 		// TODO: DRY this out -- copied from renderNames()
@@ -943,6 +1015,18 @@ const topNamesScatterplot = () => {
 			exitEase = d3.easeQuad;
 
 		let names = graphContainer.selectAll('.name:not(.timespan)');
+
+		if (Array.isArray(name)) {
+			let remainingNames = name.slice(1);
+			if (remainingNames.length) {
+				// be defensive, so that as many names get through as possible
+				// even if there are errors (there shouldn't be...)
+				try {
+					highlightName(remainingNames);
+				} catch (e) {}
+			}
+			name = name[0];
+		}
 
 		if (!name) {
 
@@ -1023,6 +1107,8 @@ const topNamesScatterplot = () => {
 				.classed('not-highlighted', true);
 
 		}
+
+
 
 
 	};
