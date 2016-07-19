@@ -19,6 +19,8 @@ TODO:
 	( ) set to display: none when it's done fading out
 	( ) set pointer-events: none on the tooltip
 ( ) do a little stress testing...
+( ) loader screen;
+	also, format raw html text in sidebar 
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -274,10 +276,27 @@ const topNamesScatterplot = () => {
 		// in the top { rankCutoff } at least once
 		// topNames = allNames.filter(d => d.value.numTopOccurrences);
 
-		// filter down to the most N popular names,
+		// filter down to the most N popular names of each sex,
 		// because there is too little variation in popularity below that
 		// to create a legible visualization in this form
 		topNames = allNames.sort((a, b) => b.value.popularity - a.value.popularity).slice(0, 2000);
+		/*
+		let numNamesPerSex = 1000,
+			sexCounters = { m: 0, f: 0 },
+			topNames = [];
+		allNames.sort((a, b) => b.value.popularity - a.value.popularity)
+			.some(name => {
+				if (sexCounters[name.value.sex] < numNamesPerSex) {
+					topNames.push(name);
+					sexCounters[name.value.sex]++;
+				}
+				if (sexCounters.m >= 1000 &&
+					sexCounters.f >= 1000) {
+					return true;
+				}
+			});
+		console.log(">>>>> total top:", topNames.length, "m:", topNames.filter(n => n.value.sex) === 'm', "f:", topNames.filter(n => n.value.sex) === 'f'));
+		*/
 		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
 
 		/*
@@ -927,7 +946,8 @@ const topNamesScatterplot = () => {
 
 		if (!name) {
 
-			names.classed('highlighted', false);
+			names
+				.classed('highlighted not-highlighted', false);
 			d3.selectAll('.timespan circle').transition()
 				.duration(exitDuration)
 				.ease(exitEase)
@@ -959,6 +979,7 @@ const topNamesScatterplot = () => {
 
 			nameElement
 				.classed('highlighted', true)
+				.classed('not-highlighted', false)
 				.raise();
 
 			// insert after any existing timespans, but before all other circles
@@ -982,8 +1003,6 @@ const topNamesScatterplot = () => {
 				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
 				.attr('cx', d => xScale(d.values[0].year))
 				.attr('cy', nameElementY)
-				// .attr('cy', d => yScale(nameDatum.value.medianRank))
-				// .attr('cy', d => yScale(d.values[0].rank))
 				.attr('r', 0.01)
 			.transition()
 				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
@@ -998,6 +1017,10 @@ const topNamesScatterplot = () => {
 			hoverTimespanCircle(null);
 			hoverTimespanCircle(timespan.selectAll('circle').filter((d, i) => i === topOccurrenceIndex));
 			*/
+
+			// fade out all unhighlighted names
+			graphContainer.selectAll('.name:not(.timespan):not(.highlighted)')
+				.classed('not-highlighted', true);
 
 		}
 

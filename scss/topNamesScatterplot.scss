@@ -340,6 +340,7 @@ $sidebar-width: 16rem;
 
 		.name {
 			&.hover {
+				opacity: 1.0;
 				circle {
 					stroke-width: 2px;
 					fill-opacity: 0.35;
@@ -389,6 +390,10 @@ $sidebar-width: 16rem;
 			&.m {
 				stroke: $stroke-color-male;
 				fill: $text-color-male;
+			}
+
+			&.not-highlighted {
+				opacity: 0.5;
 			}
 
 			line {
