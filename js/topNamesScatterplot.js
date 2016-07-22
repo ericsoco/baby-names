@@ -1,5 +1,9 @@
 /*
 TODO:
+( ) bug: when clicking to deselect timespan, tooltip fades out
+	but is still present and interferes with interaction.
+	( ) set to display: none when it's done fading out
+	(X) set pointer-events: none on the tooltip
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
@@ -8,10 +12,6 @@ TODO:
 	somewhere larger / more graphic might be nice
 ( ) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
-( ) bug: when clicking to deselect timespan, tooltip fades out
-	but is still present and interferes with interaction.
-	( ) set to display: none when it's done fading out
-	( ) set pointer-events: none on the tooltip
 ( ) do a little stress testing...
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
@@ -826,6 +826,9 @@ const topNamesScatterplot = () => {
 
 		graphEl.addEventListener('mousemove', event => {
 
+			//
+			// move year tick on x-axis
+			//
 			let year = Math.round(xScale.invert(event.pageX - graphEl.offsetLeft - margin.left)),
 				yearTick = d3.select('.year-tick');
 			yearTick.select('line')
@@ -834,6 +837,37 @@ const topNamesScatterplot = () => {
 			yearTick.select('text')
 				.attr('x', xScale(year))
 				.text(year);
+
+			//
+			// display tooltip for timespan circles when mouse is proximate
+			//
+			let x = event.pageX - graphEl.offsetLeft - margin.left,
+				y = event.pageY - graphEl.offsetTop - margin.top;
+
+			const maxDist = 80;
+			let shortestDist = Number.MAX_VALUE,
+				closestCircle = null,
+				dx, dy, dist,
+				allCircles = d3.selectAll('.timespan circle');
+			
+			allCircles.each(function (d) {
+				dx = this.getAttribute('cx') - x;
+				dy = this.getAttribute('cy') - y;
+				dist = Math.sqrt(dx * dx + dy * dy);
+
+				// don't even bother calculating circle radius if outside of maxDist
+				if (dist < maxDist) {
+					let rad = Math.max(20, rScale(d.values[0].count) * 1.5);
+					if (dist < rad && dist < shortestDist) {
+						shortestDist = dist;
+						closestCircle = this;
+					}
+				}
+			});
+
+			closestCircle = d3.select(closestCircle);
+			hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
+			highlightedTimespanCircle = closestCircle;
 
 		});
 
@@ -847,33 +881,6 @@ const topNamesScatterplot = () => {
 			} else {
 				hoverName(null);
 			}
-
-		});
-		
-		graphEl.addEventListener('mousemove', event => {
-
-			let x = event.pageX - graphEl.offsetLeft - margin.left,
-				y = event.pageY - graphEl.offsetTop - margin.top;
-
-			const maxDist = 60;
-			let shortestDist = Number.MAX_VALUE,
-				closestCircle = null,
-				dx, dy, dist,
-				allCircles = d3.selectAll('.timespan circle');
-			
-			allCircles.each(function (d) {
-				dx = this.getAttribute('cx') - x;
-				dy = this.getAttribute('cy') - y;
-				dist = Math.sqrt(dx * dx + dy * dy);
-				if (dist < maxDist && dist < shortestDist) {
-					shortestDist = dist;
-					closestCircle = this;
-				}
-			});
-
-			closestCircle = d3.select(closestCircle);
-			hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
-			highlightedTimespanCircle = closestCircle;
 
 		});
 
