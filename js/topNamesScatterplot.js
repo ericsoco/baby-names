@@ -1,9 +1,5 @@
 /*
 TODO:
-( ) name in hash when searched for / clicked
-	(X) write to hash
-	( ) read hash on load
-		this is in progress; see parseHashSelection()
 ( ) keep circle hover style (bold font) while timespan is open
 ( ) increase top margin enough to let bubbles at top of graph show in their entirety
 ( ) loader screen;
@@ -22,12 +18,16 @@ TODO:
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
-( ) clicking the brush track should not select nothing, it's confusing.
+( ) clicking the brush track should center the current extent on click location,
+	not select nothing.
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
 		circle size represents total number of babies with that name in that year
 		copy has to move above/below the fold, not enough room in sidebar.
+		( ) something about names that have changed sex:
+			ashley, lindsey/lindsay...
+			not sure i want to write a lot here, maybe that goes out as a tweet?
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
@@ -52,6 +52,10 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) name in hash when searched for / clicked
+	(X) write to hash
+	(X) read hash on load
+		this is in progress; see parseHashSelection()
 (X) when any name is selected + expanded, all other names fade out
 	so that expanded timespan is more legible
 (X) change popularity slider to allow display of all names:
@@ -504,10 +508,13 @@ const topNamesScatterplot = () => {
 				]);
 
 			// apply handler after delay to avoid
-			// responding to initial brush setup
+			// responding to initial brush setup;
+			// and don't clear selection when handler fired on init
 			setTimeout(() => {
+				let firstFire = true;
 				brush.on('brushend', () => {
-					renderNames();
+					renderNames(!firstFire);
+					firstFire = false;
 				});
 			}, 1);
 			
@@ -555,7 +562,7 @@ const topNamesScatterplot = () => {
 						.classed('disabled', false)
 				}
 
-				renderNames();
+				renderNames(true);
 			});
 
 		toggleContainer.append('div')
@@ -709,7 +716,7 @@ const topNamesScatterplot = () => {
 				if (names && names.length) {
 					parseHashSelection(names);
 				} else {
-					renderNames();
+					renderNames(false);
 				}
 				
 				initGraphInteraction(xScale, yScale, rScale, margin);
@@ -722,9 +729,11 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const renderNames = () => {
+	const renderNames = (clearSelection) => {
 
-		window.location.hash = '';
+		if (clearSelection) {
+			window.location.hash = '';
+		}
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
@@ -957,8 +966,12 @@ const topNamesScatterplot = () => {
 			namePositionExtent = d3.extent(nameObjs, d => sliderScale(d.value.popularity)),
 			midPos = namePositionExtent[0] + 0.5 * (namePositionExtent[1] - namePositionExtent[0]);
 
-		console.log(">>>>> namePositionExtent:", namePositionExtent);
-		
+		// inflate namePositionExtent slightly to ensure inclusion
+		let dist = namePositionExtent[1] - namePositionExtent[0],
+			namePositionInflator = 0.05;
+		namePositionExtent[0] -= namePositionInflator * dist;
+		namePositionExtent[1] += namePositionInflator * dist;
+
 		// set the brush extent to the greater of the distance
 		// encompassing all names, or the default brush size
 		let brushExtent = [
