@@ -1,9 +1,5 @@
 /*
 TODO:
-( ) bug: when clicking to deselect timespan, tooltip fades out
-	but is still present and interferes with interaction.
-	( ) set to display: none when it's done fading out
-	(X) set pointer-events: none on the tooltip
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
@@ -53,6 +49,10 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) bug: when clicking to deselect timespan, tooltip fades out
+	but is still present and interferes with interaction.
+	(-) set to display: none when it's done fading out
+	(X) set pointer-events: none on the tooltip
 (X) keep circle hover style (bold font) while timespan is open
 (X) increase top margin enough to let bubbles at top of graph show in their entirety
 (X) name in hash when searched for / clicked
@@ -941,6 +941,12 @@ const topNamesScatterplot = () => {
 				.classed('timespan-tooltip', true)
 			tooltip.append('h4');
 			tooltip.append('h5');
+		} else {
+			// cancel any existing transition
+			tooltip.transition()
+				.delay(0)
+				.duration(0)
+				.style('opacity', 1.0);
 		}
 
 		let circleY = +circleSel.attr('cy'),
