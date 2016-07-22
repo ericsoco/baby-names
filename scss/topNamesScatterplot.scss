@@ -376,10 +376,16 @@ $sidebar-width: 16rem;
 				}
 			}
 			
-			&.highlighted circle {
-				stroke-width: 3px;
-				fill: $background-color;
-				fill-opacity: 0.85;
+			&.highlighted {
+				circle {
+					stroke-width: 3px;
+					fill: $background-color;
+					fill-opacity: 0.85;
+				}
+
+				text {
+					font-family: "AllerBold", "Georgia", sans-serif;
+				}
 			}
 
 			&.f {

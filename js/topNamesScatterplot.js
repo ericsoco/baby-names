@@ -1,6 +1,5 @@
 /*
 TODO:
-( ) keep circle hover style (bold font) while timespan is open
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
@@ -54,6 +53,7 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) keep circle hover style (bold font) while timespan is open
 (X) increase top margin enough to let bubbles at top of graph show in their entirety
 (X) name in hash when searched for / clicked
 	(X) write to hash
