@@ -1,7 +1,6 @@
 /*
 TODO:
 ( ) keep circle hover style (bold font) while timespan is open
-( ) increase top margin enough to let bubbles at top of graph show in their entirety
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
@@ -20,6 +19,7 @@ TODO:
 	( ) no longer need most num/topOccurrences code
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
+( ) max brush extent, to prevent bad perf
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -28,6 +28,8 @@ TODO:
 		( ) something about names that have changed sex:
 			ashley, lindsey/lindsay...
 			not sure i want to write a lot here, maybe that goes out as a tweet?
+		( ) x/y positions may be slightly off, due to collision resolution for legibility
+		( ) almost entirely male names at the bottom of popularity slider...
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
@@ -52,6 +54,7 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) increase top margin enough to let bubbles at top of graph show in their entirety
 (X) name in hash when searched for / clicked
 	(X) write to hash
 	(X) read hash on load
@@ -310,6 +313,8 @@ const topNamesScatterplot = () => {
 				}
 			});
 		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
+
+		console.log(allNames.map(n => ({ name: n.value.name, median: n.value.medianRank })));
 
 		/*
 		// now that we have domains.year, calculate age of each name
@@ -615,7 +620,7 @@ const topNamesScatterplot = () => {
 		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node();
 
 		margin = {
-			top: 20,
+			top: 80,
 			right: 40,
 			bottom: 80,
 			left: 95
@@ -763,7 +768,6 @@ const topNamesScatterplot = () => {
 		let simulation = d3.forceSimulation(filteredNames)
 			.force('x', d3.forceX(d => xScale(d.value.maxYear)).strength(1))
 			.force('y', d3.forceY(d => yScale(d.value.medianRank)).strength(1))
-			// .force('collide', d3.forceCollide(d => Math.pow(rScale(d.value.maxFraction), 0.9)))
 			.force('collide', d3.forceCollide(d => Math.pow(Math.max(20, rScale(d.value.countAtMaxFraction)), 0.9)))
 			.stop();
 		for (let i = 0; i < 120; ++i) simulation.tick();
