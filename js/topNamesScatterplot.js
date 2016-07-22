@@ -314,8 +314,6 @@ const topNamesScatterplot = () => {
 			});
 		domains.topPopularity = d3.extent(topNames, d => d.value.popularity);
 
-		console.log(allNames.map(n => ({ name: n.value.name, median: n.value.medianRank })));
-
 		/*
 		// now that we have domains.year, calculate age of each name
 		allNames.forEach(d => {
@@ -940,8 +938,8 @@ const topNamesScatterplot = () => {
 
 		let circleY = +circleSel.attr('cy'),
 			tooltipTop = circleY > 0.5 * graphContainer.node().offsetHeight ?
-				circleY - 80 :
-				circleY + 50;
+				circleY - (margin.top - 60) :
+				circleY + (margin.top + 30);
 
 		tooltip.classed(sex, true)
 			.classed(sex === 'm' ? 'f' : 'm', false)
