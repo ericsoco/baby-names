@@ -1,19 +1,22 @@
 /*
 TODO:
-( ) bug (regression): displaying name from hash is broken
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	this is most interesting along with displaying all names
 	somewhere larger / more graphic might be nice
-( ) do a little stress testing...
+	( ) in tooltip, clear up meaning of numbers.
+		NNN (#MM) --> NNN this year (MMth most popular this year)
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) max brush extent, to prevent bad perf
+( ) transition brush to v4 and remove d3 v3
+	http://stackoverflow.com/questions/38237747/how-do-i-apply-a-scale-to-a-d3-v4-0-brush
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
+( ) do a little stress testing...
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -48,6 +51,7 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) bug (regression): displaying name from hash is broken
 (X) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
 	(maybe now that i'm canceling transition, it will work? revisit.)
@@ -978,13 +982,18 @@ const topNamesScatterplot = () => {
 
 		let names = window.location.hash.slice(1) && window.location.hash.slice(1).split(',');
 
+		// no names in hash, bail
 		if (!names || !names.length) return false;
 
 		let nameObjs = names
 			.map(n => topNames.find(d => d.key.toLowerCase() === n.toLowerCase()))
 			.filter(n => !!n);
 
+		// no matching names found, bail
 		if (!nameObjs || !nameObjs.length) return false;
+
+		// brush not yet inited, bail
+		if (!brush) return false;
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			toggleContainer = sidebar.select('.toggles');
@@ -1006,16 +1015,19 @@ const topNamesScatterplot = () => {
 			sliderScale.invert(Math.min(midPos - halfBrushHeight, namePositionExtent[0]))
 		];
 
-		if (brush) {
+		// ensure sex toggle is on for selected names
+		nameObjs.forEach(name => {
+			let sexToggle = toggleContainer.select(`.${name.value.sex}.sex-toggle`).node();
+			if (!sexToggle.classList.contains('on')) {
+				sexToggle.click();
+			}
+		});
+		
+		// wrap in timeout to ensure all slider init has happened,
+		// since there are timeouts in slider init within initSidebar.
+		// hacky shit, but i'm running out of fucks to give ¯\_(ツ)_/¯
+		setTimeout(() => {
 
-			// ensure sex toggle is on for selected names
-			nameObjs.forEach(name => {
-				let sexToggle = toggleContainer.select(`.${name.value.sex}.sex-toggle`).node();
-				if (!sexToggle.classList.contains('on')) {
-					sexToggle.click();
-				}
-			});
-			
 			// move brush to area where names exist
 			// TODO: why are brush transitions not working?
 			sidebar.select('.brush').transition()
@@ -1029,7 +1041,7 @@ const topNamesScatterplot = () => {
 				highlightName(names);
 			}, 500);
 
-		}
+		}, 100);
 
 		return true;
 
