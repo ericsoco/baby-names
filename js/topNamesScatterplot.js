@@ -1,20 +1,19 @@
 /*
 TODO:
+( ) bug (regression): displaying name from hash is broken
 ( ) loader screen;
 	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	this is most interesting along with displaying all names
 	somewhere larger / more graphic might be nice
-( ) display tooltip immediately on name click
-	tried to do this in highlightName, but commented out cuz it's buggy
 ( ) do a little stress testing...
-( ) refactor out unused calculations to improve startup time
-	( ) no longer need topNames
-	( ) no longer need most num/topOccurrences code
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) max brush extent, to prevent bad perf
+( ) refactor out unused calculations to improve startup time
+	( ) no longer need topNames
+	( ) no longer need most num/topOccurrences code
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -49,6 +48,9 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) display tooltip immediately on name click
+	tried to do this in highlightName, but commented out cuz it's buggy
+	(maybe now that i'm canceling transition, it will work? revisit.)
 (X) bug: when clicking to deselect timespan, tooltip fades out
 	but is still present and interferes with interaction.
 	(-) set to display: none when it's done fading out
@@ -150,6 +152,9 @@ const topNamesScatterplot = () => {
 		domains,
 		allNames,
 		topNames;
+
+	let timespanMouseInteractionDisabled = false,
+		timespanMouseInteractionTimeout;
 	
 	const topOccurrencesMin = 55,
 		topOccurrencesSpread = 10;
@@ -715,10 +720,7 @@ const topNamesScatterplot = () => {
 
 			if (frameCount === 2) {
 
-				let names = window.location.hash.slice(1) && window.location.hash.slice(1).split(',');
-				if (names && names.length) {
-					parseHashSelection(names);
-				} else {
+				if (!parseHashSelection()) {
 					renderNames(false);
 				}
 				
@@ -732,11 +734,9 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const renderNames = (clearSelection) => {
+	const renderNames = (clearSel) => {
 
-		if (clearSelection) {
-			window.location.hash = '';
-		}
+		if (clearSel) clearSelection();
 
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
@@ -816,10 +816,9 @@ const topNamesScatterplot = () => {
 
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
-				// console.log(datum);
 				addNameToSelection(datum.key);
 			} else {
-				window.location.hash = '';
+				clearSelection();
 			}
 
 		});
@@ -841,33 +840,35 @@ const topNamesScatterplot = () => {
 			//
 			// display tooltip for timespan circles when mouse is proximate
 			//
-			let x = event.pageX - graphEl.offsetLeft - margin.left,
-				y = event.pageY - graphEl.offsetTop - margin.top;
+			if (!timespanMouseInteractionDisabled) {
+				let x = event.pageX - graphEl.offsetLeft - margin.left,
+					y = event.pageY - graphEl.offsetTop - margin.top;
 
-			const maxDist = 80;
-			let shortestDist = Number.MAX_VALUE,
-				closestCircle = null,
-				dx, dy, dist,
-				allCircles = d3.selectAll('.timespan circle');
-			
-			allCircles.each(function (d) {
-				dx = this.getAttribute('cx') - x;
-				dy = this.getAttribute('cy') - y;
-				dist = Math.sqrt(dx * dx + dy * dy);
+				const maxDist = 80;
+				let shortestDist = Number.MAX_VALUE,
+					closestCircle = null,
+					dx, dy, dist,
+					allCircles = d3.selectAll('.timespan circle');
+				
+				allCircles.each(function (d) {
+					dx = this.getAttribute('cx') - x;
+					dy = this.getAttribute('cy') - y;
+					dist = Math.sqrt(dx * dx + dy * dy);
 
-				// don't even bother calculating circle radius if outside of maxDist
-				if (dist < maxDist) {
-					let rad = Math.max(20, rScale(d.values[0].count) * 1.5);
-					if (dist < rad && dist < shortestDist) {
-						shortestDist = dist;
-						closestCircle = this;
+					// don't even bother calculating circle radius if outside of maxDist
+					if (dist < maxDist) {
+						let rad = Math.max(20, rScale(d.values[0].count) * 1.5);
+						if (dist < rad && dist < shortestDist) {
+							shortestDist = dist;
+							closestCircle = this;
+						}
 					}
-				}
-			});
+				});
 
-			closestCircle = d3.select(closestCircle);
-			hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
-			highlightedTimespanCircle = closestCircle;
+				closestCircle = d3.select(closestCircle);
+				hoverTimespanCircle(closestCircle, highlightedTimespanCircle);
+				highlightedTimespanCircle = closestCircle;
+			}
 
 		});
 
@@ -899,13 +900,22 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const hoverTimespanCircle = (circleSel, lastCircleSel) => {
+	// default duration equal to timespan exit transition duration, plus a bit
+	const disableTimespanMouseInteraction = (duration = 1250) => {
+
+		timespanMouseInteractionDisabled = true;
+		if (timespanMouseInteractionTimeout) clearTimeout(timespanMouseInteractionTimeout);
+		timespanMouseInteractionTimeout = setTimeout(() => timespanMouseInteractionDisabled = false, duration);
+
+	};
+
+	const hoverTimespanCircle = (circleSel, lastCircleSel, closeImmediate) => {
 
 		let tooltip = d3.select('.timespan-tooltip');
 		if (!circleSel || !circleSel.size()) {
 			if (tooltip.size()) {
 				tooltip.transition()
-					.delay(500)
+					.delay(closeImmediate ? 0 : 500)
 					.duration(500)
 					.style('opacity', 0.0)
 					.remove();
@@ -964,15 +974,17 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const parseHashSelection = (names) => {
+	const parseHashSelection = () => {
 
-		if (!names || !names.length) return;
+		let names = window.location.hash.slice(1) && window.location.hash.slice(1).split(',');
+
+		if (!names || !names.length) return false;
 
 		let nameObjs = names
 			.map(n => topNames.find(d => d.key.toLowerCase() === n.toLowerCase()))
 			.filter(n => !!n);
 
-		if (!nameObjs || !nameObjs.length) return;
+		if (!nameObjs || !nameObjs.length) return false;
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			toggleContainer = sidebar.select('.toggles');
@@ -1019,6 +1031,8 @@ const topNamesScatterplot = () => {
 
 		}
 
+		return true;
+
 	}
 
 	const addNameToSelection = name => {
@@ -1032,6 +1046,12 @@ const topNamesScatterplot = () => {
 		let name = window.location.hash.slice(1);
 		highlightName(name.split(','));
 
+	};
+
+	const clearSelection = () => {
+		window.location.hash = '';
+		disableTimespanMouseInteraction();
+		hoverTimespanCircle(null, null, true);
 	};
 
 	const highlightName = name => {
@@ -1072,7 +1092,7 @@ const topNamesScatterplot = () => {
 				.delay(exitDuration)
 				.remove();
 
-			hoverTimespanCircle(null);
+			hoverTimespanCircle(null, null, true);
 
 		} else {
 
@@ -1123,12 +1143,13 @@ const topNamesScatterplot = () => {
 				// .attr('r', d => rScale(d.values[0].fraction));
 				.attr('r', d => rScale(d.values[0].count));
 
-			/*
 			// immediately open tooltip on clicked circle
 			// (close it first if it's already open)
-			hoverTimespanCircle(null);
+			hoverTimespanCircle(null, null, true);
 			hoverTimespanCircle(timespan.selectAll('circle').filter((d, i) => i === topOccurrenceIndex));
-			*/
+
+			// delay tooltip mouse interaction, to keep tooltip on main circle for a bit
+			disableTimespanMouseInteraction(500);
 
 			// fade out all unhighlighted names
 			graphContainer.selectAll('.name:not(.timespan):not(.highlighted)')
