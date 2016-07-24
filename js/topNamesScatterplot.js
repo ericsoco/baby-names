@@ -1,5 +1,7 @@
 /*
 TODO:
+( ) when a circle is clicked, transition it back to its true position
+	(from its force-directed position)
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	this is most interesting along with displaying all names
@@ -1110,9 +1112,17 @@ const topNamesScatterplot = () => {
 			if (nameElement.classed('highlighted')) return null;
 
 			let nameDatum = nameElement.datum(),
+				nameElementY = yScale(nameDatum.value.medianRank);
 
+				// (not using this anymore, now that name animates to true position on click)
 				// modified earlier by force layout, so use this value rather than deriving from data
-				nameElementY = parseFloat(nameElement.attr('transform').split(',')[1].split(')')[0]);
+				// nameElementY = parseFloat(nameElement.attr('transform').split(',')[1].split(')')[0]);
+
+			// animate name to true position on click
+			// (from force-directed collision avoidance position)
+			nameElement.transition()
+				.duration(1200)
+				.attr('transform', `translate(${ xScale(+nameDatum.value.maxYear) },${ yScale(nameDatum.value.medianRank) })scale(1.0)rotate(0)`);
 
 			nameElement
 				.classed('highlighted', true)
