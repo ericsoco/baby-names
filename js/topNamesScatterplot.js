@@ -1,7 +1,5 @@
 /*
 TODO:
-( ) loader screen;
-	also, format raw html text in sidebar 
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	this is most interesting along with displaying all names
@@ -51,6 +49,8 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) loader screen;
+	also, format raw html text in sidebar 
 (X) bug (regression): displaying name from hash is broken
 (X) display tooltip immediately on name click
 	tried to do this in highlightName, but commented out cuz it's buggy
@@ -337,32 +337,25 @@ const topNamesScatterplot = () => {
 
 	const render = () => {
 
-		d3.select('#app').classed('top-names-scatterplot', true);
+		d3.select('.graph').classed('loading', false);
 
 		initGraph();
 		initSidebar();
 
 	}
 
+	// populate the data-driven parts of the sidebar once the data are ready.
+	// static sidebar elements are initialized before bundled js is loaded, in index.html.
 	const initSidebar = () => {
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
-			copy = sidebar.append('div').attr('class', 'copy'),
-			nameLookupContainer = sidebar.append('div').attr('class', 'name-lookup'),
-			sliderContainer = sidebar.append('div').attr('class', 'slider'),
-			toggleContainer = sidebar.append('div').attr('class', 'toggles'),
-			legendContainer = sidebar.append('div').attr('class', 'legend'),
-			bottomSpacer = sidebar.append('div').attr('class', 'bottom-spacer');
-
-
-		// 
-		// copy
-		// 
-		let desc = document.querySelector('#app-description');
-		copy.html(desc.innerHTML);
-		document.querySelector('body').removeChild(desc);
-
+			copy = sidebar.select('.copy'),
+			nameLookupContainer = sidebar.select('.name-lookup'),
+			sliderContainer = sidebar.select('.slider'),
+			toggleContainer = sidebar.select('.toggles'),
+			legendContainer = sidebar.select('.legend'),
+			bottomSpacer = sidebar.select('.bottom-spacer');
 
 		//
 		// name lookup
@@ -651,7 +644,7 @@ const topNamesScatterplot = () => {
 			.domain(domains.count)
 			.range([5, 80]);
 
-		graphContainer = d3.select('.top-names-scatterplot .graph').append('svg')
+		graphContainer = d3.select('.top-names-scatterplot .graph').html('').append('svg')
 			.attr('width', width + margin.left + margin.right)
 			.attr('height', height + margin.top + margin.bottom)
 		.append('g')

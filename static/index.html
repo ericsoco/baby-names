@@ -6,18 +6,56 @@
 		<link rel="stylesheet" type="text/css" href="awesomplete.css">
 	</head>
 	<body>
-		<div id="app-description">
-			The <a href="https://www.ssa.gov/cgi-bin/popularnames.cgi" target="_blank">SSA</a> lists the top baby names in the U.S. for each year from 1880 to the present. This scatterplot displays the most popular 1000 names for each sex.
-			<br>
-			<!--
-			<br>
-			You might also like the <a href="http://www.babynamewizard.com/voyager" target="_blank">Baby Name Wizard</a>, <a href="http://www.visualcinnamon.com/portfolio/babynames" target="_blank">Popular Baby Names</a>, and this <a href="http://bl.ocks.org/syntagmatic/8ab9dc27f144683bc015eb4a2639d234" target="_blank">Bump Plot</a>.
-			-->
+		<div id="app" class="top-names-scatterplot">
+			<div class="sidebar">
+				<div class="copy">
+					The <a href="https://www.ssa.gov/cgi-bin/popularnames.cgi" target="_blank">SSA</a> lists the top baby names in the U.S. for each year from 1880 to the present. This scatterplot displays the most popular 1000 names for each sex.
+					<br>
+					<!--
+					<br>
+					You might also like the <a href="http://www.babynamewizard.com/voyager" target="_blank">Baby Name Wizard</a>, <a href="http://www.visualcinnamon.com/portfolio/babynames" target="_blank">Popular Baby Names</a>, and this <a href="http://bl.ocks.org/syntagmatic/8ab9dc27f144683bc015eb4a2639d234" target="_blank">Bump Plot</a>.
+					-->
+				</div>
+				<div class="name-lookup"></div>
+				<div class="slider"></div>
+				<div class="toggles"></div>
+				<div class="legend"></div>
+				<div class="bottom-spacer"></div>
+			</div>
+			<div class="graph loading">
+				<p>Bouncing thousands of babies...</p>
+				<p>Pinching thousands of baby cheeks...</p>
+				<p>Second-guessing thousands of babies' names...</p>
+				<p>Flipping through millions of birth certificates...</p>
+			</div>
 		</div>
-		<div id="app">
-			<div class="sidebar"></div>
-			<div class="graph"></div>
-		</div>
+		<script>
+			(function () {
+				var loaderMessages = document.querySelectorAll('.loading > p'),
+					index = Math.floor(Math.random() * loaderMessages.length),
+					timeout,
+					fadeTime = 1000,
+					displayTime = 3000;
+
+				function cycleLoaderMessage (stepTime) {
+					var loader = document.querySelector('.loading');
+					if (!loader) return;
+
+					var currentMessage = loader.querySelector('.awake');
+					if (currentMessage) currentMessage.classList.remove('awake');
+					timeout = setTimeout(function () {
+						if (currentMessage) currentMessage.classList.remove('active');
+						loaderMessages.item(index).classList.add('active');
+						timeout = setTimeout(function () {
+							loaderMessages.item(index).classList.add('awake');
+							index = (index + 1) % loaderMessages.length;
+							timeout = setTimeout(cycleLoaderMessage, displayTime);
+						}, 20);
+					}, stepTime || fadeTime);
+				}
+				cycleLoaderMessage(1);
+			})();
+		</script>
 		<script src="bundle.js"></script>
 	</body>
 </html>
