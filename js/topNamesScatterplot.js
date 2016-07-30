@@ -1,11 +1,9 @@
 /*
 TODO:
-( ) regression: tooltip doesn't open immediately on click
-	happened after implementing circle animation to actual position
-( ) clicking the brush track should center the current extent on click location,
-	not select nothing.
 ( ) transition brush to v4 and remove d3 v3
 	http://stackoverflow.com/questions/38237747/how-do-i-apply-a-scale-to-a-d3-v4-0-brush
+( ) clicking the brush track should center the current extent on click location,
+	not select nothing.
 ( ) max brush extent, to prevent bad perf
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
@@ -45,6 +43,8 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) regression: tooltip doesn't open immediately on click
+	happened after implementing circle animation to actual position
 (X) display name and overall (all-time) rank somewhere.
 	in tooltip?
 	somewhere larger / more graphic might be nice
@@ -1175,7 +1175,7 @@ const topNamesScatterplot = () => {
 				popularityRank: nameDatum.value.popularityRank
 			}));
 
-			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.fraction === nameDatum.value.maxFraction),
+			let topOccurrenceIndex = occurrencesData.findIndex(d => d.fraction === nameDatum.value.maxFraction),
 				circles = timespan.selectAll('circle')
 				.data(occurrencesData)
 			.enter().append('circle')
@@ -1189,7 +1189,6 @@ const topNamesScatterplot = () => {
 				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
 				.duration(enterDuration)
 				.ease(enterEase)
-				// .attr('r', d => rScale(d.fraction));
 				.attr('r', d => rScale(d.count));
 
 			// immediately open tooltip on clicked circle
