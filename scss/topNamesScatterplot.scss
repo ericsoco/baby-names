@@ -504,13 +504,16 @@ $sidebar-width: 16rem;
 
 	.timespan-tooltip {
 		position: absolute;
-		
-		min-width: 6rem;
-		min-height: 3rem;
+		min-width: 10rem;
+		min-height: 5.5rem;
 		padding: 0.5rem;
 
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+
 		background-color: rgba($background-color, 0.9);
-		text-align: center;
+		// text-align: center;
 		pointer-events: none;
 
 		border-width: 2px;
@@ -520,19 +523,90 @@ $sidebar-width: 16rem;
 		&.f {
 			color: $text-color-female;
 			border-color: $stroke-color-female;
+			.count {
+				border-color: rgba($stroke-color-female, 0.5);
+			}
 		}
 		&.m {
 			color: $text-color-male;
 			border-color: $stroke-color-male;
+			.count {
+				border-color: rgba($stroke-color-male, 0.5);
+			}
 		}
 
-		h4 {
-			font-weight: normal;
-			margin: 0.25rem 0 0.5rem 0;
+		.top {
+			width: 100%;
+			height: 2rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
 		}
-		h5 {
+		h4 {
+			flex: 1 0 auto;
+			margin: 0;
 			font-weight: normal;
-			margin: 0.5rem 0 0.25rem 0;
+			font-size: 1.35rem;
+			text-align: left;
+		}
+		.overall-rank {
+			flex: 0 0 auto;
+			margin-left: 1rem;
+			line-height: 0.9rem;
+			text-align: right;
+			span {
+				display: block;
+				&:first-of-type {
+					font-size: 1.25rem;
+				}
+				&:last-of-type {
+					font-size: 0.5rem;
+				}
+			}
+		}
+
+		.bottom {
+			width: 100%;
+			height: 3rem;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.year-stats {
+			flex: 0.2 1 4rem;
+			text-align: center;
+		}
+		.count {
+			padding-bottom: 0.25rem;
+			border-bottom-style: solid;
+			border-bottom-width: 1px;
+			span {
+				display: block;
+				&:first-of-type {
+					font-size: 0.9rem;
+				}
+				&:last-of-type {
+					font-size: 0.5rem;
+				}
+			}
+		}
+		.rank {
+			padding-top: 0.25rem;
+			font-size: 0.9rem;
+		}
+		.year {
+			flex: 1 0 2.5rem;
+			text-align: right;
+			span {
+				// display: inline-block;
+				&:first-of-type {
+					font-size: 0.5rem;
+					margin-right: 0.25rem;
+				}
+				&:last-of-type {
+					font-size: 1.25rem;
+				}
+			}
 		}
 	}
 

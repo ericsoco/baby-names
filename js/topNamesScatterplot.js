@@ -1,18 +1,20 @@
 /*
 TODO:
-( ) when a circle is clicked, transition it back to its true position
-	(from its force-directed position)
+( ) regression: tooltip doesn't open immediately on click
+	happened after implementing circle animation to actual position
 ( ) display name and overall (all-time) rank somewhere.
 	in tooltip?
-	this is most interesting along with displaying all names
 	somewhere larger / more graphic might be nice
 	( ) in tooltip, clear up meaning of numbers.
 		NNN (#MM) --> NNN this year (MMth most popular this year)
+			Jennifer: #22 overall
+			182,123 babies this year
+			(#1 this year)
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
-( ) max brush extent, to prevent bad perf
 ( ) transition brush to v4 and remove d3 v3
 	http://stackoverflow.com/questions/38237747/how-do-i-apply-a-scale-to-a-d3-v4-0-brush
+( ) max brush extent, to prevent bad perf
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -51,6 +53,8 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) when a circle is clicked, transition it back to its true position
+	(from its force-directed position)
 (X) loader screen;
 	also, format raw html text in sidebar 
 (X) bug (regression): displaying name from hash is broken
@@ -317,6 +321,7 @@ const topNamesScatterplot = () => {
 				if (sexCounters[name.value.sex] < numNamesPerSex) {
 					topNames.push(name);
 					sexCounters[name.value.sex]++;
+					name.value.popularityRank = sexCounters[name.value.sex];
 				}
 				if (sexCounters.m >= 1000 &&
 					sexCounters.f >= 1000) {
@@ -856,7 +861,7 @@ const topNamesScatterplot = () => {
 
 					// don't even bother calculating circle radius if outside of maxDist
 					if (dist < maxDist) {
-						let rad = Math.max(20, rScale(d.values[0].count) * 1.5);
+						let rad = Math.max(20, rScale(d.count) * 1.5);
 						if (dist < rad && dist < shortestDist) {
 							shortestDist = dist;
 							closestCircle = this;
@@ -928,11 +933,12 @@ const topNamesScatterplot = () => {
 		}
 
 		let datum = circleSel.datum(),
-			name = datum.values[0].name,
-			year = datum.values[0].year,
-			count = datum.values[0].count,
-			rank = datum.values[0].rank,
-			sex = datum.values[0].sex;
+			{ name,
+			year,
+			count,
+			rank,
+			sex,
+			popularityRank } = datum;
 
 		circleSel.classed('highlighted-occurrence', true);
 		circleSel.raise();
@@ -942,14 +948,29 @@ const topNamesScatterplot = () => {
 		}
 
 		let graphContainer = d3.select('.top-names-scatterplot .graph'),
-			tooltipWidth = 96;	// topNamesScatterplot.scss#.timespan-tooltip.min-width;
+			tooltipWidth = 128;	// topNamesScatterplot.scss#.timespan-tooltip.min-width;
 		tooltip = graphContainer.select('.timespan-tooltip');
 
 		if (!tooltip.size()) {
 			tooltip = graphContainer.append('div')
 				.classed('timespan-tooltip', true)
-			tooltip.append('h4');
-			tooltip.append('h5');
+			
+			let top = tooltip.append('div')
+				.classed('top', true);
+			top.append('h4');
+			top.append('div')
+				.classed('overall-rank', true);
+
+			let bottom = tooltip.append('div')
+				.classed('bottom', true);
+			let yearStats = bottom.append('div')
+				.classed('year-stats', true);
+			yearStats.append('div')
+				.classed('count', true);
+			yearStats.append('div')
+				.classed('rank', true);
+			bottom.append('p')
+				.classed('year', true);
 		} else {
 			// cancel any existing transition
 			tooltip.transition()
@@ -968,8 +989,15 @@ const topNamesScatterplot = () => {
 			.style('left', `${ +circleSel.attr('cx') + margin.left - 0.5*tooltipWidth - 10 }px`)
 			.style('top', `${ tooltipTop }px`)
 			.style('opacity', null);
-		tooltip.select('h4').text(`${ name }, ${ year }`);
-		tooltip.select('h5').text(`${ count } (#${ rank })`);
+		tooltip.select('h4').text(name);
+		tooltip.select('.overall-rank').html(`<span>#${ popularityRank }</span><span>overall</span>`);
+		tooltip.select('.count').html(`<span>${ count }</span><span>babies</span>`);
+		tooltip.select('.rank').text(`#${ rank }`);
+		tooltip.select('.year').html(`<span>in</span><span>${ year }</span>`);
+
+		// TODO:
+		// add thousands/millions commas
+		// popularity as rank, not as calculated value
 
 	};
 
@@ -1141,22 +1169,28 @@ const topNamesScatterplot = () => {
 				.attr('x2', xScale(nameDatum.value.lastYear))
 				.attr('y2', nameElementY);
 
-			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.values[0].fraction === nameDatum.value.maxFraction),
+			// flatten data and pass name overall popularity to each occurrence
+			let occurrencesData = nameDatum.value.occurrences.map(o => ({
+				...o.values[0],
+				popularityRank: nameDatum.value.popularityRank
+			}));
+
+			let topOccurrenceIndex = nameDatum.value.occurrences.findIndex(d => d.fraction === nameDatum.value.maxFraction),
 				circles = timespan.selectAll('circle')
-				.data(nameDatum.value.occurrences)
+				.data(occurrencesData)
 			.enter().append('circle')
-				.attr('class', d => d.values[0].sex)
+				.attr('class', d => d.sex)
 				.classed('occurrence', true)
-				.classed('top-rank', d => +d.values[0].rank < rankCutoff)
-				.attr('cx', d => xScale(d.values[0].year))
+				.classed('top-rank', d => +d.rank < rankCutoff)
+				.attr('cx', d => xScale(d.year))
 				.attr('cy', nameElementY)
 				.attr('r', 0.01)
 			.transition()
 				.delay((d, i) => Math.abs(topOccurrenceIndex - i) * 2)
 				.duration(enterDuration)
 				.ease(enterEase)
-				// .attr('r', d => rScale(d.values[0].fraction));
-				.attr('r', d => rScale(d.values[0].count));
+				// .attr('r', d => rScale(d.fraction));
+				.attr('r', d => rScale(d.count));
 
 			// immediately open tooltip on clicked circle
 			// (close it first if it's already open)
