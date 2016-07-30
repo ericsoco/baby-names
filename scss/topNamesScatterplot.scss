@@ -505,7 +505,7 @@ $sidebar-width: 16rem;
 	.timespan-tooltip {
 		position: absolute;
 		min-width: 10rem;
-		min-height: 5.5rem;
+		min-height: 6rem;
 		padding: 0.5rem;
 
 		display: flex;
@@ -583,7 +583,7 @@ $sidebar-width: 16rem;
 			span {
 				display: block;
 				&:first-of-type {
-					font-size: 0.9rem;
+					font-size: 1rem;
 				}
 				&:last-of-type {
 					font-size: 0.5rem;
@@ -592,13 +592,12 @@ $sidebar-width: 16rem;
 		}
 		.rank {
 			padding-top: 0.25rem;
-			font-size: 0.9rem;
+			font-size: 1rem;
 		}
 		.year {
 			flex: 1 0 2.5rem;
 			text-align: right;
 			span {
-				// display: inline-block;
 				&:first-of-type {
 					font-size: 0.5rem;
 					margin-right: 0.25rem;

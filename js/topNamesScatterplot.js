@@ -2,14 +2,6 @@
 TODO:
 ( ) regression: tooltip doesn't open immediately on click
 	happened after implementing circle animation to actual position
-( ) display name and overall (all-time) rank somewhere.
-	in tooltip?
-	somewhere larger / more graphic might be nice
-	( ) in tooltip, clear up meaning of numbers.
-		NNN (#MM) --> NNN this year (MMth most popular this year)
-			Jennifer: #22 overall
-			182,123 babies this year
-			(#1 this year)
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) transition brush to v4 and remove d3 v3
@@ -53,6 +45,14 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) display name and overall (all-time) rank somewhere.
+	in tooltip?
+	somewhere larger / more graphic might be nice
+	(X) in tooltip, clear up meaning of numbers.
+		NNN (#MM) --> NNN this year (MMth most popular this year)
+			Jennifer: #22 overall
+			182,123 babies this year
+			(#1 this year)
 (X) when a circle is clicked, transition it back to its true position
 	(from its force-directed position)
 (X) loader screen;
@@ -981,8 +981,8 @@ const topNamesScatterplot = () => {
 
 		let circleY = +circleSel.attr('cy'),
 			tooltipTop = circleY > 0.5 * graphContainer.node().offsetHeight ?
-				circleY - (margin.top - 60) :
-				circleY + (margin.top + 30);
+				circleY - (margin.top + 10) :
+				circleY + (margin.top + 50);
 
 		tooltip.classed(sex, true)
 			.classed(sex === 'm' ? 'f' : 'm', false)
@@ -991,7 +991,7 @@ const topNamesScatterplot = () => {
 			.style('opacity', null);
 		tooltip.select('h4').text(name);
 		tooltip.select('.overall-rank').html(`<span>#${ popularityRank }</span><span>overall</span>`);
-		tooltip.select('.count').html(`<span>${ count }</span><span>babies</span>`);
+		tooltip.select('.count').html(`<span>${ d3.format(',')(count*10) }</span><span>babies</span>`);
 		tooltip.select('.rank').text(`#${ rank }`);
 		tooltip.select('.year').html(`<span>in</span><span>${ year }</span>`);
 
