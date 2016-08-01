@@ -5,6 +5,8 @@ TODO:
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) max brush extent, to prevent bad perf
+( ) bring all d3.v4 imports up to 1.0+
+	import only used exports, instead of entire modules
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -119,8 +121,7 @@ TODO:
 
 import d3_array from 'd3-array';
 import d3_axis from 'd3-axis';
-// import d3_brush from 'd3-brush';		// not ported to v4 yet: https://github.com/d3/d3/issues/2461
-import d3All from 'd3'
+import * as d3_brush from 'd3-brush';
 import d3_collection from 'd3-collection';
 import d3_ease from 'd3-ease';
 import d3_force from 'd3-force';
@@ -132,8 +133,7 @@ import d3_transition from 'd3-transition';
 const d3 = {
 	...d3_array,
 	...d3_axis,
-	// ...d3_brush,
-	brush: d3All.svg.brush,
+	...d3_brush,
 	...d3_collection,
 	...d3_ease,
 	...d3_force,
@@ -407,7 +407,7 @@ const topNamesScatterplot = () => {
 			}
 
 			let halfBrushHeight = (sliderScale.range()[0] - sliderScale.range()[1]) * popularitySpread;
-			let brushExtent = [
+			let brushHandleSize = [
 				sliderScale.invert(sliderScale(name.value.popularity) + halfBrushHeight),
 				sliderScale.invert(sliderScale(name.value.popularity) - halfBrushHeight)
 			];
@@ -420,13 +420,19 @@ const topNamesScatterplot = () => {
 					sexToggle.click();
 				}
 				
+				// move brush to area where names exist
+				// TODO: why are brush transitions not working?
+				brush.move(sidebar.select('.brush')
+					.transition().duration(1000), brushHandleSize);
+				/*
 				// move brush to area where name exists
 				// TODO: why are brush transitions not working?
 				sidebar.select('.brush').transition()
 					.duration(1000)
-					.call(brush.extent(brushExtent))
+					.call(brush.extent(brushHandleSize))
 					.call(brush)
 					.call(brush.event);
+				*/
 
 				// highlight name after a delay
 				setTimeout(() => {
@@ -511,9 +517,41 @@ const topNamesScatterplot = () => {
 						// .tickFormat(d3.format('d'))
 					);
 
+			brush = d3.brushY()
+				.extent([[0, sliderWidth], sliderScale.range().reverse()]);
+
+			// apply handler after delay to avoid
+			// responding to initial brush setup;
+			// and don't clear selection when handler fired on init
+			// TODO in d3.v4, probably don't need to do this setTimeout dance;
+			// just set initial selection before adding 'end' event handler.
+			setTimeout(() => {
+				let firstFire = true;
+				brush.on('end', () => {
+					renderNames(!firstFire);
+					firstFire = false;
+				});
+			}, 1);
+
+			let brushEl = sliderSvg.append('g')
+				.attr('class', 'brush')
+				.call(brush);
+				// .call(brush.event)	// TODO: why is this called in d3.v3 paradigm? to set initial handle size (d3's extent)?
+			brushEl.selectAll('rect')
+				.attr('width', sliderWidth);
+
+			console.log(">>>>> moving to:", [
+				sliderScale(popularityInitVal) - height * popularitySpread,
+				sliderScale(popularityInitVal) + height * popularitySpread
+			]);
+			brush.move(brushEl, [
+				sliderScale(popularityInitVal) - height * popularitySpread,
+				sliderScale(popularityInitVal) + height * popularitySpread
+			]);
+
+			/*
 			brush = d3.brush()
 				.y(sliderScale)
-				// .extent([topOccurrencesMin, topOccurrencesMin + topOccurrencesSpread]);
 				.extent([
 					sliderScale.invert(sliderScale(popularityInitVal) + height * popularitySpread),
 					sliderScale.invert(sliderScale(popularityInitVal) - height * popularitySpread)
@@ -536,6 +574,7 @@ const topNamesScatterplot = () => {
 				.call(brush.event)
 			.selectAll('rect')
 				.attr('width', sliderWidth);
+			*/
 
 			sliderContainer.append('div')
 				.attr('class', 'label')
@@ -742,17 +781,43 @@ const topNamesScatterplot = () => {
 
 		if (clearSel) clearSelection();
 
+		//
+		// TODO NEXT:
+		// 
+		// had to swap extent indexes below, and then run them through sliderScale.invert(),
+		// to get the correct values.
+		// here's what i've found so far:
+		// v4 brush seems to operate solely on absolute pixel values,
+		// and does not support a scale internally in any way.
+		// so, using it requires scaling on the way in and the way out.
+		// also, since my scale+brush runs from higher values to lower (is backwards, essentially),
+		// i have to flip indices at certain moments like below.
+		//
+		// also found what appears to be a d3 bug: d3-brush::empty returns empty
+		// when it shouldn't for one-dimensional brushes. filed here:
+		// https://github.com/d3/d3/issues/2928
+		//
+		// now, initial brush selection is set correctly,
+		// and names are filtered correctly, but:
+		// a) no selection handle appears on the slider background
+		//		(maybe because brush DOM is different -- `.extent` is no longer a thing?)
+		// b) brush interaction is broken.
+		// the 0<->1 and sliderScale.invert() stuff below will probably
+		// have to be applied in the other parts of the code that interact with the brush...
+		//
+
+
+
 		// filter down to only the names that have appeared
 		// in the top { rankCutoff } a number of times specified by brush extent
-		let nameSliderExtent = brush.extent(),
+		// let nameSliderExtent = brush.extent(),
+		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
+			nameSliderExtent = d3.brushSelection(sidebar.select('.brush').node()),
+			popularityExtent = [sliderScale.invert(nameSliderExtent[1]), sliderScale.invert(nameSliderExtent[0])],
 			filteredNames = topNames.filter(d => 
-				// d.value.numTopOccurrences >= nameSliderExtent[0] &&
-				// d.value.numTopOccurrences <= nameSliderExtent[1]
-				d.value.popularity >= nameSliderExtent[0] &&
-				d.value.popularity <= nameSliderExtent[1]
+				d.value.popularity >= popularityExtent[0] &&
+				d.value.popularity <= popularityExtent[1]
 			);
-		// console.log(nameSliderExtent);
-		// console.log(filteredNames.map(n => n.key));
 
 		// filter to only selected sexes
 		let sexToggles = d3.selectAll('.top-names-scatterplot .sex-toggle').nodes()
@@ -1033,7 +1098,7 @@ const topNamesScatterplot = () => {
 
 		// set the brush extent to the greater of the distance
 		// encompassing all names, or the default brush size
-		let brushExtent = [
+		let brushHandleSize = [
 			sliderScale.invert(Math.max(midPos + halfBrushHeight, namePositionExtent[1])),
 			sliderScale.invert(Math.min(midPos - halfBrushHeight, namePositionExtent[0]))
 		];
@@ -1053,11 +1118,17 @@ const topNamesScatterplot = () => {
 
 			// move brush to area where names exist
 			// TODO: why are brush transitions not working?
+			brush.move(sidebar.select('.brush')
+				.transition().duration(1000), brushHandleSize);
+			/*
+			// move brush to area where names exist
+			// TODO: why are brush transitions not working?
 			sidebar.select('.brush').transition()
 				.duration(1000)
-				.call(brush.extent(brushExtent))
+				.call(brush.extent(brushHandleSize))
 				.call(brush)
 				.call(brush.event);
+			*/
 
 			// highlight name after a delay
 			setTimeout(() => {
