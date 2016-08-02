@@ -159,10 +159,11 @@ $sidebar-width: 16rem;
 			}
 		}
 
-		.extent {
+		.selection {
 			stroke: $label-color;
 			stroke-width: 1px;
-			fill: rgba($background-color, 0.5);
+			fill: $background-color;
+			fill-opacity: 0.5;
 		}
 
 		.label {
