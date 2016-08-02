@@ -10,6 +10,7 @@ TODO:
 ( ) max brush extent, to prevent bad perf
 ( ) bring all d3.v4 imports up to 1.0+
 	import only used exports, instead of entire modules
+	do this in a new repo clone, to make sure that npm install is setting things up correctly
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -515,19 +516,6 @@ const topNamesScatterplot = () => {
 			brush = d3.brushY()
 				.extent([[0, sliderExtentY[0]], [sliderWidth, sliderExtentY[1]]]);
 
-			// apply handler after delay to avoid
-			// responding to initial brush setup;
-			// and don't clear selection when handler fired on init
-			// TODO in d3.v4, probably don't need to do this setTimeout dance;
-			// just set initial selection before adding 'end' event handler.
-			setTimeout(() => {
-				let firstFire = true;
-				brush.on('end', () => {
-					renderNames(!firstFire);
-					firstFire = false;
-				});
-			}, 1);
-
 			let brushSel = sliderSvg.append('g')
 				.attr('class', 'brush')
 				.call(brush);
@@ -536,6 +524,12 @@ const topNamesScatterplot = () => {
 				sliderScale(popularityInitVal) - height * popularitySpread,
 				sliderScale(popularityInitVal) + height * popularitySpread
 			]);
+
+			let firstFire = true;
+			brush.on('end', () => {
+				renderNames(!firstFire);
+				firstFire = false;
+			});
 
 			sliderContainer.append('div')
 				.attr('class', 'label')
@@ -742,36 +736,8 @@ const topNamesScatterplot = () => {
 
 		if (clearSel) clearSelection();
 
-		//
-		// TODO NEXT:
-		// 
-		// had to swap extent indexes below, and then run them through sliderScale.invert(),
-		// to get the correct values.
-		// here's what i've found so far:
-		// v4 brush seems to operate solely on absolute pixel values,
-		// and does not support a scale internally in any way.
-		// so, using it requires scaling on the way in and the way out.
-		// also, since my scale+brush runs from higher values to lower (is backwards, essentially),
-		// i have to flip indices at certain moments like below.
-		//
-		// also found what appears to be a d3 bug: d3-brush::empty returns empty
-		// when it shouldn't for one-dimensional brushes. filed here:
-		// https://github.com/d3/d3/issues/2928
-		//
-		// now, initial brush selection is set correctly,
-		// and names are filtered correctly, but:
-		// a) no selection handle appears on the slider background
-		//		(maybe because brush DOM is different -- `.extent` is no longer a thing?)
-		// b) brush interaction is broken.
-		// the 0<->1 and sliderScale.invert() stuff below will probably
-		// have to be applied in the other parts of the code that interact with the brush...
-		//
-
-
-
 		// filter down to only the names that have appeared
-		// in the top { rankCutoff } a number of times specified by brush extent
-		// let nameSliderExtent = brush.extent(),
+		// a number of times specified by brush extent
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			nameSliderExtent = d3.brushSelection(sidebar.select('.brush').node()),
 			popularityExtent = [sliderScale.invert(nameSliderExtent[1]), sliderScale.invert(nameSliderExtent[0])],
