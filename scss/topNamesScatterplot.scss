@@ -7,6 +7,8 @@ $stroke-color-male: #90F2DF;
 $text-color-male: #189EB2;
 $sidebar-padding: 1.25rem;
 $sidebar-width: 16rem;
+$font-family: "AllerLight", "Georgia", sans-serif;
+$font-family-bold: "AllerBold", "Georgia", sans-serif;
 
 .top-names-scatterplot {
 	display: flex;
@@ -14,7 +16,7 @@ $sidebar-width: 16rem;
 	height: 100%;
 
 	color: $label-color;
-	font-family: "AllerLight", "Georgia", sans-serif;
+	font-family: $font-family;
 
 	.sidebar {
 		display: flex;
@@ -67,7 +69,7 @@ $sidebar-width: 16rem;
 			border-right: none;
 
 			font-size: 1.25rem;
-			font-family: "Aller", "Georgia", sans-serif;
+			font-family: $font-family;
 			color: $label-color;
 			text-transform: capitalize;
 
@@ -162,6 +164,7 @@ $sidebar-width: 16rem;
 		.selection {
 			stroke: $label-color;
 			stroke-width: 1px;
+			stroke-opacity: 0.75;
 			fill: $background-color;
 			fill-opacity: 0.5;
 		}
@@ -183,6 +186,8 @@ $sidebar-width: 16rem;
 	.slider-background-grid {
 		text {
 			fill: $label-color;
+			font-size: 1rem;
+			font-family: $font-family;
 		}
 
 		> g:nth-of-type(2) text {
@@ -250,12 +255,12 @@ $sidebar-width: 16rem;
 					top: $toggle-size / 2 - 0.9rem;
 				}
 				&.f {
-					font-family: "AllerBold", "Georgia", sans-serif;
+					font-family: $font-family-bold;
 					border-color: $stroke-color-female;
 					background-color: rgba($text-color-female, 0.35);
 				}
 				&.m {
-					font-family: "AllerBold", "Georgia", sans-serif;
+					font-family: $font-family-bold;
 					border-color: $stroke-color-male;
 					background-color: rgba($text-color-male, 0.35);
 				}
@@ -388,6 +393,8 @@ $sidebar-width: 16rem;
 
 		.axis text {
 			fill: $label-color;
+			font-size: 1rem;
+			font-family: $font-family;
 		}
 
 		.name {
@@ -398,7 +405,7 @@ $sidebar-width: 16rem;
 					fill-opacity: 0.35;
 				}
 				text {
-					font-family: "AllerBold", "Georgia", sans-serif;
+					font-family: $font-family-bold;
 				}
 			}
 
@@ -436,7 +443,7 @@ $sidebar-width: 16rem;
 				}
 
 				text {
-					font-family: "AllerBold", "Georgia", sans-serif;
+					font-family: $font-family-bold;
 				}
 			}
 
@@ -497,7 +504,8 @@ $sidebar-width: 16rem;
 
 		.year-tick {
 			text {
-				font-size: 1.16em;
+				font-size: 1.16rem;
+				font-family: $font-family;
 				text-anchor: middle;
 			}
 		}

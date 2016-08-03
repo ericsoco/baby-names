@@ -3,14 +3,14 @@ TODO:
 ( ) constrain tooltip to viewport width --
 	hovering over circle at left/right cuts off tooltip.
 	go to /#Silas for a repro.
-( ) transition brush to v4 and remove d3 v3
-	http://stackoverflow.com/questions/38237747/how-do-i-apply-a-scale-to-a-d3-v4-0-brush
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) max brush extent, to prevent bad perf
 ( ) bring all d3.v4 imports up to 1.0+
 	import only used exports, instead of entire modules
 	do this in a new repo clone, to make sure that npm install is setting things up correctly
+( ) consider testing out rollup?
+	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -29,7 +29,6 @@ TODO:
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
-( ) animate brush to new position
 ( ) icons at lower-left:
 	( ) twitter
 	( ) transmote
@@ -49,6 +48,15 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) transition brush to v4 and remove d3 v3
+	(-) remaining problem: on brush click/drag,
+		d3Selection.event is null and causes null ref error in d3-brush::started().
+		is there some issue with how modules are loaded?
+		or perhaps incompatible versions of d3-selection...
+		may force the "bring all d3.v4 imports up to 1.0+" issue
+		--	started this, with d3-selection and then had to do d3-transition as well,
+			but didn't fix it...
+(X) animate brush to new position
 (X) regression: tooltip doesn't open immediately on click
 	happened after implementing circle animation to actual position
 (X) display name and overall (all-time) rank somewhere.
@@ -122,18 +130,21 @@ TODO:
 	a simple d3-brush could allow adjusting topOccurences + spread.
 */
 
-
-import d3_array from 'd3-array';
-import d3_axis from 'd3-axis';
+/*
+// can't import individual modules,
+// because of incompatibility with d3-event and babel:
+// https://github.com/d3/d3/issues/2733
+import * as d3_array from 'd3-array';
+import * as d3_axis from 'd3-axis';
 import * as d3_brush from 'd3-brush';
-import d3_collection from 'd3-collection';
-import d3_ease from 'd3-ease';
-import d3_force from 'd3-force';
-import d3_format from 'd3-format';
-import d3_request from 'd3-request';
-import d3_scale from 'd3-scale';
-import d3_selection from 'd3-selection';
-import d3_transition from 'd3-transition';
+import * as d3_collection from 'd3-collection';
+import * as d3_ease from 'd3-ease';
+import * as d3_force from 'd3-force';
+import * as d3_format from 'd3-format';
+import * as d3_request from 'd3-request';
+import * as d3_scale from 'd3-scale';
+import * as d3_selection from 'd3-selection';
+import * as d3_transition from 'd3-transition';
 const d3 = {
 	...d3_array,
 	...d3_axis,
@@ -147,6 +158,8 @@ const d3 = {
 	...d3_selection,
 	...d3_transition
 };
+*/
+import * as d3 from 'd3';
 
 import awesomplete from 'awesomplete';
 
@@ -1148,7 +1161,7 @@ const topNamesScatterplot = () => {
 				.raise();
 
 			// insert after any existing timespans, but before all other circles
-			let timespan = graphContainer.append('g', '.name:not(.timespan)')
+			let timespan = graphContainer.insert('g', '.name:not(.timespan)')
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 				// .style('filter', 'url(#gooey)');
 
