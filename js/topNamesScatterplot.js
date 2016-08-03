@@ -3,9 +3,6 @@ TODO:
 ( ) constrain tooltip to viewport width --
 	hovering over circle at left/right cuts off tooltip.
 	go to /#Silas for a repro.
-( ) clicking the brush track should center the current extent on click location,
-	not select nothing.
-( ) max brush extent, to prevent bad perf
 ( ) consider testing out rollup?
 	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
@@ -54,6 +51,9 @@ TODO:
 		--	started this, with d3-selection and then had to do d3-transition as well,
 			but didn't fix it...
 (X) animate brush to new position
+(X) clicking the brush track should center the current extent on click location,
+	not select nothing.
+(X) max brush extent, to prevent bad perf
 (X) bring all d3.v4 imports up to 1.0+
 	import only used exports, instead of entire modules
 	do this in a new repo clone, to make sure that npm install is setting things up correctly
@@ -492,26 +492,22 @@ const topNamesScatterplot = () => {
 							legendContainer.node().offsetHeight -
 							bottomSpacer.node().offsetHeight -
 							sliderMargin.top - sliderMargin.bottom,
-				// height = sliderContainer.node().offsetHeight - sliderMargin.top - sliderMargin.bottom,
 				sliderSvg = sliderContainer.append('svg')
 					.attr('width', width + sliderMargin.left + sliderMargin.right)
 					.attr('height', height + sliderMargin.top + sliderMargin.bottom)
 				.append('g')
 					.attr('transform', `translate(${ 0.5 * (width - sliderWidth) + sliderMargin.left },${ sliderMargin.top })`);
 
-			// let sliderScale = d3.scaleLinear()
 			sliderScale = d3.scalePow()
 				.exponent(-0.1)
 				.clamp(true)
 				.domain(domains.topPopularity)
-				// .domain(domains.topOccurrence)
 				.range([height, 0]);
 
 			let sliderBackground = sliderSvg.append('rect')
 				.attr('class', 'slider-background')
 				.attr('width', sliderWidth)
 				.attr('height', height);
-
 
 			let precision = d3.precisionFixed(0.001),
 				sliderGrid = sliderSvg.append('g')
@@ -521,8 +517,6 @@ const topNamesScatterplot = () => {
 						.tickSize(-sliderWidth)
 						.tickValues([0.001, 0.01, 0.1, 1, 10])
 						.tickFormat(d => d3.format(`.${ d3.precisionFixed(d) }f`)(d))
-						// .tickValues([1, 20, 40, 60, 80, 100, 115, 130])
-						// .tickFormat(d3.format('d'))
 					);
 
 			let sliderExtentY = sliderScale.range().reverse();
@@ -538,15 +532,63 @@ const topNamesScatterplot = () => {
 				sliderScale(popularityInitVal) + height * popularitySpread
 			]);
 
-			let firstFire = true;
+			let firstFire = true,
+				newSelectionCenter,
+				maxSelectionSize = height * 8 * popularitySpread;
+
+			brush.on('start', () => {
+				// brush mouse down; store mouse location
+				if (d3.event.selection && d3.event.selection[0] === d3.event.selection[1]) {
+					newSelectionCenter = d3.event.selection[0];
+				}
+			});
+
+
 			brush.on('end', () => {
-				renderNames(!firstFire);
+
+				let brushCenter;
+
+				if (!d3.event.selection) {
+
+					// empty selection (brush clicked);
+					// draw new selection of default width around mouse down location
+					// or if no mouse down location stored, around initial selection center
+					brushCenter = newSelectionCenter || sliderScale(popularityInitVal);
+					brush.move(brushSel, [
+						brushCenter - height * popularitySpread,
+						brushCenter + height * popularitySpread
+					]);
+
+				} else {
+
+					if (d3.event.selection[1] - d3.event.selection[0] > maxSelectionSize) {
+
+						// selection is too large;
+						// animate back down to a more reasonable size
+						brushCenter = d3.event.selection[0] + 0.5 * (d3.event.selection[1] - d3.event.selection[0]);
+						brushSel.transition()
+							.duration(400)
+						.call(brush.move, [
+							brushCenter - 0.49 * maxSelectionSize,
+							brushCenter + 0.49 * maxSelectionSize
+						]);
+
+					} else {
+
+						// valid selection, let 'er rip
+						renderNames(!firstFire);
+
+					}
+					
+				}
+
 				firstFire = false;
+				newSelectionCenter = null;
+
 			});
 
 			sliderContainer.append('div')
 				.attr('class', 'label')
-				// .text(`Occurrences in the top ${ rankCutoff } names of each year`);
 				.text('Popularity');
 		}, 1);
 
@@ -752,8 +794,19 @@ const topNamesScatterplot = () => {
 		// filter down to only the names that have appeared
 		// a number of times specified by brush extent
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
-			nameSliderExtent = d3.brushSelection(sidebar.select('.brush').node()),
-			popularityExtent = [sliderScale.invert(nameSliderExtent[1]), sliderScale.invert(nameSliderExtent[0])],
+			nameSliderExtent = d3.brushSelection(sidebar.select('.brush').node());
+
+		if (!nameSliderExtent) {
+			// brush was clicked and selection cleared;
+			// set a new selection at the clicked location
+
+			console.log(">>>>> TODO: set new selection");
+
+			// renderNames();
+			return;
+		}
+
+		let popularityExtent = [sliderScale.invert(nameSliderExtent[1]), sliderScale.invert(nameSliderExtent[0])],
 			filteredNames = topNames.filter(d => 
 				d.value.popularity >= popularityExtent[0] &&
 				d.value.popularity <= popularityExtent[1]
