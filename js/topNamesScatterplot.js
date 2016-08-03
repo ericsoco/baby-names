@@ -6,9 +6,6 @@ TODO:
 ( ) clicking the brush track should center the current extent on click location,
 	not select nothing.
 ( ) max brush extent, to prevent bad perf
-( ) bring all d3.v4 imports up to 1.0+
-	import only used exports, instead of entire modules
-	do this in a new repo clone, to make sure that npm install is setting things up correctly
 ( ) consider testing out rollup?
 	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
@@ -57,6 +54,9 @@ TODO:
 		--	started this, with d3-selection and then had to do d3-transition as well,
 			but didn't fix it...
 (X) animate brush to new position
+(X) bring all d3.v4 imports up to 1.0+
+	import only used exports, instead of entire modules
+	do this in a new repo clone, to make sure that npm install is setting things up correctly
 (X) regression: tooltip doesn't open immediately on click
 	happened after implementing circle animation to actual position
 (X) display name and overall (all-time) rank somewhere.
