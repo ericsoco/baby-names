@@ -1,14 +1,17 @@
 /*
 TODO:
-( ) constrain tooltip to viewport width --
-	hovering over circle at left/right cuts off tooltip.
-	go to /#Silas for a repro.
 ( ) consider testing out rollup?
 	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
 ( ) do a little stress testing...
+( ) share icons
+	( ) facebook
+	( ) twitter
+	( ) transmote
+	( ) github (link to source)
+	( ) "you might also like" links at lower left, in dropup?
 
 ( ) write copy
 		circles appear at year in which name was at its most popular
@@ -23,17 +26,6 @@ TODO:
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
-( ) icons at lower-left:
-	( ) twitter
-	( ) transmote
-	( ) github (link to source)
-	( ) "you might also like" links at lower left, in dropup?
-
-( ) fix up other prototypes
-	( ) to work with new index.html
-	( ) apply styles via top-level class
-		in same way as .top-names-scatterplot
-	( ) add header to matrix
 
 ( ) link to GH repo
 ( ) link to scraper
@@ -42,6 +34,13 @@ TODO:
 ( ) post on transmote
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) constrain tooltip to viewport width --
+	hovering over circle at left/right cuts off tooltip.
+(-) fix up other prototypes
+	( ) to work with new index.html
+	( ) apply styles via top-level class
+		in same way as .top-names-scatterplot
+	( ) add header to matrix
 (X) transition brush to v4 and remove d3 v3
 	(-) remaining problem: on brush click/drag,
 		d3Selection.event is null and causes null ref error in d3-brush::started().
@@ -543,7 +542,6 @@ const topNamesScatterplot = () => {
 				}
 			});
 
-
 			brush.on('end', () => {
 
 				let brushCenter;
@@ -1038,13 +1036,15 @@ const topNamesScatterplot = () => {
 		}
 
 		let circleY = +circleSel.attr('cy'),
+			tooltipLeft = Math.max(0, Math.min(width - 0.5*tooltipWidth,
+				 +circleSel.attr('cx') + margin.left - 0.5*tooltipWidth - 10)),
 			tooltipTop = circleY > 0.5 * graphContainer.node().offsetHeight ?
 				circleY - (margin.top + 10) :
 				circleY + (margin.top + 50);
 
 		tooltip.classed(sex, true)
 			.classed(sex === 'm' ? 'f' : 'm', false)
-			.style('left', `${ +circleSel.attr('cx') + margin.left - 0.5*tooltipWidth - 10 }px`)
+			.style('left', `${ tooltipLeft }px`)
 			.style('top', `${ tooltipTop }px`)
 			.style('opacity', null);
 		tooltip.select('h4').text(name);
