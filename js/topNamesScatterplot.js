@@ -6,6 +6,9 @@ TODO:
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
 ( ) do a little stress testing...
+( ) twitter/facebook/slack unfurl
+	(X) markup
+	( ) upload image to correct URL
 ( ) share icons
 	( ) facebook
 	( ) twitter
