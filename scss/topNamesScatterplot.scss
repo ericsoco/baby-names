@@ -316,9 +316,32 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 		}
 	}
 
-	.bottom-spacer {
+	//
+	// share icons
+	//
+	.share {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+
 		width: 100%;
-		flex: 0 0 7.5rem;
+		// height: 2.5rem;
+		flex: 0 0 2.5rem;
+		margin-top: 1rem;
+
+		.share-icon {
+			flex: 0 0 2.5rem;
+			background-color: red;
+			/*
+			display: inline-block;
+			width: 2.5rem;
+			height: 2.5rem;
+
+			&:not(:first-of-type) {
+				margin-left: 0.75rem;
+			}
+			*/
+		}
 	}
 
 	.graph {

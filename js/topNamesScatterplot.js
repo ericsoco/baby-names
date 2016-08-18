@@ -1,5 +1,6 @@
 /*
 TODO:
+( ) kill scrollbars
 ( ) consider testing out rollup?
 	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
@@ -11,7 +12,10 @@ TODO:
 	( ) upload image to correct URL
 ( ) share icons
 	( ) facebook
+		( ) use FB sdk.js instead?
+			https://developers.facebook.com/docs/plugins/share-button
 	( ) twitter
+		https://dev.twitter.com/web/tweet-button/web-intent
 	( ) transmote
 	( ) github (link to source)
 	( ) "you might also like" links at lower left, in dropup?
@@ -23,8 +27,10 @@ TODO:
 		( ) something about names that have changed sex:
 			ashley, lindsey/lindsay...
 			not sure i want to write a lot here, maybe that goes out as a tweet?
-		( ) x/y positions may be slightly off, due to collision resolution for legibility
+		( ) why do circles sometimes move on click?
+			x/y positions may be slightly off, due to collision resolution for legibility
 		( ) almost entirely male names at the bottom of popularity slider...
+		( ) how is popularity calculated / what do ticks values on slider mean?
 ( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
@@ -35,6 +41,7 @@ TODO:
 ( ) shrink down bundle.js (2.3MB!!)
 
 ( ) post on transmote
+	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
 (X) constrain tooltip to viewport width --
@@ -381,7 +388,7 @@ const topNamesScatterplot = () => {
 			sliderContainer = sidebar.select('.slider'),
 			toggleContainer = sidebar.select('.toggles'),
 			legendContainer = sidebar.select('.legend'),
-			bottomSpacer = sidebar.select('.bottom-spacer');
+			shareContainer = sidebar.select('.share');
 
 		//
 		// name lookup
@@ -479,6 +486,11 @@ const topNamesScatterplot = () => {
 		// wait one cycle to measure the rest of the elements and fill remaining space
 		//
 		setTimeout(() => {
+			console.log(copy.node().offsetHeight);
+			console.log(parseFloat(window.getComputedStyle(copy.node()).marginBottom.replace('px', '')));
+			console.log(shareContainer.node().offsetHeight);
+			console.log(parseFloat(window.getComputedStyle(shareContainer.node()).marginTop.replace('px', '')));
+			console.log(2*parseFloat(window.getComputedStyle(sidebar.node()).paddingTop.replace('px', '')));
 			let sliderWidth = 40,
 				sliderMargin = {
 					top: 20,
@@ -488,12 +500,17 @@ const topNamesScatterplot = () => {
 				},
 				width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
 				height = sidebarEl.offsetHeight -
-							copy.node().offsetHeight -
+							(copy.node().offsetHeight +
+								parseFloat(window.getComputedStyle(copy.node()).marginBottom.replace('px', ''))
+							) -
 							nameLookupContainer.node().offsetHeight -
 							toggleContainer.node().offsetHeight -
 							legendContainer.node().offsetHeight -
-							bottomSpacer.node().offsetHeight -
-							sliderMargin.top - sliderMargin.bottom,
+							(shareContainer.node().offsetHeight + 
+								parseFloat(window.getComputedStyle(shareContainer.node()).marginTop.replace('px', ''))
+							) -
+							sliderMargin.top - sliderMargin.bottom -
+							2 * parseFloat(window.getComputedStyle(sidebar.node()).paddingTop.replace('px', '')),
 				sliderSvg = sliderContainer.append('svg')
 					.attr('width', width + sliderMargin.left + sliderMargin.right)
 					.attr('height', height + sliderMargin.top + sliderMargin.bottom)
@@ -669,6 +686,41 @@ const topNamesScatterplot = () => {
 		legendContainer.append('div')
 			.attr('class', 'label')
 			.text('Babies per year');
+
+		//
+		// share icons
+		//
+		let shareIcons = [
+			{
+				icon: './img/iconmonstr-facebook-3.svg',
+				url: 'https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no',
+				popup: true
+			},
+			{
+				icon: './img/iconmonstr-twitter-3.svg',
+				url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours?&url=http://transmote.com/hey-baby&hashtags=dataviz,babyname,opendata',
+				popup: true
+			},
+			{
+				icon: './img/iconmonstr-github-3.svg',
+				url: 'https://github.com/ericsoco/baby-names',
+				popup: false
+			},
+			{
+				icon: './img/transmote.svg',
+				url: 'http://transmote.com/projects/hey-baby',
+				popup: false
+			},
+		];
+		shareContainer.selectAll('a.share-icon')
+			.data(shareIcons)
+		.enter().append('a')
+			.classed('share-icon', true);
+				// TODO: get styles right for sidebar height with shareContainer and without bottomSpacer
+				// TODO: how does https://dev.twitter.com/web/tweet-button/web-intent pop open in new window w/o JS (window.open)??
+				// onclick: () => {
+				// 	window.open('https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no');
+				// }
 
 	};
 
