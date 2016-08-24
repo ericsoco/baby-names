@@ -383,7 +383,6 @@ const topNamesScatterplot = () => {
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
-			copy = sidebar.select('.copy'),
 			nameLookupContainer = sidebar.select('.name-lookup'),
 			sliderContainer = sidebar.select('.slider'),
 			toggleContainer = sidebar.select('.toggles'),
@@ -486,11 +485,6 @@ const topNamesScatterplot = () => {
 		// wait one cycle to measure the rest of the elements and fill remaining space
 		//
 		setTimeout(() => {
-			console.log(copy.node().offsetHeight);
-			console.log(parseFloat(window.getComputedStyle(copy.node()).marginBottom.replace('px', '')));
-			console.log(shareContainer.node().offsetHeight);
-			console.log(parseFloat(window.getComputedStyle(shareContainer.node()).marginTop.replace('px', '')));
-			console.log(2*parseFloat(window.getComputedStyle(sidebar.node()).paddingTop.replace('px', '')));
 			let sliderWidth = 40,
 				sliderMargin = {
 					top: 20,
@@ -500,9 +494,6 @@ const topNamesScatterplot = () => {
 				},
 				width = sidebarEl.offsetWidth - sliderMargin.left - sliderMargin.right,
 				height = sidebarEl.offsetHeight -
-							(copy.node().offsetHeight +
-								parseFloat(window.getComputedStyle(copy.node()).marginBottom.replace('px', ''))
-							) -
 							nameLookupContainer.node().offsetHeight -
 							toggleContainer.node().offsetHeight -
 							legendContainer.node().offsetHeight -
