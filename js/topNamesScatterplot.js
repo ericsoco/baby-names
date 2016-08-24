@@ -683,17 +683,17 @@ const topNamesScatterplot = () => {
 		//
 		let shareIcons = [
 			{
-				icon: './img/iconmonstr-facebook-3.svg',
+				icon: 'icon-facebook',
 				url: 'https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no',
 				popup: true
 			},
 			{
-				icon: './img/iconmonstr-twitter-3.svg',
+				icon: 'icon-twitter',
 				url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours?&url=http://transmote.com/hey-baby&hashtags=dataviz,babyname,opendata',
 				popup: true
 			},
 			{
-				icon: './img/iconmonstr-github-3.svg',
+				icon: 'icon-github',
 				url: 'https://github.com/ericsoco/baby-names',
 				popup: false
 			},
@@ -706,12 +706,17 @@ const topNamesScatterplot = () => {
 		shareContainer.selectAll('a.share-icon')
 			.data(shareIcons)
 		.enter().append('a')
-			.classed('share-icon', true);
-				// TODO: get styles right for sidebar height with shareContainer and without bottomSpacer
-				// TODO: how does https://dev.twitter.com/web/tweet-button/web-intent pop open in new window w/o JS (window.open)??
-				// onclick: () => {
-				// 	window.open('https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no');
-				// }
+			.classed('share-icon', true)
+			.attr('href', (d, i) => shareIcons[i].url)
+		.append('svg')
+			.attr('width', 40)
+			.attr('height', 40)
+			.html((d, i) => `<use xlink:href="#${ shareIcons[i].icon }" />`);
+
+		// TODO: how does https://dev.twitter.com/web/tweet-button/web-intent pop open in new window w/o JS (window.open)??
+		// onclick: () => {
+		// 	window.open('https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no');
+		// }
 
 	};
 

@@ -360,7 +360,10 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 
 		.share-icon {
 			flex: 0 0 2.5rem;
-			background-color: red;
+
+			svg {
+				fill: $label-color;
+			}
 			/*
 			display: inline-block;
 			width: 2.5rem;
