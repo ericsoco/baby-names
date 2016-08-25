@@ -1,12 +1,8 @@
 /*
 TODO:
-( ) kill scrollbars
-( ) consider testing out rollup?
-	http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
-( ) do a little stress testing...
 ( ) twitter/facebook/slack unfurl
 	(X) markup
 	( ) upload image to correct URL
@@ -19,7 +15,6 @@ TODO:
 	( ) transmote
 	( ) github (link to source)
 	( ) "you might also like" links at lower left, in dropup?
-
 ( ) write copy
 		circles appear at year in which name was at its most popular
 		circle size represents total number of babies with that name in that year
@@ -31,7 +26,6 @@ TODO:
 			x/y positions may be slightly off, due to collision resolution for legibility
 		( ) almost entirely male names at the bottom of popularity slider...
 		( ) how is popularity calculated / what do ticks values on slider mean?
-( ) refine design/colors
 ( ) be sure sidebar is responsive enough
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
@@ -39,11 +33,17 @@ TODO:
 ( ) link to GH repo
 ( ) link to scraper
 ( ) shrink down bundle.js (2.3MB!!)
+	( ) consider testing out rollup?
+		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 
+( ) do a little stress testing...
+( ) one last bug scrub
 ( ) post on transmote
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) refine design/colors
+(X) kill scrollbars
 (X) constrain tooltip to viewport width --
 	hovering over circle at left/right cuts off tooltip.
 (-) fix up other prototypes
@@ -953,7 +953,7 @@ const topNamesScatterplot = () => {
 			//
 			if (!timespanMouseInteractionDisabled) {
 				let x = event.pageX - graphEl.offsetLeft - margin.left,
-					y = event.pageY - graphEl.offsetTop - margin.top;
+					y = event.pageY - (graphEl.getBoundingClientRect().top + window.pageYOffset) - margin.top;
 
 				const maxDist = 80;
 				let shortestDist = Number.MAX_VALUE,
