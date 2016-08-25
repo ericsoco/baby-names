@@ -7,14 +7,14 @@ TODO:
 	(X) markup
 	( ) upload image to correct URL
 ( ) share icons
-	( ) facebook
-		( ) use FB sdk.js instead?
-			https://developers.facebook.com/docs/plugins/share-button
-	( ) twitter
-		https://dev.twitter.com/web/tweet-button/web-intent
 	( ) transmote
-	( ) github (link to source)
-	( ) "you might also like" links at lower left, in dropup?
+	(X) facebook
+		(-) use FB sdk.js instead?
+			https://developers.facebook.com/docs/plugins/share-button
+	(X) twitter
+		https://dev.twitter.com/web/tweet-button/web-intent
+	(X) github (link to source)
+	(-) "you might also like" links at lower left, in dropup?
 ( ) write copy
 		circles appear at year in which name was at its most popular
 		circle size represents total number of babies with that name in that year
@@ -681,42 +681,56 @@ const topNamesScatterplot = () => {
 		//
 		// share icons
 		//
-		let shareIcons = [
-			{
-				icon: 'icon-facebook',
-				url: 'https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no',
-				popup: true
+		let sharePopupWindowSize = {
+				width: 600,
+				height: 400
 			},
-			{
-				icon: 'icon-twitter',
-				url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours?&url=http://transmote.com/hey-baby&hashtags=dataviz,babyname,opendata',
-				popup: true
-			},
-			{
-				icon: 'icon-github',
-				url: 'https://github.com/ericsoco/baby-names',
-				popup: false
-			},
-			{
-				icon: './img/transmote.svg',
-				url: 'http://transmote.com/projects/hey-baby',
-				popup: false
-			},
-		];
-		shareContainer.selectAll('a.share-icon')
+			shareIcons = [
+				{
+					icon: 'icon-facebook',
+					url: 'https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby',
+					popupConfig: `width=${ sharePopupWindowSize.width },height=${ sharePopupWindowSize.height },scrollbars=no`
+				},
+				{
+					icon: 'icon-twitter',
+					url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours?&url=http://transmote.com/hey-baby&hashtags=dataviz,babyname,opendata',
+					popupConfig: `width=${ sharePopupWindowSize.width },height=${ sharePopupWindowSize.height },scrollbars=no`
+				},
+				{
+					icon: 'icon-github',
+					url: 'https://github.com/ericsoco/baby-names',
+					popupConfig: null
+				},
+				{
+					icon: './img/transmote.svg',
+					url: 'http://transmote.com/projects/hey-baby',
+					popupConfig: null
+				},
+			];
+
+		let shareEnter = shareContainer.selectAll('a.share-icon')
 			.data(shareIcons)
-		.enter().append('a')
+		.enter();
+		let shareLinks = shareEnter.append('a')
 			.classed('share-icon', true)
 			.attr('href', (d, i) => shareIcons[i].url)
+			.attr('target', (d, i) => !shareIcons[i].popupConfig ? '_blank' : null)
 		.append('svg')
 			.attr('width', 40)
 			.attr('height', 40)
 			.html((d, i) => `<use xlink:href="#${ shareIcons[i].icon }" />`);
 
-		// TODO: how does https://dev.twitter.com/web/tweet-button/web-intent pop open in new window w/o JS (window.open)??
-		// onclick: () => {
-		// 	window.open('https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby", "pop", "width=600, height=400, scrollbars=no');
-		// }
+		shareLinks.nodes().forEach((node, i) => {
+			if (shareIcons[i].popupConfig) {
+				node.addEventListener('click', event => {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					let left = 0.5 * (window.innerWidth - sharePopupWindowSize.width),
+						top = 0.5 * (window.innerHeight - sharePopupWindowSize.height);
+					window.open(shareIcons[i].url, 'share-pop', `${ shareIcons[i].popupConfig },left=${ left },top=${ top }`);
+				});
+			}
+		});
 
 	};
 
