@@ -1,13 +1,49 @@
 /*
 TODO:
-( ) refactor out unused calculations to improve startup time
-	( ) no longer need topNames
-	( ) no longer need most num/topOccurrences code
+( ) center share dialogs on screen
+	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 ( ) twitter/facebook/slack unfurl
 	(X) markup
 	( ) upload image to correct URL
-( ) share icons
-	( ) transmote
+( ) finish info-modal
+	( ) close on click outside
+	( ) close button ('X')
+	( ) close on esc
+( ) responsive-ish
+	( ) info-modal
+	( ) sidebar
+( ) fonts race condition:
+	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
+
+( ) refactor out unused calculations to improve startup time
+	( ) no longer need topNames
+	( ) no longer need most num/topOccurrences code
+( ) shrink down bundle.js (2.3MB!!)
+	( ) consider testing out rollup?
+		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
+( ) do a little stress testing...
+( ) check other browsers
+( ) one last bug scrub
+
+( ) post on transmote
+	http://transmote.com/hey-baby (used in social share links)
+( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
+
+(X) link to GH repo
+(X) link to scraper
+(X) write copy
+		circles appear at year in which name was at its most popular
+		circle size represents total number of babies with that name in that year
+		copy has to move above/below the fold, not enough room in sidebar.
+		(X) something about names that have changed sex:
+			ashley, lindsey/lindsay...
+			not sure i want to write a lot here, maybe that goes out as a tweet?
+		(X) why do circles sometimes move on click?
+			x/y positions may be slightly off, due to collision resolution for legibility
+		(X) almost entirely male names at the bottom of popularity slider...
+		(X) how is popularity calculated / what do ticks values on slider mean?
+(X) share icons
+	(-) transmote
 	(X) facebook
 		(-) use FB sdk.js instead?
 			https://developers.facebook.com/docs/plugins/share-button
@@ -15,33 +51,6 @@ TODO:
 		https://dev.twitter.com/web/tweet-button/web-intent
 	(X) github (link to source)
 	(-) "you might also like" links at lower left, in dropup?
-( ) write copy
-		circles appear at year in which name was at its most popular
-		circle size represents total number of babies with that name in that year
-		copy has to move above/below the fold, not enough room in sidebar.
-		( ) something about names that have changed sex:
-			ashley, lindsey/lindsay...
-			not sure i want to write a lot here, maybe that goes out as a tweet?
-		( ) why do circles sometimes move on click?
-			x/y positions may be slightly off, due to collision resolution for legibility
-		( ) almost entirely male names at the bottom of popularity slider...
-		( ) how is popularity calculated / what do ticks values on slider mean?
-( ) be sure sidebar is responsive enough
-( ) fonts race condition:
-	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
-
-( ) link to GH repo
-( ) link to scraper
-( ) shrink down bundle.js (2.3MB!!)
-	( ) consider testing out rollup?
-		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
-
-( ) do a little stress testing...
-( ) one last bug scrub
-( ) post on transmote
-	http://transmote.com/hey-baby (used in social share links)
-( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
-
 (X) refine design/colors
 (X) kill scrollbars
 (X) constrain tooltip to viewport width --
@@ -700,12 +709,7 @@ const topNamesScatterplot = () => {
 					icon: 'icon-github',
 					url: 'https://github.com/ericsoco/baby-names',
 					popupConfig: null
-				},
-				{
-					icon: './img/transmote.svg',
-					url: 'http://transmote.com/projects/hey-baby',
-					popupConfig: null
-				},
+				}
 			];
 
 		let shareEnter = shareContainer.selectAll('a.share-icon')
@@ -731,6 +735,16 @@ const topNamesScatterplot = () => {
 				});
 			}
 		});
+
+		// info-modal button
+		shareContainer.append('div')
+			.classed('info-modal-button', true)
+		.append('div')
+			.text('?')
+			.on('click', event => {
+				d3.select('#info-modal-container')
+					.classed('visible', true);
+			});
 
 	};
 

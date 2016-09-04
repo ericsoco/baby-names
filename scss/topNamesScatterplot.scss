@@ -364,15 +364,26 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 			svg {
 				fill: $label-color;
 			}
-			/*
-			display: inline-block;
-			width: 2.5rem;
-			height: 2.5rem;
+		}
 
-			&:not(:first-of-type) {
-				margin-left: 0.75rem;
+		.info-modal-button {
+			flex: 0 0 2.5rem;
+			width: 40px;
+			height: 40px;
+
+			background-color: $label-color;
+			border-radius: 50%;
+
+			div {
+				padding-top: 0.15rem;
+				color: $background-color;
+				font-family: $font-family-bold;
+				font-size: 2rem;
+				text-align: center;
+
+				cursor: pointer;
+				user-select: none;
 			}
-			*/
 		}
 	}
 
@@ -673,4 +684,42 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 		}
 	}
 
+}
+
+// 
+// modal
+//
+#info-modal-container {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba($background-color, 0.5);
+
+	&.visible {
+		display: block !important;
+	}
+}
+
+#info-modal {
+	position: absolute;
+	width: 50vw;
+	height: 50vh;
+	min-width: 320px;
+	min-height: 560px;
+	left: 25vw;
+	bottom: 25vh;
+	overflow-x: hidden;
+	overflow-y: auto;
+
+	border: 1px solid rgba($label-color, 0.25);
+	background-color: rgba($background-color, 0.85);
+	padding: 1rem 2.25rem;
+	font-family: $font-family;
+
+	li {
+		padding: 0.25rem 0;
+		list-style-type: circle;
+	}
 }
