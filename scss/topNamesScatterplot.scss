@@ -38,21 +38,25 @@ $sidebar-width: 16rem;
 $font-family: "AllerLight", "Georgia", sans-serif;
 $font-family-bold: "AllerBold", "Georgia", sans-serif;
 
+/*
 #app {
 	border-top: 1px solid rgba($label-color, 0.25);
 }
+*/
 
 #title-block {
 	// fix the FOUC
 	visibility: visible !important;
 
-	margin: 5rem 0;
+	padding: 5rem 0;
 	font-family: "AllerLight", "Georgia", sans-serif;
 	text-align: center;
-	color: #707070;
+	color: #ffffff;
+	background-color: #727A8C;
 
 	h1 {
 		font-size: 3rem;
+		margin-top: 0;
 	}
 
 	.title-body {
