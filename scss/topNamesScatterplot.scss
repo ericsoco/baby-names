@@ -1,10 +1,38 @@
 $background-color: #ffffff;
 $sidebar-background-color: #f9f9f9;
 $label-color: #707070;
+
+/*
+// blue & pink
 $stroke-color-female: #F2B5DA;
 $text-color-female: #E057C1;
+$timespan-fill-female: $stroke-color-female;
 $stroke-color-male: #90F2DF;
 $text-color-male: #189EB2;
+$timespan-fill-male: $stroke-color-male;
+$timespan-fill-opacity: 0.5;
+*/
+
+// blue & peach
+$stroke-color-female: #F2BBB5;
+$text-color-female: #E0563F;
+$timespan-fill-female: $text-color-female;
+$stroke-color-male: #90F2DF;
+$text-color-male: #189EB2;
+$timespan-fill-male: $text-color-male;
+$timespan-fill-opacity: 0.2;
+
+/*
+// mint & magenta
+$stroke-color-female: #D4618E;
+$text-color-female: #A65373;
+$timespan-fill-female: $stroke-color-female;
+$stroke-color-male: #79F2C1;
+$text-color-male: #42A67E;
+$timespan-fill-male: $stroke-color-male;
+$timespan-fill-opacity: 0.5;
+*/
+
 $sidebar-padding: 1.25rem;
 $sidebar-width: 16rem;
 $font-family: "AllerLight", "Georgia", sans-serif;
@@ -483,12 +511,13 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 			}
 
 			&.timespan circle {
-				fill-opacity: 0.2;
+				fill-opacity: 0.4 * $timespan-fill-opacity;
 				stroke-opacity: 0.0;
+				mix-blend-mode: darken;
 
 				&.top-rank {
 					stroke-opacity: 0.0;
-					fill-opacity: 0.5;
+					fill-opacity: $timespan-fill-opacity;
 				}
 
 				&.occurrence.highlighted-occurrence {
@@ -500,11 +529,11 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 
 				&.f {
 					stroke: $stroke-color-female;
-					fill: $stroke-color-female;
+					fill: $timespan-fill-female;
 				}
 				&.m {
 					stroke: $stroke-color-male;
-					fill: $stroke-color-male;
+					fill: $timespan-fill-male;
 				}
 			}
 			
@@ -532,6 +561,12 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 
 			&.not-highlighted {
 				opacity: 0.5;
+				&.f text {
+					fill: darken($text-color-female, 20%);
+				}
+				&.m text {
+					fill: darken($text-color-male, 20%);
+				}
 			}
 
 			line {
