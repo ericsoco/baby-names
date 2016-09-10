@@ -26,7 +26,8 @@ TODO:
 ( ) check other browsers
 ( ) one last bug scrub
 
-( ) post on transmote
+( ) add gh-deploy script and deploy on gh-pages
+( ) alias that to transmote:
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
