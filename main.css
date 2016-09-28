@@ -1,0 +1,611 @@
+@font-face {
+  font-family: 'AllerLight';
+  src: url("./font/aller_lt-webfont.eot");
+  src: url("./font/aller_lt-webfont.eot?#iefix") format("embedded-opentype"), url("./font/aller_lt-webfont.woff") format("application/x-font-woff"), url("./font/aller_lt-webfont.ttf") format("truetype"), url("./font/aller_lt-webfont.svg#aller_lightregular") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'AllerBold';
+  src: url("./font/aller_bd-webfont.eot");
+  src: url("./font/aller_bd-webfont.eot?#iefix") format("embedded-opentype"), url("./font/aller_bd-webfont.woff") format("application/x-font-woff"), url("./font/aller_bd-webfont.ttf") format("truetype"), url("./font/aller_bd-webfont.svg#allerbold") format("svg");
+  font-weight: normal;
+  font-style: normal; }
+
+.matrix {
+  table-layout: fixed;
+  border-collapse: collapse; }
+  .matrix .row {
+    position: relative;
+    height: 12px;
+    font-size: 8px;
+    line-height: 0;
+    white-space: nowrap; }
+    .matrix .row.f {
+      background-color: #f2eee1; }
+    .matrix .row.m {
+      background-color: #dae8e0; }
+    .matrix .row th {
+      margin: 0;
+      padding: 0 6px 0 0;
+      font-weight: normal;
+      text-align: right; }
+  .matrix .punch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    padding: 0; }
+    .matrix .punch:nth-child(10n+1) {
+      border-right: #a9a9a9 1px solid; }
+    .matrix .punch > div {
+      border-radius: 50%;
+      background-color: #000000;
+      transform: translate(-50%, -50%);
+      margin: 6px 0 0 6px; }
+
+.scatterplot {
+  pointer-events: none;
+  background-color: #ffffff; }
+  .scatterplot .axis path,
+  .scatterplot .axis line {
+    fill: none;
+    stroke: #707070;
+    stroke-width: 1px;
+    shape-rendering: crispEdges; }
+  .scatterplot .axis text {
+    fill: #707070; }
+  .scatterplot circle {
+    fill: transparent;
+    stroke: #a9a9a9;
+    stroke-width: 1px;
+    z-index: 1;
+    pointer-events: auto; }
+    .scatterplot circle.f {
+      stroke: #f2f035; }
+    .scatterplot circle.m {
+      stroke: #90f200; }
+    .scatterplot circle.highlighted {
+      stroke-width: 3px;
+      z-index: 2; }
+      .scatterplot circle.highlighted.f {
+        stroke: #e0ca00;
+        fill: rgba(224, 202, 0, 0.25); }
+      .scatterplot circle.highlighted.m {
+        stroke: #09bf00;
+        fill: rgba(9, 191, 0, 0.25); }
+  .scatterplot .selection-label text {
+    fill: #707070; }
+  .scatterplot .selection-label tspan:nth-child(2) {
+    font-size: smaller; }
+  .scatterplot .selection-line {
+    stroke: #707070;
+    stroke-opacity: 0.5; }
+
+/*
+// blue & pink
+$stroke-color-female: #F2B5DA;
+$text-color-female: #E057C1;
+$timespan-fill-female: $stroke-color-female;
+$stroke-color-male: #90F2DF;
+$text-color-male: #189EB2;
+$timespan-fill-male: $stroke-color-male;
+$timespan-fill-opacity: 0.5;
+*/
+/*
+// mint & magenta
+$stroke-color-female: #D4618E;
+$text-color-female: #A65373;
+$timespan-fill-female: $stroke-color-female;
+$stroke-color-male: #79F2C1;
+$text-color-male: #42A67E;
+$timespan-fill-male: $stroke-color-male;
+$timespan-fill-opacity: 0.5;
+*/
+/*
+#app {
+	border-top: 1px solid rgba($label-color, 0.25);
+}
+*/
+#title-block {
+  visibility: visible !important;
+  padding: 5rem 0;
+  font-family: "AllerLight", "Georgia", sans-serif;
+  text-align: center;
+  color: #ffffff;
+  background-color: #727A8C; }
+  #title-block h1 {
+    font-family: "AllerBold", "Georgia", sans-serif;
+    font-size: 3rem;
+    margin-top: 0; }
+  #title-block .title-body {
+    width: 635px;
+    margin: 0 auto;
+    font-size: 1.25rem; }
+  #title-block p {
+    text-align: left; }
+
+.top-names-scatterplot {
+  display: flex;
+  position: relative;
+  height: 100%;
+  color: #727A8C;
+  font-family: "AllerLight", "Georgia", sans-serif; }
+  .top-names-scatterplot .sidebar {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100vh;
+    flex: 1 0 16rem;
+    max-width: 16rem;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    background-color: #f9f9f9; }
+  .top-names-scatterplot .copy {
+    width: 100%;
+    flex: 0 1 auto;
+    margin-bottom: 1.5rem; }
+  .top-names-scatterplot .name-lookup {
+    width: 100%;
+    flex: 0 0 3.5rem; }
+    .top-names-scatterplot .name-lookup div.awesomplete {
+      position: absolute;
+      width: calc(100% - 2.5rem);
+      left: 1.25rem;
+      margin-bottom: 1rem; }
+    .top-names-scatterplot .name-lookup input.awesomplete {
+      position: relative;
+      width: 100%;
+      padding: 5%;
+      box-sizing: border-box;
+      border: 1px solid rgba(114, 122, 140, 0.25);
+      border-left: none;
+      border-right: none;
+      font-size: 1.25rem;
+      font-family: "AllerLight", "Georgia", sans-serif;
+      color: #727A8C;
+      text-transform: capitalize; }
+      .top-names-scatterplot .name-lookup input.awesomplete:focus {
+        top: -1px;
+        border: 2px solid rgba(114, 122, 140, 0.5);
+        border-left: none;
+        border-right: none;
+        outline: none; }
+      .top-names-scatterplot .name-lookup input.awesomplete::-webkit-input-placeholder {
+        font-size: 1.25rem; }
+      .top-names-scatterplot .name-lookup input.awesomplete::-moz-placeholder {
+        font-size: 1.25rem; }
+      .top-names-scatterplot .name-lookup input.awesomplete:-ms-input-placeholder {
+        font-size: 1.25rem; }
+      .top-names-scatterplot .name-lookup input.awesomplete::placeholder {
+        font-size: 1.25rem; }
+    .top-names-scatterplot .name-lookup ul {
+      border-radius: 0; }
+    .top-names-scatterplot .name-lookup li {
+      color: #727A8C; }
+    .f .top-names-scatterplot .name-lookup mark {
+      color: #E0563F;
+      background-color: rgba(242, 187, 181, 0.2); }
+    .m .top-names-scatterplot .name-lookup mark {
+      color: #189EB2;
+      background-color: rgba(144, 242, 223, 0.2); }
+    .top-names-scatterplot .name-lookup li:hover.f,
+    .top-names-scatterplot .name-lookup li[aria-selected="true"].f {
+      color: #E0563F;
+      background-color: rgba(224, 86, 63, 0.2); }
+      .top-names-scatterplot .name-lookup li:hover.f mark,
+      .top-names-scatterplot .name-lookup li[aria-selected="true"].f mark {
+        background-color: rgba(242, 187, 181, 0.6); }
+    .top-names-scatterplot .name-lookup li:hover.m,
+    .top-names-scatterplot .name-lookup li[aria-selected="true"].m {
+      color: #189EB2;
+      background-color: rgba(24, 158, 178, 0.2); }
+      .top-names-scatterplot .name-lookup li:hover.m mark,
+      .top-names-scatterplot .name-lookup li[aria-selected="true"].m mark {
+        background-color: rgba(144, 242, 223, 0.6); }
+  .top-names-scatterplot .slider {
+    position: relative;
+    width: 100%;
+    flex: 1 0.25;
+    padding-left: 50%;
+    box-sizing: border-box; }
+    .top-names-scatterplot .slider svg {
+      transform: translateX(-50%); }
+    .top-names-scatterplot .slider .axis path {
+      display: none; }
+    .top-names-scatterplot .slider .axis line {
+      fill: none;
+      stroke: #727A8C;
+      stroke-width: 1px;
+      shape-rendering: crispEdges; }
+    .top-names-scatterplot .slider .axis text {
+      fill: #727A8C; }
+    .top-names-scatterplot .slider .selection {
+      stroke: #727A8C;
+      stroke-width: 1px;
+      stroke-opacity: 0.75;
+      fill: #ffffff;
+      fill-opacity: 0.5; }
+    .top-names-scatterplot .slider .label {
+      position: absolute;
+      bottom: 1.5rem;
+      width: 100%;
+      margin-left: -50%;
+      text-align: center;
+      font-size: 1.25rem; }
+  .top-names-scatterplot .slider-background {
+    fill: rgba(114, 122, 140, 0.25); }
+  .top-names-scatterplot .slider-background-grid text {
+    fill: #727A8C;
+    font-size: 1rem;
+    font-family: "AllerLight", "Georgia", sans-serif; }
+  .top-names-scatterplot .slider-background-grid > g:nth-of-type(2) text {
+    transform: translateY(-0.5rem); }
+  .top-names-scatterplot .slider-background-grid line,
+  .top-names-scatterplot .slider-background-grid path {
+    fill: none;
+    stroke: #f9f9f9;
+    shape-rendering: crispEdges; }
+  .top-names-scatterplot .toggles {
+    flex: 0 0 auto;
+    position: relative;
+    width: 100%; }
+    .top-names-scatterplot .toggles .toggles-container {
+      display: flex;
+      justify-content: space-around; }
+    .top-names-scatterplot .toggles .sex-toggle {
+      display: inline-block;
+      width: 4rem;
+      height: 4rem;
+      flex: 0 0 4rem;
+      box-sizing: border-box;
+      text-align: center;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      border-radius: 50%;
+      border-style: solid;
+      border-width: 1px;
+      cursor: pointer; }
+      .top-names-scatterplot .toggles .sex-toggle:first-of-type {
+        margin-left: 1rem; }
+      .top-names-scatterplot .toggles .sex-toggle:last-of-type {
+        margin-right: 1rem; }
+      .top-names-scatterplot .toggles .sex-toggle.f {
+        font-weight: normal;
+        color: #E0563F;
+        border-color: #F2BBB5;
+        background-color: rgba(224, 86, 63, 0.1); }
+      .top-names-scatterplot .toggles .sex-toggle.m {
+        font-weight: normal;
+        color: #189EB2;
+        border-color: #90F2DF;
+        background-color: rgba(24, 158, 178, 0.1); }
+      .top-names-scatterplot .toggles .sex-toggle.on {
+        border-width: 3px; }
+        .top-names-scatterplot .toggles .sex-toggle.on span {
+          top: 1.1rem; }
+        .top-names-scatterplot .toggles .sex-toggle.on.f {
+          font-family: "AllerBold", "Georgia", sans-serif;
+          border-color: #F2BBB5;
+          background-color: rgba(224, 86, 63, 0.35); }
+        .top-names-scatterplot .toggles .sex-toggle.on.m {
+          font-family: "AllerBold", "Georgia", sans-serif;
+          border-color: #90F2DF;
+          background-color: rgba(24, 158, 178, 0.35); }
+      .top-names-scatterplot .toggles .sex-toggle.disabled {
+        cursor: not-allowed; }
+      .top-names-scatterplot .toggles .sex-toggle span {
+        display: block;
+        position: relative;
+        top: 1.3rem; }
+    .top-names-scatterplot .toggles .label {
+      width: 100%;
+      text-align: center;
+      font-size: 1.25rem;
+      margin-bottom: 1.25rem; }
+  .top-names-scatterplot .legend {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 0 0 auto; }
+    .top-names-scatterplot .legend circle {
+      fill: rgba(114, 122, 140, 0.1);
+      stroke: rgba(114, 122, 140, 0.5);
+      stroke-width: 1px; }
+    .top-names-scatterplot .legend text {
+      transform: translateY(-1.1rem);
+      fill: #727A8C;
+      text-anchor: middle;
+      text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.75); }
+    .top-names-scatterplot .legend .label {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 1.25rem; }
+  .top-names-scatterplot .share {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    flex: 0 0 2.5rem;
+    margin-top: 1rem; }
+    .top-names-scatterplot .share .share-icon {
+      flex: 0 0 2.5rem; }
+      .top-names-scatterplot .share .share-icon svg {
+        fill: #727A8C; }
+    .top-names-scatterplot .share .info-modal-button {
+      flex: 0 0 2.5rem;
+      width: 40px;
+      height: 40px;
+      background-color: #727A8C;
+      border-radius: 50%; }
+      .top-names-scatterplot .share .info-modal-button div {
+        padding-top: 0.15rem;
+        color: #ffffff;
+        font-family: "AllerBold", "Georgia", sans-serif;
+        font-size: 2rem;
+        text-align: center;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none; }
+  .top-names-scatterplot .graph {
+    position: relative;
+    flex-grow: 1;
+    height: 100%;
+    background-color: #ffffff; }
+    .top-names-scatterplot .graph.loading {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center; }
+      .top-names-scatterplot .graph.loading p {
+        max-width: 30rem;
+        color: #727A8C;
+        font-size: 3rem;
+        text-align: center;
+        /*
+				display: none;
+				opacity: 0;
+				transition: opacity 1s;
+				&.closing {
+					display: block;
+					opacity: 0;
+				}
+				&.active {
+					display: block;
+					opacity: 1;
+					transition: opacity 1s;
+				}
+				*/
+        /*
+				&.active {
+					opacity: 1;
+					transition: opacity 1s, height 0s;
+				}
+				&.hidden {
+					height: 0;
+					opacity: 0;
+					transition: opacity 1s, height 0s 1s;
+				}*/
+        display: none;
+        opacity: 0;
+        transition: opacity 1s; }
+        .top-names-scatterplot .graph.loading p.active {
+          display: block;
+          opacity: 0; }
+        .top-names-scatterplot .graph.loading p.awake {
+          display: block;
+          opacity: 1; }
+    .top-names-scatterplot .graph svg {
+      pointer-events: none; }
+    .top-names-scatterplot .graph .axis path,
+    .top-names-scatterplot .graph .axis line {
+      fill: none;
+      stroke: #727A8C;
+      stroke-width: 1px;
+      shape-rendering: crispEdges; }
+    .top-names-scatterplot .graph .axis text {
+      fill: #727A8C;
+      font-size: 1rem;
+      font-family: "AllerLight", "Georgia", sans-serif; }
+    .top-names-scatterplot .graph .name.hover {
+      opacity: 1.0; }
+      .top-names-scatterplot .graph .name.hover circle {
+        stroke-width: 2px;
+        fill-opacity: 0.35; }
+      .top-names-scatterplot .graph .name.hover text {
+        font-family: "AllerBold", "Georgia", sans-serif; }
+    .top-names-scatterplot .graph .name.timespan circle {
+      fill-opacity: 0.08;
+      stroke-opacity: 0.0;
+      mix-blend-mode: darken; }
+      .top-names-scatterplot .graph .name.timespan circle.top-rank {
+        stroke-opacity: 0.0;
+        fill-opacity: 0.2; }
+      .top-names-scatterplot .graph .name.timespan circle.occurrence.highlighted-occurrence {
+        stroke-opacity: 1.0;
+        stroke-width: 2px;
+        fill: #ffffff;
+        fill-opacity: 0.85; }
+      .top-names-scatterplot .graph .name.timespan circle.f {
+        stroke: #F2BBB5;
+        fill: #E0563F; }
+      .top-names-scatterplot .graph .name.timespan circle.m {
+        stroke: #90F2DF;
+        fill: #189EB2; }
+    .top-names-scatterplot .graph .name.highlighted circle {
+      stroke-width: 3px;
+      fill: #ffffff;
+      fill-opacity: 0.85; }
+    .top-names-scatterplot .graph .name.highlighted text {
+      font-family: "AllerBold", "Georgia", sans-serif; }
+    .top-names-scatterplot .graph .name.f {
+      stroke: #F2BBB5;
+      fill: #E0563F; }
+    .top-names-scatterplot .graph .name.m {
+      stroke: #90F2DF;
+      fill: #189EB2; }
+    .top-names-scatterplot .graph .name.not-highlighted {
+      opacity: 0.5; }
+      .top-names-scatterplot .graph .name.not-highlighted.f text {
+        fill: #9f2d1a; }
+      .top-names-scatterplot .graph .name.not-highlighted.m text {
+        fill: #0c4e58; }
+    .top-names-scatterplot .graph .name line {
+      stroke-opacity: 1.0;
+      stroke: #d9d9d9; }
+    .top-names-scatterplot .graph .name text {
+      stroke: none;
+      text-anchor: middle;
+      font-weight: normal;
+      pointer-events: auto;
+      cursor: pointer;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none; }
+      .top-names-scatterplot .graph .name text::selection {
+        background: none; }
+    .top-names-scatterplot .graph .name circle {
+      fill-opacity: 0.1;
+      stroke-width: 1px;
+      pointer-events: auto;
+      cursor: pointer; }
+    .top-names-scatterplot .graph .selection-label text {
+      fill: #727A8C; }
+    .top-names-scatterplot .graph .selection-label tspan:nth-child(2) {
+      font-size: smaller; }
+    .top-names-scatterplot .graph .selection-line {
+      stroke: #727A8C;
+      stroke-opacity: 0.5; }
+    .top-names-scatterplot .graph .year-tick text {
+      font-size: 1.16rem;
+      font-family: "AllerLight", "Georgia", sans-serif;
+      text-anchor: middle; }
+  .top-names-scatterplot .timespan-tooltip {
+    position: absolute;
+    min-width: 10rem;
+    min-height: 6rem;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.9);
+    pointer-events: none;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 8px; }
+    .top-names-scatterplot .timespan-tooltip.f {
+      color: #E0563F;
+      border-color: #F2BBB5; }
+      .top-names-scatterplot .timespan-tooltip.f .count {
+        border-color: rgba(242, 187, 181, 0.5); }
+    .top-names-scatterplot .timespan-tooltip.m {
+      color: #189EB2;
+      border-color: #90F2DF; }
+      .top-names-scatterplot .timespan-tooltip.m .count {
+        border-color: rgba(144, 242, 223, 0.5); }
+    .top-names-scatterplot .timespan-tooltip .top {
+      width: 100%;
+      height: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center; }
+    .top-names-scatterplot .timespan-tooltip h4 {
+      flex: 1 0 auto;
+      margin: 0;
+      font-weight: normal;
+      font-size: 1.35rem;
+      text-align: left; }
+    .top-names-scatterplot .timespan-tooltip .overall-rank {
+      flex: 0 0 auto;
+      margin-left: 1rem;
+      line-height: 0.9rem;
+      text-align: right; }
+      .top-names-scatterplot .timespan-tooltip .overall-rank span {
+        display: block; }
+        .top-names-scatterplot .timespan-tooltip .overall-rank span:first-of-type {
+          font-size: 1.25rem; }
+        .top-names-scatterplot .timespan-tooltip .overall-rank span:last-of-type {
+          font-size: 0.5rem; }
+    .top-names-scatterplot .timespan-tooltip .bottom {
+      width: 100%;
+      height: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center; }
+    .top-names-scatterplot .timespan-tooltip .year-stats {
+      flex: 0.2 1 4rem;
+      text-align: center; }
+    .top-names-scatterplot .timespan-tooltip .count {
+      padding-bottom: 0.25rem;
+      border-bottom-style: solid;
+      border-bottom-width: 1px; }
+      .top-names-scatterplot .timespan-tooltip .count span {
+        display: block; }
+        .top-names-scatterplot .timespan-tooltip .count span:first-of-type {
+          font-size: 1rem; }
+        .top-names-scatterplot .timespan-tooltip .count span:last-of-type {
+          font-size: 0.5rem; }
+    .top-names-scatterplot .timespan-tooltip .rank {
+      padding-top: 0.25rem;
+      font-size: 1rem; }
+    .top-names-scatterplot .timespan-tooltip .year {
+      flex: 1 0 2.5rem;
+      text-align: right; }
+      .top-names-scatterplot .timespan-tooltip .year span:first-of-type {
+        font-size: 0.5rem;
+        margin-right: 0.25rem; }
+      .top-names-scatterplot .timespan-tooltip .year span:last-of-type {
+        font-size: 1.25rem; }
+
+#info-modal-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.5); }
+  #info-modal-container.visible {
+    display: block !important; }
+
+#info-modal {
+  position: absolute;
+  width: 50vw;
+  height: 50vh;
+  min-width: 320px;
+  min-height: 560px;
+  left: 25vw;
+  bottom: 25vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgba(114, 122, 140, 0.25);
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 1rem 2.25rem;
+  font-family: "AllerLight", "Georgia", sans-serif; }
+  #info-modal li {
+    padding: 0.25rem 0;
+    list-style-type: circle; }
+  #info-modal .close-button {
+    position: absolute;
+    font-size: 2rem;
+    top: 0.5rem;
+    right: 0.75rem;
+    cursor: pointer; }
+
+body {
+  position: relative;
+  margin: 0;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  color: #000000;
+  font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+  font-weight: 300; }
+
+#app {
+  width: 100%;
+  overflow: hidden; }

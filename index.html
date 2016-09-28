@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Baby names come and go. And come back again. See where your name falls among the past 135 years of baby names in the U.S.">
+
+		<!-— facebook open graph tags -->
+		<meta property="og:url" content="http://transmote.com/baby-names/" />
+		<meta property="og:title" content="Hey baby, what's your name?" />
+		<meta property="og:description" content="Baby names come and go. And come back again. See where your name falls among the past 135 years of baby names in the U.S." />
+		<meta property="og:site_name" content="transmote" />
+		<meta property="og:image" content="http://transmote.com/baby-names/babynames-sample.jpg" />
+		<meta property="og:image:type" content="image/jpeg" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="600" />
+		
+		<!-— twitter card tags -->
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@ericsoco">
+		<meta name="twitter:creator" content="@ericsoco">
+		<meta name="twitter:title" content="Hey baby, what's your name?">
+		<meta name="twitter:description" content="Baby names come and go. And come back again. See where your name falls among the past 135 years of baby names in the U.S.">
+		<meta name="twitter:image" content="http://transmote.com/baby-names/babynames-sample.jpg" />
+
+		<title>Hey baby, what's your name?</title>
+
+		<link rel="stylesheet" type="text/css" href="main.css">
+		<link rel="stylesheet" type="text/css" href="awesomplete.css">
+	</head>
+	<body>
+		<div id="title-block" style="visibility: hidden">
+			<h1>hey baby, what's your name?</h1>
+			<div class="title-body">
+				<p>
+					The <a href="https://www.ssa.gov/cgi-bin/popularnames.cgi" target="_blank">SSA</a> lists the top baby names in the U.S. for each year from 1880 to the present. This scatterplot displays the most popular 1000 names for each sex.
+				</p>
+			</div>
+		</div>
+		<div id="app" class="top-names-scatterplot">
+			<div class="sidebar">
+				<div class="name-lookup"></div>
+				<div class="slider"></div>
+				<div class="toggles"></div>
+				<div class="legend"></div>
+				<div class="share"></div>
+			</div>
+			<div class="graph loading">
+				<p>Bouncing thousands of babies...</p>
+				<p>Pinching thousands of baby cheeks...</p>
+				<p>Second-guessing thousands of babies' names...</p>
+				<p>Flipping through millions of birth certificates...</p>
+			</div>
+		</div>
+		<div id="info-modal-container" style="display: none">
+			<div id="info-modal">
+				<div class="close-button">&times;</div>
+				<h3>Details:</h3>
+				<p>
+					Circles appear at the year in which the name was at its most popular. The circle size represents the total number of babies with that name born in that year.
+				</p>
+				<p>
+					For legibility, I apply some moderate collision detection and the circles may be pushed a bit away from their actual location on the graph; if you see a circle move when you click it, it's easing back to its actual position.
+				</p>
+				<p>
+					In case you were wondering...to determine the popularity of each name, I start with the fraction of babies in each year with that name. Then, I sum all of the fractions for each of the years. This results in the numbers along the Popularity slider, which is set up on a logarithmic scale to account for the vast difference between the frequency of Johns and Marys vs. Braylons and Paisleys.
+				</p>
+				<h3>Secrets!</h3>
+				<p>
+					<ul>
+						<li>A number of names have changed sex over the years, like Ashley and Lindsey/Lindsay. This visualization shows only one sex per name per year.</li>
+						<li>The bottom tenth or so of the Popularity slider yields only male names. Why are the less popular male names (among the top 1000) so much less popular than their female counterparts?</li>
+						<li>Find any other unexpected gems? <a href="https://twitter.com/ericsoco" target="_blank">Tell me about it!</a></li>
+					</ul>
+				</p>
+				<h3>Why?</h3>
+				<p>
+					Well, I had a baby! And a little paternity leave. Inspired by previous experiments like the <a href="http://www.babynamewizard.com/voyager" target="_blank">Baby Name Wizard</a>, <a href="http://www.visualcinnamon.com/portfolio/babynames" target="_blank">Popular Baby Names</a>, and this <a href="http://bl.ocks.org/syntagmatic/8ab9dc27f144683bc015eb4a2639d234" target="_blank">Bump Plot</a>, I decided to take a pass myself. Took a bit longer than expected...but hey, that's life with two kids.
+				</p>
+				<p>
+					This is a <a href="http://transmote.com/" target="_blank">transmote</a> joint. Feel free to break it yourself <a href="https://github.com/ericsoco/baby-names/" target="_blank">here</a>. You can get some baby names yourself with <a href="https://github.com/ericsoco/baby-name-scraper" target="_blank">this scraper</a>.
+				</p>
+			</div>
+		</div>
+		<script>
+			(function () {
+				var loaderMessages = document.querySelectorAll('.loading > p'),
+					index = Math.floor(Math.random() * loaderMessages.length),
+					timeout,
+					fadeTime = 1000,
+					displayTime = 2000;
+
+				function cycleLoaderMessage (stepTime) {
+					var loader = document.querySelector('.loading');
+					if (!loader) return;
+
+					var currentMessage = loader.querySelector('.awake');
+					if (currentMessage) currentMessage.classList.remove('awake');
+					timeout = setTimeout(function () {
+						if (currentMessage) currentMessage.classList.remove('active');
+						loaderMessages.item(index).classList.add('active');
+						timeout = setTimeout(function () {
+							loaderMessages.item(index).classList.add('awake');
+							index = (index + 1) % loaderMessages.length;
+							timeout = setTimeout(cycleLoaderMessage, displayTime);
+						}, 20);
+					}, stepTime || fadeTime);
+				}
+				cycleLoaderMessage(1);
+			})();
+		</script>
+		<script src="bundle.js"></script>
+
+		<svg height="0" width="0" style="display: none">
+		    <defs>
+		    	<symbol id="icon-twitter" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z"/></symbol>
+				<symbol id="icon-facebook" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm3 8h-1.35c-.538 0-.65.221-.65.778v1.222h2l-.209 2h-1.791v7h-3v-7h-2v-2h2v-2.308c0-1.769.931-2.692 3.029-2.692h1.971v3z"/></symbol>
+				<symbol id="icon-github" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></symbol>
+			</defs>
+		</svg>
+	</body>
+</html>
