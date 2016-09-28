@@ -12,13 +12,10 @@ TODO:
 	( ) validate
 		( ) fb: https://developers.facebook.com/tools/debug/sharing/?q=http%3A%2F%2Ftransmote.com%2Fbaby-names%2F
 		( ) twitter: https://cards-dev.twitter.com/validator
-( ) finish info-modal
-	( ) close on click outside
-	( ) close button ('X')
-	( ) close on esc
 ( ) responsive-ish
 	( ) info-modal
 	( ) sidebar
+	( ) title
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
 
@@ -38,6 +35,10 @@ TODO:
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) finish info-modal
+	(X) close on click outside
+	(X) close button ('X')
+	(X) close on esc
 (X) use aller display for title block?
 (X) deselecting a highlighted name scrolls all the way back up to the top of the page
 (X) link to GH repo
@@ -220,6 +221,7 @@ const topNamesScatterplot = () => {
 	const init = () => {
 
 		window.addEventListener('hashchange', onHashChange);
+		window.addEventListener('keydown', onKeyDown);
 
 		let loaded = {
 			names: null,
@@ -395,7 +397,7 @@ const topNamesScatterplot = () => {
 		initGraph();
 		initSidebar();
 
-	}
+	};
 
 	// populate the data-driven parts of the sidebar once the data are ready.
 	// static sidebar elements are initialized before bundled js is loaded, in index.html.
@@ -756,6 +758,39 @@ const topNamesScatterplot = () => {
 				d3.select('#info-modal-container')
 					.classed('visible', true);
 			});
+
+		d3.select('#info-modal-container')
+			.on('click', closeInfoModal);
+
+		d3.select('#info-modal .close-button')
+			.on('click', closeInfoModal);
+
+		d3.select('#info-modal')
+			.on('click', event => {
+				if (event) {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+				}
+			});
+
+	};
+
+	const closeInfoModal = event => {
+
+		d3.select('#info-modal-container')
+			.classed('visible', false);
+
+	}
+
+	const onKeyDown = event => {
+
+		if (event.keyCode === 27) {
+			if (d3.select('#info-modal-container').classed('visible')) {
+				closeInfoModal();
+			} else {
+				clearSelection();
+			}
+		}
 
 	};
 

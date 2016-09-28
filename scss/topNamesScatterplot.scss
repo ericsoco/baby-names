@@ -772,4 +772,12 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 		padding: 0.25rem 0;
 		list-style-type: circle;
 	}
+
+	.close-button {
+		position: absolute;
+		font-size: 2rem;
+		top: 0.5rem;
+		right: 0.75rem;
+		cursor: pointer;
+	}
 }
