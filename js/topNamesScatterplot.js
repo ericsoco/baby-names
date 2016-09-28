@@ -1,6 +1,5 @@
 /*
 TODO:
-( ) use aller display for title block?
 ( ) center share dialogs on screen
 	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 ( ) twitter/facebook/slack unfurl
@@ -39,6 +38,7 @@ TODO:
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) use aller display for title block?
 (X) deselecting a highlighted name scrolls all the way back up to the top of the page
 (X) link to GH repo
 (X) link to scraper

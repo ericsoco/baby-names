@@ -49,18 +49,19 @@ $font-family-bold: "AllerBold", "Georgia", sans-serif;
 	visibility: visible !important;
 
 	padding: 5rem 0;
-	font-family: "AllerLight", "Georgia", sans-serif;
+	font-family: $font-family;
 	text-align: center;
 	color: #ffffff;
 	background-color: #727A8C;
 
 	h1 {
+		font-family: $font-family-bold;
 		font-size: 3rem;
 		margin-top: 0;
 	}
 
 	.title-body {
-		width: 615px;
+		width: 635px;
 		margin: 0 auto;
 		font-size: 1.25rem;
 	}
