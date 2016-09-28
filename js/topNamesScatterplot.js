@@ -1,11 +1,18 @@
 /*
 TODO:
-( ) deselecting a highlighted name scrolls all the way back up to the top of the page
+( ) use aller display for title block?
 ( ) center share dialogs on screen
 	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 ( ) twitter/facebook/slack unfurl
 	(X) markup
-	( ) upload image to correct URL
+	(X) upload image to correct URL
+	( ) turn off bot redirection for paths to actual non-portfolio projects
+		e.g. http://transmote.com/baby-names
+		ideally, whitelist bot redirection instead of blacklisting each project.
+		(quick fix, tho, is to blacklist by putting .htaccess in /baby-names/.)
+	( ) validate
+		( ) fb: https://developers.facebook.com/tools/debug/sharing/?q=http%3A%2F%2Ftransmote.com%2Fbaby-names%2F
+		( ) twitter: https://cards-dev.twitter.com/validator
 ( ) finish info-modal
 	( ) close on click outside
 	( ) close button ('X')
@@ -21,6 +28,7 @@ TODO:
 	( ) no longer need most num/topOccurrences code
 ( ) shrink down bundle.js (2.3MB!!)
 	( ) consider testing out rollup?
+		https://medium.com/@yonester/bundling-with-rollup-the-basics-b782b55f36a8#.b3fr38ily
 		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) do a little stress testing...
 ( ) check other browsers
@@ -31,6 +39,7 @@ TODO:
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) deselecting a highlighted name scrolls all the way back up to the top of the page
 (X) link to GH repo
 (X) link to scraper
 (X) write copy
@@ -1221,7 +1230,11 @@ const topNamesScatterplot = () => {
 	};
 
 	const clearSelection = () => {
-		window.location.hash = '';
+		// pushState instead of setting hash to avoid scrolling to top of document
+		// and have to manually call handler since 'popstate' is only fired on browser back/forward button press
+		history.pushState(null, null, '#');
+		onHashChange();
+
 		disableTimespanMouseInteraction();
 		hoverTimespanCircle(null, null, true);
 	};
