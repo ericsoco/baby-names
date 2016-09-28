@@ -2,16 +2,6 @@
 TODO:
 ( ) center share dialogs on screen
 	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
-( ) twitter/facebook/slack unfurl
-	(X) markup
-	(X) upload image to correct URL
-	( ) turn off bot redirection for paths to actual non-portfolio projects
-		e.g. http://transmote.com/baby-names
-		ideally, whitelist bot redirection instead of blacklisting each project.
-		(quick fix, tho, is to blacklist by putting .htaccess in /baby-names/.)
-	( ) validate
-		( ) fb: https://developers.facebook.com/tools/debug/sharing/?q=http%3A%2F%2Ftransmote.com%2Fbaby-names%2F
-		( ) twitter: https://cards-dev.twitter.com/validator
 ( ) responsive-ish
 	( ) info-modal
 	( ) sidebar
@@ -35,6 +25,16 @@ TODO:
 	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) twitter/facebook/slack unfurl
+	(X) markup
+	(X) upload image to correct URL
+	(X) turn off bot redirection for paths to actual non-portfolio projects
+		e.g. http://transmote.com/baby-names
+		ideally, whitelist bot redirection instead of blacklisting each project.
+		(quick fix, tho, is to blacklist by putting .htaccess in /baby-names/.)
+	(X) validate
+		(X) fb: https://developers.facebook.com/tools/debug/sharing/?q=http%3A%2F%2Ftransmote.com%2Fbaby-names%2F
+		(X) twitter: https://cards-dev.twitter.com/validator
 (X) finish info-modal
 	(X) close on click outside
 	(X) close button ('X')
