@@ -1,21 +1,22 @@
 /*
 TODO:
-( ) fonts race condition:
-	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
-
-( ) check other browsers
-( ) refactor out unused calculations to improve startup time
-	( ) no longer need topNames
-	( ) no longer need most num/topOccurrences code
 ( ) shrink down bundle.js (2.3MB!!)
-	( ) consider testing out rollup?
+	(-) consider testing out rollup?
 		https://medium.com/@yonester/bundling-with-rollup-the-basics-b782b55f36a8#.b3fr38ily
 		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
+	( ) remove babel-polyfill if not used.
+		it's 600KB!
+	( ) why is bundle unminified? missing browserify option?
 ( ) do a little stress testing...
 ( ) one last bug scrub
-
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(-) fonts race condition:
+	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
+(X) check other browsers
+(-) refactor out unused calculations to improve startup time
+	( ) no longer need topNames
+	( ) no longer need most num/topOccurrences code
 (X) responsive-ish
 	(X) info-modal
 	(X) sidebar
@@ -189,7 +190,9 @@ const d3 = {
 	...d3_transition
 };
 */
-import * as d3 from 'd3';
+
+// loading via <script> tag to keep bundle.js size down
+// import * as d3 from 'd3';
 
 import awesomplete from 'awesomplete';
 
