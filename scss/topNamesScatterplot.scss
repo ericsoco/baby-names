@@ -103,7 +103,7 @@ $bp-larger-than-mobile: 'min-width: 768px';
 		display: flex;
 		flex-direction: column;
 		flex: 1 0 $sidebar-width;
-		
+
 		width: 100%;
 		@media (#{$bp-larger-than-mobile}) {
 			width: auto;
@@ -780,18 +780,27 @@ $bp-larger-than-mobile: 'min-width: 768px';
 
 #info-modal {
 	position: absolute;
-	width: 50vw;
-	height: 50vh;
-	min-width: 320px;
-	min-height: 560px;
-	left: 25vw;
-	bottom: 25vh;
-	overflow-x: hidden;
+	padding: 1rem 2.25rem;
+	box-sizing: border-box;
+
+	width: 90vw;
+	height: 94vh;
+	left: 5vw;
+	bottom: 3vh;
 	overflow-y: auto;
+
+	@media (#{$bp-larger-than-mobile}) {
+		width: 50vw;
+		height: 50vh;
+		min-width: 320px;
+		min-height: 560px;
+		left: 25vw;
+		bottom: 25vh;
+		overflow-x: hidden;
+	}
 
 	border: 1px solid rgba($label-color, 0.25);
 	background-color: rgba($background-color, 0.85);
-	padding: 1rem 2.25rem;
 	font-family: $font-family;
 
 	li {

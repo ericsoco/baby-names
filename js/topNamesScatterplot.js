@@ -1,9 +1,5 @@
 /*
 TODO:
-( ) responsive-ish
-	( ) info-modal
-	( ) sidebar
-	( ) title
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
 
@@ -20,6 +16,10 @@ TODO:
 
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) responsive-ish
+	(X) info-modal
+	(X) sidebar
+	(X) title
 (X) center share dialogs on screen
 	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 (-) add gh-deploy script and deploy on gh-pages
@@ -394,14 +394,15 @@ const topNamesScatterplot = () => {
 
 		d3.select('.graph').classed('loading', false);
 
-		initGraph();
-		initSidebar();
+		let isSmallScreen = window.innerWidth < 768;	// .scss $bp-larger-than-mobile
+		initGraph(isSmallScreen);
+		initSidebar(isSmallScreen);
 
 	};
 
 	// populate the data-driven parts of the sidebar once the data are ready.
 	// static sidebar elements are initialized before bundled js is loaded, in index.html.
-	const initSidebar = () => {
+	const initSidebar = (isSmallScreen) => {
 
 		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
 			sidebarEl = sidebar.node(),
@@ -476,6 +477,8 @@ const topNamesScatterplot = () => {
 				setTimeout(() => {
 					addNameToSelection(name.key);
 				}, 500);
+
+				if (isSmallScreen) window.scrollTo(0, document.body.scrollHeight);
 
 			}
 
@@ -655,6 +658,8 @@ const topNamesScatterplot = () => {
 				}
 
 				renderNames(true);
+
+				if (isSmallScreen) window.scrollTo(0, document.body.scrollHeight);
 			});
 
 		toggleContainer.append('div')
@@ -757,6 +762,7 @@ const topNamesScatterplot = () => {
 			.on('click', event => {
 				d3.select('#info-modal-container')
 					.classed('visible', true);
+				if (isSmallScreen) window.scrollTo(0, document.body.scrollHeight);
 			});
 
 		d3.select('#info-modal-container')
@@ -794,10 +800,9 @@ const topNamesScatterplot = () => {
 
 	};
 
-	const initGraph = () => {
+	const initGraph = (isSmallScreen) => {
 
-		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node(),
-			isSmallScreen = window.innerWidth < 768;	// .scss $bp-larger-than-mobile
+		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node();
 
 		margin = {
 			top: 80,
