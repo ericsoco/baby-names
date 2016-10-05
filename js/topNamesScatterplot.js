@@ -1,7 +1,5 @@
 /*
 TODO:
-( ) center share dialogs on screen
-	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
 ( ) responsive-ish
 	( ) info-modal
 	( ) sidebar
@@ -9,6 +7,7 @@ TODO:
 ( ) fonts race condition:
 	sometimes copy block renders before AllerLight font has loaded, and appears as Georgia.
 
+( ) check other browsers
 ( ) refactor out unused calculations to improve startup time
 	( ) no longer need topNames
 	( ) no longer need most num/topOccurrences code
@@ -17,14 +16,15 @@ TODO:
 		https://medium.com/@yonester/bundling-with-rollup-the-basics-b782b55f36a8#.b3fr38ily
 		http://bl.ocks.org/mbostock/bb09af4c39c79cffcde4
 ( ) do a little stress testing...
-( ) check other browsers
 ( ) one last bug scrub
 
-( ) add gh-deploy script and deploy on gh-pages
-( ) alias that to transmote:
-	http://transmote.com/hey-baby (used in social share links)
 ( ) tweet to kai, nadieh bremer; lea verou (awesomplete)
 
+(X) center share dialogs on screen
+	http://stackoverflow.com/questions/4068373/center-a-popup-window-on-screen
+(-) add gh-deploy script and deploy on gh-pages
+(-) alias that to transmote:
+	http://transmote.com/hey-baby (used in social share links)
 (X) twitter/facebook/slack unfurl
 	(X) markup
 	(X) upload image to correct URL
@@ -796,7 +796,8 @@ const topNamesScatterplot = () => {
 
 	const initGraph = () => {
 
-		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node();
+		let sidebarEl = d3.select('.top-names-scatterplot .sidebar').node(),
+			isSmallScreen = window.innerWidth < 768;	// .scss $bp-larger-than-mobile
 
 		margin = {
 			top: 80,
@@ -804,7 +805,7 @@ const topNamesScatterplot = () => {
 			bottom: 80,
 			left: 95
 		};
-		width = window.innerWidth - sidebarEl.offsetWidth - margin.left - margin.right;
+		width = window.innerWidth - (isSmallScreen ? 0 : sidebarEl.offsetWidth) - margin.left - margin.right;
 		height = window.innerHeight - margin.top - margin.bottom;
 
 		xScale = d3.scaleLinear()
@@ -848,6 +849,7 @@ const topNamesScatterplot = () => {
 
 		let xAxis = d3.axisBottom()
 			.scale(xScale)
+			.ticks(isSmallScreen ? 4 : null)
 			.tickFormat(d3.format('d'))
 		let xAxisEl = graphContainer.append('g')
 			.classed('x axis', true)
