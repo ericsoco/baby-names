@@ -108,38 +108,54 @@ $timespan-fill-opacity: 0.5;
 */
 #title-block {
   visibility: visible !important;
-  padding: 5rem 0;
+  padding: 2rem 0;
   font-family: "AllerLight", "Georgia", sans-serif;
   text-align: center;
   color: #ffffff;
   background-color: #727A8C; }
+  @media (min-width: 768px) {
+    #title-block {
+      padding: 5rem 0; } }
   #title-block h1 {
     font-family: "AllerBold", "Georgia", sans-serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
     margin-top: 0; }
+    @media (min-width: 768px) {
+      #title-block h1 {
+        font-size: 3rem; } }
   #title-block .title-body {
-    width: 635px;
+    width: 80%;
     margin: 0 auto;
     font-size: 1.25rem; }
+    @media (min-width: 768px) {
+      #title-block .title-body {
+        width: 635px; } }
   #title-block p {
+    margin: 0;
     text-align: left; }
 
 .top-names-scatterplot {
-  display: flex;
   position: relative;
   height: 100%;
   color: #727A8C;
   font-family: "AllerLight", "Georgia", sans-serif; }
+  @media (min-width: 768px) {
+    .top-names-scatterplot {
+      display: flex; } }
   .top-names-scatterplot .sidebar {
-    display: flex;
-    flex-direction: column;
     position: relative;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
     flex: 1 0 16rem;
-    max-width: 16rem;
+    width: 100%;
     padding: 1.25rem;
     box-sizing: border-box;
     background-color: #f9f9f9; }
+    @media (min-width: 768px) {
+      .top-names-scatterplot .sidebar {
+        width: auto;
+        max-width: 16rem; } }
   .top-names-scatterplot .copy {
     width: 100%;
     flex: 0 1 auto;
@@ -205,9 +221,11 @@ $timespan-fill-opacity: 0.5;
   .top-names-scatterplot .slider {
     position: relative;
     width: 100%;
-    flex: 1 0.25;
     padding-left: 50%;
     box-sizing: border-box; }
+    @media (min-width: 768px) {
+      .top-names-scatterplot .slider {
+        flex: 1 0.25; } }
     .top-names-scatterplot .slider svg {
       transform: translateX(-50%); }
     .top-names-scatterplot .slider .axis path {
@@ -354,9 +372,11 @@ $timespan-fill-opacity: 0.5;
         user-select: none; }
   .top-names-scatterplot .graph {
     position: relative;
-    flex-grow: 1;
     height: 100%;
     background-color: #ffffff; }
+    @media (min-width: 768px) {
+      .top-names-scatterplot .graph {
+        flex-grow: 1; } }
     .top-names-scatterplot .graph.loading {
       height: 100vh;
       display: flex;
@@ -575,18 +595,25 @@ $timespan-fill-opacity: 0.5;
 
 #info-modal {
   position: absolute;
-  width: 50vw;
-  height: 50vh;
-  min-width: 320px;
-  min-height: 560px;
-  left: 25vw;
-  bottom: 25vh;
-  overflow-x: hidden;
+  padding: 1rem 2.25rem;
+  box-sizing: border-box;
+  width: 90vw;
+  height: 94vh;
+  left: 5vw;
+  bottom: 3vh;
   overflow-y: auto;
   border: 1px solid rgba(114, 122, 140, 0.25);
   background-color: rgba(255, 255, 255, 0.85);
-  padding: 1rem 2.25rem;
   font-family: "AllerLight", "Georgia", sans-serif; }
+  @media (min-width: 768px) {
+    #info-modal {
+      width: 50vw;
+      height: 50vh;
+      min-width: 320px;
+      min-height: 560px;
+      left: 25vw;
+      bottom: 25vh;
+      overflow-x: hidden; } }
   #info-modal li {
     padding: 0.25rem 0;
     list-style-type: circle; }
