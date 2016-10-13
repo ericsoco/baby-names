@@ -1,8 +1,8 @@
 /*
 TODO:
 ( ) doesn't really work on mobile :/
-	( ) preloader is way down screen
-	(X) sidebar is jacked, even tho it works in emulator...
+	(X) preloader is way down screen
+	( ) sidebar is jacked, even tho it works in emulator...
 
 (X) get up on gh-pages / babybubbl.es
 	(X) unfurl URLs

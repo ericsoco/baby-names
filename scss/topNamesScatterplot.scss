@@ -468,6 +468,13 @@ $bp-larger-than-mobile: 'min-width: 768px';
 		&.loading {
 			height: 100vh;
 
+			// move preloader up above sidebar on mobile,
+			// so it's visible from the top of the page
+			transform: translateY(-125vh);
+			@media (#{$bp-larger-than-mobile}) {
+				transform: none;
+			}
+
 			display: flex;
 			justify-content: center;
 			align-items: center;
