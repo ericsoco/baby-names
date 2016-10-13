@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
                                                                                                                                                                                                                                                                   TODO:
@@ -1018,7 +1018,7 @@ var topNamesScatterplot = function topNamesScatterplot() {
 
 	// default duration equal to timespan exit transition duration, plus a bit
 	var disableTimespanMouseInteraction = function disableTimespanMouseInteraction() {
-		var duration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1250;
+		var duration = arguments.length <= 0 || arguments[0] === undefined ? 1250 : arguments[0];
 
 
 		timespanMouseInteractionDisabled = true;
