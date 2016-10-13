@@ -1,9 +1,8 @@
 /*
 TODO:
-( ) doesn't really work on mobile :/
+(X) doesn't really work on mobile :/
 	(X) preloader is way down screen
-	( ) sidebar is jacked, even tho it works in emulator...
-
+	(X) sidebar is jacked, even tho it works in emulator...
 (X) get up on gh-pages / babybubbl.es
 	(X) unfurl URLs
 	(-) redirect from transmote.com/baby-names
@@ -756,7 +755,10 @@ const topNamesScatterplot = () => {
 		.append('svg')
 			.attr('width', 40)
 			.attr('height', 40)
-			.html((d, i) => `<use xlink:href="#${ shareIcons[i].icon }" />`);
+		.append('use')
+			// Injecting <use> via .html() doesn't work on iOS Safari. wtf???
+			.attr('xlink:href', (d, i) => `#${ shareIcons[i].icon }`);
+			// .html((d, i) => `<use xlink:href="#${ shareIcons[i].icon }"></use>`);
 
 		shareLinks.nodes().forEach((node, i) => {
 			if (shareIcons[i].popupConfig) {
