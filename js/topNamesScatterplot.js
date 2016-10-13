@@ -2,12 +2,12 @@
 TODO:
 ( ) doesn't really work on mobile :/
 	( ) preloader is way down screen
-	( ) sidebar is jacked, even tho it works in emulator...
+	(X) sidebar is jacked, even tho it works in emulator...
+
 (X) get up on gh-pages / babybubbl.es
 	(X) unfurl URLs
 	(-) redirect from transmote.com/baby-names
 		(-) rename /babybubbles
-
 (X) shrink down bundle.js (2.3MB!!)
 	(-) consider testing out rollup?
 		https://medium.com/@yonester/bundling-with-rollup-the-basics-b782b55f36a8#.b3fr38ily

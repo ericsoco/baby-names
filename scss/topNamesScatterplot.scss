@@ -383,6 +383,11 @@ $bp-larger-than-mobile: 'min-width: 768px';
 		box-sizing: border-box;
 		flex: 0 0 auto;//12rem;
 
+		display: none;
+		@media (#{$bp-larger-than-mobile}) {
+			display: block;
+		}
+
 		circle {
 			fill: rgba($label-color, 0.1);
 			stroke: rgba($label-color, 0.5);
