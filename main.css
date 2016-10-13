@@ -326,7 +326,11 @@ $timespan-fill-opacity: 0.5;
     position: relative;
     width: 100%;
     box-sizing: border-box;
-    flex: 0 0 auto; }
+    flex: 0 0 auto;
+    display: none; }
+    @media (min-width: 768px) {
+      .top-names-scatterplot .legend {
+        display: block; } }
     .top-names-scatterplot .legend circle {
       fill: rgba(114, 122, 140, 0.1);
       stroke: rgba(114, 122, 140, 0.5);
