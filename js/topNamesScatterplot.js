@@ -948,8 +948,6 @@ const topNamesScatterplot = () => {
 			// brush was clicked and selection cleared;
 			// set a new selection at the clicked location
 
-			console.log(">>>>> TODO: set new selection");
-
 			// renderNames();
 			return;
 		}
@@ -1022,8 +1020,8 @@ const topNamesScatterplot = () => {
 		let graphEl = document.querySelector('.top-names-scatterplot .graph'),
 			highlightedTimespanCircle = null;
 
-		graphEl.addEventListener('click', event => {
-
+		let clickHandler = event => {
+			
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
 				addNameToSelection(datum.key);
@@ -1031,7 +1029,9 @@ const topNamesScatterplot = () => {
 				clearSelection();
 			}
 
-		});
+		};
+		graphEl.addEventListener('click', clickHandler);
+		graphEl.addEventListener('touchstart', clickHandler);
 
 		graphEl.addEventListener('mousemove', event => {
 
