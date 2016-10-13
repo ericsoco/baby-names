@@ -25,10 +25,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
                                                                                                                                                                                                                                                                   TODO:
-                                                                                                                                                                                                                                                                  ( ) doesn't really work on mobile :/
-                                                                                                                                                                                                                                                                  	( ) preloader is way down screen
+                                                                                                                                                                                                                                                                  (X) doesn't really work on mobile :/
+                                                                                                                                                                                                                                                                  	(X) preloader is way down screen
                                                                                                                                                                                                                                                                   	(X) sidebar is jacked, even tho it works in emulator...
-                                                                                                                                                                                                                                                                  
                                                                                                                                                                                                                                                                   (X) get up on gh-pages / babybubbl.es
                                                                                                                                                                                                                                                                   	(X) unfurl URLs
                                                                                                                                                                                                                                                                   	(-) redirect from transmote.com/baby-names
@@ -731,9 +730,12 @@ var topNamesScatterplot = function topNamesScatterplot() {
 			return shareIcons[i].url;
 		}).attr('target', function (d, i) {
 			return !shareIcons[i].popupConfig ? '_blank' : null;
-		}).append('svg').attr('width', 40).attr('height', 40).html(function (d, i) {
-			return '<use xlink:href="#' + shareIcons[i].icon + '" />';
+		}).append('svg').attr('width', 40).attr('height', 40).append('use')
+		// Injecting <use> via .html() doesn't work on iOS Safari. wtf???
+		.attr('xlink:href', function (d, i) {
+			return '#' + shareIcons[i].icon;
 		});
+		// .html((d, i) => `<use xlink:href="#${ shareIcons[i].icon }"></use>`);
 
 		shareLinks.nodes().forEach(function (node, i) {
 			if (shareIcons[i].popupConfig) {
