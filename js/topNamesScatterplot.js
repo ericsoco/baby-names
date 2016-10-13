@@ -1031,7 +1031,7 @@ const topNamesScatterplot = () => {
 
 		};
 		graphEl.addEventListener('click', clickHandler);
-		graphEl.addEventListener('touchstart', clickHandler);
+		graphEl.addEventListener('touchend', clickHandler);
 
 		graphEl.addEventListener('mousemove', event => {
 
