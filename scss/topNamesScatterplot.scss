@@ -653,7 +653,7 @@ $bp-larger-than-mobile: 'min-width: 768px';
 			}
 
 			&.not-highlighted {
-				opacity: 0.5;
+				opacity: 0.4;
 				&.f text {
 					fill: darken($text-color-female, 20%);
 				}

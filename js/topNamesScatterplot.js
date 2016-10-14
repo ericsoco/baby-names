@@ -490,7 +490,7 @@ const topNamesScatterplot = () => {
 
 				// highlight name after a delay
 				setTimeout(() => {
-					addNameToSelection(name.key);
+					addNameToSelection(name.key, false);
 				}, 500);
 
 				if (isSmallScreen) window.scrollTo(0, document.body.scrollHeight);
@@ -1024,7 +1024,7 @@ const topNamesScatterplot = () => {
 			
 			let datum = d3.select(event.target).datum();
 			if (datum && datum.key) {
-				addNameToSelection(datum.key);
+				addNameToSelection(datum.key, true);
 			} else {
 				clearSelection();
 			}
@@ -1276,24 +1276,57 @@ const topNamesScatterplot = () => {
 
 	}
 
-	const addNameToSelection = name => {
+	const addNameToSelection = (name, removeDupe) => {
+
 		let hash = window.location.hash.slice(1);
-		if (hash) hash += ',';
-		window.location.hash = hash + name;
+		if (hash) {
+			hash = hash.split(',');
+			let i = hash.indexOf(name);
+			if (~i) {
+				if (removeDupe) {
+					hash.splice(i, 1);
+					window.location.hash = hash.join(',');
+				}
+				return;
+			}
+			hash.push(name);
+		} else {
+			hash = [ name ];
+		}
+
+		window.location.hash = hash.join(',');
+
 	}
 
 	const onHashChange = event => {
 
-		let name = window.location.hash.slice(1);
-		highlightName(name.split(','));
+		let names = window.location.hash.slice(1).split(',');
+		highlightName(names);
+
+		let oldNames = (event ? event.oldURL : '').split('#');
+		if (oldNames.length > 1) {
+			oldNames = oldNames[1].split(',')
+				.filter(n => !~names.indexOf(n));
+
+			if (oldNames.length && !names.length) {
+				// names were removed and there are none left --
+				// clear all selection state
+				clearSelection(true);
+			} else {
+				// remove each name individually
+				oldNames.forEach(n => unhighlightName(n));
+			}
+		}
 
 	};
 
-	const clearSelection = () => {
+	const clearSelection = (skipHashChange) => {
 		// pushState instead of setting hash to avoid scrolling to top of document
 		// and have to manually call handler since 'popstate' is only fired on browser back/forward button press
-		history.pushState(null, null, '#');
-		onHashChange();
+		if (skipHashChange !== true) {
+			history.pushState(null, null, '#');
+			onHashChange();
+		}
 
 		disableTimespanMouseInteraction();
 		hoverTimespanCircle(null, null, true);
@@ -1369,6 +1402,7 @@ const topNamesScatterplot = () => {
 
 			// insert after any existing timespans, but before all other circles
 			let timespan = graphContainer.insert('g', '.name:not(.timespan)')
+				.datum(name)
 				.attr('class', `name ${ nameDatum.value.sex } timespan`);
 				// .style('filter', 'url(#gooey)');
 
@@ -1415,8 +1449,43 @@ const topNamesScatterplot = () => {
 
 		}
 
+	};
 
+	const unhighlightName = name => {
 
+		let names = graphContainer.selectAll('.name:not(.timespan)'),
+			nameElement = names.filter(d => d.key === name);
+
+		// couldn't find it, fail gracefully
+		if (nameElement.empty()) return null;
+
+		// not highlighted! nothing to see here, please disperse.
+		if (!nameElement.classed('highlighted')) return null;
+
+		nameElement.classed('highlighted', false);
+
+		// TODO: DRY this out -- copied from renderNames()
+		const enterDuration = 300,
+			enterEase = t => d3.easeBackOut(t, 3.0),	// custom overshoot isn't working...why?
+			exitDuration = 750,
+			exitEase = d3.easeQuad;
+
+		let nameTimespan = graphContainer.selectAll('.timespan')
+			.filter(d => d === name);
+		
+		nameTimespan.selectAll('circle').transition()
+			.duration(exitDuration)
+			.ease(exitEase)
+			.attr('r', 0.01);
+		nameTimespan.selectAll('line').transition()
+			.duration(exitDuration)
+			.ease(exitEase)
+			.attr('opacity', 0.0);
+		nameTimespan.transition()
+			.delay(exitDuration)
+			.remove();
+
+		hoverTimespanCircle(null, null, true);
 
 	};
 
