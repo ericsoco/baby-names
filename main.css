@@ -567,7 +567,7 @@ $timespan-fill-opacity: 0.5;
       stroke: #90F2DF;
       fill: #189EB2; }
     .top-names-scatterplot .graph .name.not-highlighted {
-      opacity: 0.5; }
+      opacity: 0.4; }
       .top-names-scatterplot .graph .name.not-highlighted.f text {
         fill: #9f2d1a; }
       .top-names-scatterplot .graph .name.not-highlighted.m text {
