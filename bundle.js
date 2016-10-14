@@ -644,6 +644,8 @@ var topNamesScatterplot = function topNamesScatterplot() {
 			});
 
 			sliderContainer.append('div').attr('class', 'label').text('Popularity');
+
+			nameLookupInput.focus();
 		}, 1);
 
 		//
