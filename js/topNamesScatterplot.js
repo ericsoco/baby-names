@@ -733,12 +733,12 @@ const topNamesScatterplot = () => {
 			shareIcons = [
 				{
 					icon: 'icon-facebook',
-					url: 'https://www.facebook.com/sharer/sharer.php?u=http://transmote.com/hey-baby',
+					url: 'https://www.facebook.com/sharer/sharer.php?u=http://babybubbl.es',
 					popupConfig: `width=${ sharePopupWindowSize.width },height=${ sharePopupWindowSize.height },scrollbars=no`
 				},
 				{
 					icon: 'icon-twitter',
-					url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours?&url=http://transmote.com/hey-baby&hashtags=dataviz,babyname,opendata',
+					url: 'https://twitter.com/intent/tweet?text=Baby names come and go. And come back again. How about yours%3F&url=http://babybubbl.es&hashtags=dataviz,babyname,opendata',
 					popupConfig: `width=${ sharePopupWindowSize.width },height=${ sharePopupWindowSize.height },scrollbars=no`
 				},
 				{
