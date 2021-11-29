@@ -917,19 +917,28 @@ const topNamesScatterplot = () => {
 
 		// wait to build and render circles until after axes have rendered.
 		// wait two frames to ensure stack has cleared and DOM has updated+rendered.
+		//
+		// NOTE: this is pretty hacky...initGraphInteraction called only once
+		// arbitrarily 2 frames in, but renderNames is hitting a race condition
+		// due to sidebar brush not getting created until some time later.
+
 		let frameCount = 0;
 
 		let onRAF = () => {
 			frameCount++;
 
-			if (frameCount === 2) {
+			if (frameCount >= 2) {
+				// do this only once
+				if (frameCount === 2) {
+					initGraphInteraction(xScale, yScale, rScale, margin);
+				}
 
 				if (!parseHashSelection()) {
-					renderNames(false);
+					// if renderNames unsuccessful, try again next frame
+					if (!renderNames(false)) {
+						window.requestAnimationFrame(onRAF);
+					}
 				}
-				
-				initGraphInteraction(xScale, yScale, rScale, margin);
-
 			} else {
 				window.requestAnimationFrame(onRAF);
 			}
@@ -942,17 +951,20 @@ const topNamesScatterplot = () => {
 
 		if (clearSel) clearSelection();
 
+		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
+			brushNode = sidebar.select('.brush').node();
+		if (!brushNode) return false;
+
 		// filter down to only the names that have appeared
 		// a number of times specified by brush extent
-		let sidebar = d3.select('.top-names-scatterplot .sidebar'),
-			nameSliderExtent = d3.brushSelection(sidebar.select('.brush').node());
+		let nameSliderExtent = d3.brushSelection(brushNode);
 
 		if (!nameSliderExtent) {
 			// brush was clicked and selection cleared;
 			// set a new selection at the clicked location
 
 			// renderNames();
-			return;
+			return false;
 		}
 
 		let popularityExtent = [sliderScale.invert(nameSliderExtent[1]), sliderScale.invert(nameSliderExtent[0])],
@@ -1016,6 +1028,7 @@ const topNamesScatterplot = () => {
 			.attr('opacity', 0.0)
 			.remove();
 
+		return true;
 	};
 
 	const initGraphInteraction = (xScale, yScale, rScale, margin) => {
